@@ -34,7 +34,10 @@ public class ToDoCollection {
             int rInt = r.nextInt(10)+1;
             Log.d(TAG, i + ": " + rInt);
             for(int j = 0; j < rInt; j++){
-                subCollection.add(new ToDo(String.valueOf(j+1), false));
+                if(j % 2 == 0)
+                    subCollection.add(new ToDo(String.valueOf(j+1), false));
+                else
+                    subCollection.add(new ToDo(String.valueOf(j+1), true));
             }
             this.collection.add(subCollection);
         }

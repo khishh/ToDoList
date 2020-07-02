@@ -79,6 +79,15 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         Log.d(TAG, "position: " + position);
         tv.setText(doList.get(position).getContent());
 
+        if(doList.get(position).isDone()){
+            ib.setImageResource(R.drawable.ic_check_item);
+            ib.setTag(R.drawable.ic_check_item);
+        }
+        else{
+            ib.setImageResource(R.drawable.item_circle);
+            ib.setTag(R.drawable.item_circle);
+        }
+
         LinearLayout linearLayout = holder.view.findViewById(R.id.item_linear_layout);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +99,28 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 if(listener != null){
                     listener.onClick(position);
                 }
+            }
+        });
+
+        ib.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Integer res = (Integer)((ImageButton)v).getTag();
+                if(res == null || res == R.drawable.item_circle){
+                    ((ImageButton)v).setImageResource(R.drawable.ic_check_item);
+                    ((ImageButton)v).setTag(R.drawable.ic_check_item);
+
+                    // change To-Do's isDone to be true
+                    doList.get(position).setDone(true);
+                }
+                else{
+                    ((ImageButton)v).setImageResource(R.drawable.item_circle);
+                    ((ImageButton)v).setTag(R.drawable.item_circle);
+
+                    // change To-Do's isDone to be true
+                    doList.get(position).setDone(false);
+                }
+
             }
         });
     }
