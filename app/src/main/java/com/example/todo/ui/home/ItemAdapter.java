@@ -31,6 +31,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     private static final String TAG = "ItemAdapter";
 
+    private Listener listener;
+
     private Fragment fragment;
 
     private List<ToDo> doList;
@@ -39,6 +41,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     private int[] test = {5, 4, 6, 8, 10, 15, 8, 3, 12, 2};
 
+    interface  Listener{
+        void onClick(int position);
+    }
+
+    public void setListener(Listener listener){
+        this.listener = listener;
+    }
 
     // may need change since I needed fragment to add EditText below RecyclerView
     public ItemAdapter(Fragment fragment, List<ToDo> doList){
@@ -76,11 +85,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Touched at " + position, Toast.LENGTH_SHORT).show();
 
-                // how to show keyboard programmatically
-                // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
-                InputMethodManager inputMethodManager = (InputMethodManager)(v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
-                inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                Log.d(TAG, v.getClass().toString() + " " + v.getId());
 
+                if(listener != null){
+                    listener.onClick(position);
+                }
             }
         });
     }
