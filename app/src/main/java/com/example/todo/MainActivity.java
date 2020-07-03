@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 Log.d(TAG, String.valueOf(rootView.getRootView().getHeight()) + " " + rootView.getHeight());
                 int heightDiff = rootView.getRootView().getHeight() - rootView.getHeight();
-                if(heightDiff > Util.dpToPx(rootView.getContext(), 200)){
+                if(heightDiff > Util.dpToPx(rootView.getContext(), 300)){
                     navView.setVisibility(View.GONE);
                 }
                 else{
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             navView.setVisibility(View.VISIBLE);
                         }
-                    }, 100);
+                    }, 50);
 
                 }
             }

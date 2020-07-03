@@ -1,13 +1,9 @@
 package com.example.todo.ui.home;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -16,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,8 +28,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     private Listener listener;
 
-    private Fragment fragment;
-
     private List<ToDo> doList;
 
     private List<ToDo> toDoCollection = new ArrayList<>();
@@ -50,8 +43,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
     }
 
     // may need change since I needed fragment to add EditText below RecyclerView
-    public ItemAdapter(Fragment fragment, List<ToDo> doList){
-        this.fragment = fragment;
+    public ItemAdapter(List<ToDo> doList){
         this.doList = doList;
     }
 
@@ -76,10 +68,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         TextView tv = holder.view.findViewById(R.id.item_text_view);
         ImageButton ib = holder.view.findViewById(R.id.item_image);
 
-        Log.d(TAG, "position: " + position);
-        tv.setText(doList.get(position).getContent());
+        // able to display the newly added item in the List shows on top of the recyclerview
+        int reversePosition = getItemCount() - position - 1;
+        Log.d(TAG, "position: " + reversePosition);
+        tv.setText(doList.get(reversePosition).getContent());
 
-        if(doList.get(position).isDone()){
+        if(doList.get(reversePosition).isDone()){
             ib.setImageResource(R.drawable.ic_check_item);
             ib.setTag(R.drawable.ic_check_item);
         }
@@ -88,8 +82,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             ib.setTag(R.drawable.item_circle);
         }
 
-        LinearLayout linearLayout = holder.view.findViewById(R.id.item_linear_layout);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
+//        LinearLayout linearLayout = holder.view.findViewById(R.id.item_linear_layout);
+        tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(v.getContext(), "Touched at " + position, Toast.LENGTH_SHORT).show();

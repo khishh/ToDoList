@@ -5,7 +5,6 @@
     android:id="@+id/item_linear_layout"
     android:orientation="horizontal"
     android:background="?android:attr/selectableItemBackground"
-    android:padding="10dp"
     android:gravity="center_vertical"
     >
 
@@ -14,16 +13,19 @@
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="5"
+        android:textSize="20sp"
+        android:padding="10dp"
         />
 
     <ImageButton
         android:id="@+id/item_image"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:src="@drawable/item_circle"
         android:background="@android:color/transparent"
-        android:padding="5dp"
+        android:layout_weight="1"
+        android:layout_marginStart="10dp"
         />
 
 
