@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +27,10 @@ import android.widget.Toast;
 
 import com.example.todo.R;
 import com.example.todo.model.ToDo;
+import com.example.todo.model.ToDoCollection;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
 import com.example.todo.util.Util;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +51,13 @@ public class ItemFragment extends Fragment {
     private LinearLayout linearLayout;
     private EditText editText;
     private Button updateBtn;
+    private FloatingActionButton addBtn;
+    private FloatingActionButton deleteBtn;
 
+    // position of the Tab
     private int position;
 
+    // position of the item in a list clicked recently
     private int positionItem;
 
     private ItemViewModel itemViewModel;
@@ -76,7 +84,8 @@ public class ItemFragment extends Fragment {
         LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(view.getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new ItemAdapter(this, new ArrayList<ToDo>());
+        adapter = new ItemAdapter(new ArrayList<ToDo>());
+
         adapter.setListener(new ItemAdapter.Listener() {
             @Override
             public void onClick(final int position) {
@@ -86,24 +95,17 @@ public class ItemFragment extends Fragment {
                 positionItem = position;
 
                 if(linearLayout.getVisibility() == View.GONE){
+                    int reversePosition = adapter.getItemCount() - positionItem - 1;
+                    updateBtn.setText("Update");
                     showKeyboard(linearLayout);
-
-//                    linearLayout.setVisibility(View.VISIBLE);
-//                    editText.setVisibility(View.VISIBLE);
-//                    updateBtn.setVisibility(View.VISIBLE);
-
+                    editText.setText(itemViewModel.getDoList().getValue().get(reversePosition).getContent());
                 }
                 else{
-//                    linearLayout.setVisibility(View.GONE);
-//                    editText.setVisibility(View.GONE);
-//                    updateBtn.setVisibility(View.GONE);
                     hideKeyboard(linearLayout);
                 }
             }
         });
         recyclerView.setAdapter(adapter);
-
-
 
         return view;
     }
@@ -119,21 +121,88 @@ public class ItemFragment extends Fragment {
         frameLayout = view.findViewById(R.id.item_fragment_container);
         updateBtn = view.findViewById(R.id.update_btn);
         editText = view.findViewById(R.id.user_input_edit_text);
+        addBtn = view.findViewById(R.id.btn_add_todo);
+        deleteBtn = view.findViewById(R.id.btn_delete_todo);
 
         linearLayout = view.findViewById(R.id.user_input_linear_layout);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Linearlayout touched", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "LinearLayout touched", Toast.LENGTH_SHORT).show();
             }
         });
 
         setVisibilityListener();
+        attachOnClickListenerToViews();
+    }
+
+    private void attachOnClickListenerToViews(){
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.d(TAG, String.valueOf(positionItem));
+                editText.setText("");
+                updateBtn.setText("Add");
+
+                // let position of item clicked -1 to distinguish from adding and updating a item.
+                positionItem = -1;
+                showKeyboard(linearLayout);
+            }
+        });
+
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAllDoneItems();
+            }
+        });
+
+        updateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!TextUtils.isEmpty(editText.getText().toString())){
+
+                    String newToDoContent = editText.getText().toString();
+
+                    // add new To-Do Item
+                    if(positionItem == -1){
+                        addNewToDoItem(newToDoContent);
+                    }
+                    // update existing To-Do Item
+                    else{
+                        updateToDoItem(newToDoContent);
+                    }
+
+                    hideKeyboard(linearLayout);
+                }
+            }
+        });
+    }
+
+    private void addNewToDoItem(String newToDoContent){
+        ToDo newItem = new ToDo(newToDoContent, false);
+        ToDoCollection.getInstance().setNewSubCollectionAtPosition(newItem, position);
+        Toast.makeText(linearLayout.getContext(), "new ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
+        itemViewModel.setToDoList(position);
+    }
+
+    private void updateToDoItem(String newToDoContent){
+        // need to compute the reversePosition since displaying in the reversed order
+        // -> if positionItem(user clicked position) is 0, then the item position needed to change is the last element in the List.
+        int reversePosition = adapter.getItemCount() - positionItem - 1;
+        itemViewModel.getDoList().getValue().get(reversePosition).setContent(newToDoContent);
+        itemViewModel.setToDoList(position);
+    }
+
+    private void deleteAllDoneItems(){
+        ToDoCollection.getInstance().deleteAllDoneItemsAtPosition(position);
+        itemViewModel.setToDoList(position);
     }
 
 
     private void observeViewModel(){
-
         itemViewModel.getDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
@@ -142,46 +211,12 @@ public class ItemFragment extends Fragment {
         });
     }
 
-//    private void setUpUI(View view){
-//
-//        Log.d(TAG, "View = " + view.getClass().toString());
-//
-//        // if view touched is the container of EditText and Buttons, skip setting onTouchListener
-//        if(view.getId() == R.id.item_linear_layout || view.getId() == R.id.user_input_linear_layout
-//        || view.getId() == R.id.list_recycler_view){
-//            Log.d(TAG, "Found seeking linear layout " + view.getId());
-//        }
-//        else if( view.getId() != R.id.item_linear_layout &&
-//                 view.getId() != R.id.item_image &&
-//                 view.getId() != R.id.user_input_edit_text &&
-//                 view.getId() != R.id.update_btn){
-//            view.setOnTouchListener(new View.OnTouchListener() {
-//                @Override
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    hideKeyboard(v);
-//                    hideEditDialog();
-//                    return false;
-//                }
-//            });
-//        }
-//
-//        if(view instanceof ViewGroup){
-//            Log.d(TAG, "innerView = " + ((ViewGroup)view).getChildCount());
-//            for(int i = 0; i < ((ViewGroup) view).getChildCount(); i++){
-//                View innerView = ((ViewGroup)view).getChildAt(i);
-//                Log.d(TAG, "innerView = " + innerView.getClass().toString());
-//                setUpUI(innerView);
-//            }
-//        }
-//    }
-
     private void showKeyboard(View view){
         // how to show keyboard programmatically
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager != null)
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-//        recyclerView.smoothScrollToPosition(2);
     }
 
     private void hideKeyboard(View view){
@@ -190,19 +225,6 @@ public class ItemFragment extends Fragment {
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
     }
-
-
-
-//    private void hideEditDialog(){
-//        Log.d(TAG, String.valueOf("Before " +linearLayout.getVisibility()));
-//        if(linearLayout.getVisibility() == View.VISIBLE){
-//            Log.d(TAG, "pass here");
-//            linearLayout.setVisibility(View.GONE);
-//            updateBtn.setVisibility(View.GONE);
-//            editText.setVisibility(View.GONE);
-//        }
-//        Log.d(TAG, "after " + String.valueOf(linearLayout.getVisibility()));
-//    }
 
     // control the visibility of the user input area depending on the current size of the screen
     // --> if the height diff is more than 200(assuming that soft input is open already), so open the input area
@@ -213,10 +235,18 @@ public class ItemFragment extends Fragment {
             public void onGlobalLayout() {
                 Log.d(TAG, frameLayout.getRootView().getHeight() + " " + frameLayout.getHeight());
                 int heightDiff = frameLayout.getRootView().getHeight() - frameLayout.getHeight();
-                if (heightDiff < Util.dpToPx(frameLayout.getContext(), 200)) {
+                if (heightDiff < Util.dpToPx(frameLayout.getContext(), 300)) {
                     linearLayout.setVisibility(View.GONE);
                     editText.setVisibility(View.GONE);
                     updateBtn.setVisibility(View.GONE);
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            addBtn.setVisibility(View.VISIBLE);
+                            deleteBtn.setVisibility(View.VISIBLE);
+                        }
+                    }, 50);
 
                 }
                 else{
@@ -224,11 +254,16 @@ public class ItemFragment extends Fragment {
                     editText.setVisibility(View.VISIBLE);
                     updateBtn.setVisibility(View.VISIBLE);
 
-                    recyclerView.smoothScrollToPosition(positionItem);
+                    if(positionItem != -1)
+                        recyclerView.smoothScrollToPosition(positionItem);
+
+                    addBtn.setVisibility(View.GONE);
+                    deleteBtn.setVisibility(View.GONE);
                 }
             }
         });
     }
+
 
     @Override
     public void onStop() {

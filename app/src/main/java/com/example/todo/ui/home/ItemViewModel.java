@@ -27,4 +27,5 @@ public class ItemViewModel extends ViewModel {
     public void setToDoList(int position){
         doList.setValue(ToDoCollection.getInstance().getCollection().get(position));
     }
+
 }
