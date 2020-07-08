@@ -1,5 +1,6 @@
-package com.example.todo.ui.home;
+package com.example.todo.ui.home.itemfragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -95,13 +96,15 @@ public class ItemFragment extends Fragment {
                 positionItem = position;
 
                 if(linearLayout.getVisibility() == View.GONE){
+                    editText.requestFocus();
                     int reversePosition = adapter.getItemCount() - positionItem - 1;
                     updateBtn.setText("Update");
-                    showKeyboard(linearLayout);
+                    showKeyboard(editText);
                     editText.setText(itemViewModel.getDoList().getValue().get(reversePosition).getContent());
                 }
                 else{
-                    hideKeyboard(linearLayout);
+                    hideKeyboard(editText);
+                    editText.clearFocus();
                 }
             }
         });
@@ -110,8 +113,12 @@ public class ItemFragment extends Fragment {
         return view;
     }
 
+
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+
 
         // for test
         itemViewModel = new ViewModelProvider(this).get(ItemViewModel.class);
@@ -148,6 +155,7 @@ public class ItemFragment extends Fragment {
 
                 // let position of item clicked -1 to distinguish from adding and updating a item.
                 positionItem = -1;
+                editText.requestFocus();
                 showKeyboard(linearLayout);
             }
         });
@@ -175,7 +183,17 @@ public class ItemFragment extends Fragment {
                         updateToDoItem(newToDoContent);
                     }
 
-                    hideKeyboard(linearLayout);
+                    hideKeyboard(editText);
+                    editText.clearFocus();
+                }
+            }
+        });
+
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+
                 }
             }
         });
@@ -214,16 +232,23 @@ public class ItemFragment extends Fragment {
     private void showKeyboard(View view){
         // how to show keyboard programmatically
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
+        Log.d(TAG, "Show keyboard");
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager != null)
-            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+//            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
     }
 
     private void hideKeyboard(View view){
+        View currentFocused = ((Activity)view.getContext()).getCurrentFocus();
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         assert inputMethodManager != null;
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
+
+//        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        editText.clearFocus();
     }
 
     // control the visibility of the user input area depending on the current size of the screen
@@ -239,6 +264,9 @@ public class ItemFragment extends Fragment {
                     linearLayout.setVisibility(View.GONE);
                     editText.setVisibility(View.GONE);
                     updateBtn.setVisibility(View.GONE);
+
+
+
 
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -263,6 +291,7 @@ public class ItemFragment extends Fragment {
             }
         });
     }
+
 
 
     @Override

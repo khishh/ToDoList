@@ -7,13 +7,16 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.todo.ui.home.HomeFragment"
+        android:name="com.example.todo.ui.home.homefragment.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_navigation_home_to_itemEditFragment"
             app:destination="@id/itemEditFragment"
             app:enterAnim="@anim/fragment_fade_enter" />
+        <action
+            android:id="@+id/MoveToTabManagement"
+            app:destination="@id/tabManagementFragment" />
     </fragment>
 
     <fragment
@@ -44,4 +47,9 @@
             app:argType="integer"
             android:defaultValue="0" />
     </fragment>
+    <fragment
+        android:id="@+id/tabManagementFragment"
+        android:name="com.example.todo.ui.home.TabManagementFragment"
+        android:label="fragment_tab_management"
+        tools:layout="@layout/fragment_tab_management" />
 </navigation>

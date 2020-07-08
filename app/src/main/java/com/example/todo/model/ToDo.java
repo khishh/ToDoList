@@ -1,8 +1,18 @@
 package com.example.todo.model;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class ToDo {
 
+    @PrimaryKey (autoGenerate = true)
+    private int toDoId;
+
+    private int toDoOwnerIndex;
+
     private String content;
+
     private boolean isDone;
 
     public ToDo(String content, boolean isDone){
@@ -26,5 +36,22 @@ public class ToDo {
 
     public void setDone(boolean done) {
         isDone = done;
+    }
+
+
+    public int getToDoOwnerIndex() {
+        return toDoOwnerIndex;
+    }
+
+    public void setToDoOwnerIndex(int toDoOwnerIndex) {
+        this.toDoOwnerIndex = toDoOwnerIndex;
+    }
+
+    public int getToDoId() {
+        return toDoId;
+    }
+
+    public void setToDoId(int toDoId) {
+        this.toDoId = toDoId;
     }
 }

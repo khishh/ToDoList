@@ -1,4 +1,4 @@
-package com.example.todo.ui.home;
+package com.example.todo.ui.home.itemfragment;
 
 import android.util.Log;
 
@@ -8,12 +8,14 @@ import androidx.lifecycle.ViewModel;
 import com.example.todo.model.ToDo;
 import com.example.todo.model.ToDoCollection;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemViewModel extends ViewModel {
 
     private static final String TAG = "ItemViewModel";
     private MutableLiveData<List<ToDo>> doList = new MutableLiveData<>();
+    private MutableLiveData<Integer> tabCount = new MutableLiveData<>();
 
     public ItemViewModel(){
         super();
@@ -28,4 +30,11 @@ public class ItemViewModel extends ViewModel {
         doList.setValue(ToDoCollection.getInstance().getCollection().get(position));
     }
 
+    public MutableLiveData<Integer> getTabCount() {
+        return tabCount;
+    }
+
+    public void updateTabCount() {
+        tabCount.setValue(ToDoCollection.getInstance().getCollection().size());
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.todo.model;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,13 @@ public class ToDoCollection {
 
     private List<List<ToDo>> collection = new ArrayList<>();
 
+    private List<String> collectionTitles = new ArrayList<>();
+
     private static ToDoCollection instance;
 
     private ToDoCollection(){
         setUpToDoItems();
+        setUpTabTitles();
     }
 
     public static ToDoCollection getInstance() {
@@ -32,7 +36,7 @@ public class ToDoCollection {
             List<ToDo> subCollection = new ArrayList<>();
             Random r = new Random();
             int rInt = r.nextInt(20)+1;
-            Log.d(TAG, i + ": " + rInt);
+//            Log.d(TAG, i + ": " + rInt);
             for(int j = 0; j < rInt; j++){
                 if(j % 2 == 0)
                     subCollection.add(new ToDo(String.valueOf(j+1), false));
@@ -42,7 +46,15 @@ public class ToDoCollection {
             this.collection.add(subCollection);
         }
 
-        Log.d(TAG, this.collection.toString());
+//        Log.d(TAG, this.collection.toString());
+
+    }
+
+    private void setUpTabTitles(){
+
+        for(int i = 0; i < 10; i++){
+            this.collectionTitles.add("ToDo" + String.valueOf(i+1));
+        }
 
     }
 
@@ -69,5 +81,21 @@ public class ToDoCollection {
             }
         }
         Log.d(TAG, collection.get(position).toString());
+    }
+
+    public void incrementSizeOfCollection(String newTabTitle){
+        List<ToDo> newSubCollection = new ArrayList<>();
+        this.collection.add(newSubCollection);
+        Log.d(TAG, String.valueOf(collection.size()));
+
+        collectionTitles.add(newTabTitle);
+    }
+
+    public List<String> getCollectionTitles() {
+        return collectionTitles;
+    }
+
+    public void setCollectionTitles(List<String> collectionTitles) {
+        this.collectionTitles = collectionTitles;
     }
 }
