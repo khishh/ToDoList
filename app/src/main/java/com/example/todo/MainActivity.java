@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
-import com.example.todo.model.ToDoCollection;
 import com.example.todo.util.Util;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 

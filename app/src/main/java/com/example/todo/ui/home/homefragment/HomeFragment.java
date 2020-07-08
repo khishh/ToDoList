@@ -19,11 +19,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.todo.R;
+import com.example.todo.model.Tab;
 import com.example.todo.ui.home.itemfragment.ItemFragment;
 import com.google.android.material.tabs.TabLayout;
 
@@ -56,7 +58,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
+        homeViewModel.initializeData();
 
         toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -87,17 +89,34 @@ public class HomeFragment extends Fragment {
 
         // test
 
-        initializeTabFragments();
+//        initializeTabFragments();
 
 //        pagerAdapter.addFragment(new ItemFragment(), "Hello", 0);
         viewPager.setAdapter(pagerAdapter);
 
+        observeViewModel();
+
     }
+
+    private void observeViewModel() {
+        homeViewModel.getTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
+            @Override
+            public void onChanged(List<Tab> tabs) {
+                List<String> tabTitles = new ArrayList<>();
+                for(int i = 0; i < tabs.size(); i++){
+                    tabTitles.add(tabs.get(i).getTabTitle());
+                }
+
+                pagerAdapter.updatePagerAdapter(tabTitles);
+            }
+        });
+    }
+
 
     private void initializeTabFragments(){
 
-        for(int i = 0; i < homeViewModel.getTabCount().getValue(); i++){
-            pagerAdapter.addFragment(new ItemFragment(), homeViewModel.getTabTitles().getValue().get(i), i);
+        for(int i = 0; i < homeViewModel.getTabListSize(); i++){
+            pagerAdapter.addFragment(new ItemFragment(), homeViewModel.getTabTitleWithPosition(i), i);
         }
 
     }
@@ -109,6 +128,13 @@ public class HomeFragment extends Fragment {
 
         public HomeCollectionPagerAdapter(@NonNull FragmentManager fm) {
             super(fm);
+        }
+
+        public void updatePagerAdapter(List<String> tabTitles){
+            mFragmentTitleList.clear();
+            mFragmentTitleList.addAll(tabTitles);
+            initializeTabFragments();
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -124,7 +150,7 @@ public class HomeFragment extends Fragment {
 
             Fragment fragment = mFragmentList.get(position);
             Bundle bundle = new Bundle();
-            bundle.putInt(ItemFragment.ARG_OBJECT, position);
+            bundle.putInt(ItemFragment.ARG_OBJECT, homeViewModel.getTabIdAtPosition(position));
             fragment.setArguments(bundle);
 
             return fragment;

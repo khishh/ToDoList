@@ -1,5 +1,7 @@
 package com.example.todo.model;
 
+import android.util.Log;
+
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -20,8 +22,8 @@ public abstract class TabToDoDao {
     @Query("SELECT * FROM Tab")
     public abstract List<Tab> getAllTab();
 
-    @Query("SELECT * FROM Tab where tabId = :tabId")
-    public abstract Tab getTab(int tabId);
+    @Query("SELECT * FROM Tab where tabIndex = :tabIndex")
+    public abstract Tab getTab(int tabIndex);
 
     @Query("SELECT * FROM ToDo where toDoOwnerIndex = :toDoOwnerIndex")
     public abstract List<ToDo> getToDoList(int toDoOwnerIndex);
@@ -30,16 +32,18 @@ public abstract class TabToDoDao {
         List<ToDo> toDoList = tab.getToDoList();
 
         for(int i = 0; i < toDoList.size(); i++){
-            toDoList.get(i).setToDoOwnerIndex(tab.getTabId());
+            toDoList.get(i).setToDoOwnerIndex(tab.getTabIndex());
+            Log.d(TAG, tab.getTabIndex() + " " + toDoList.get(i).getToDoOwnerIndex());
         }
 
+        Log.d(TAG, "Size of toDoList == " + toDoList.size());
         insertToDoList(toDoList);
         insertTab(tab);
     }
 
-    public Tab getTabWithToDo(int tabId){
-        Tab tab = getTab(tabId);
-        List<ToDo> toDoList = getToDoList(tabId);
+    public Tab getTabWithToDo(int tabIndex){
+        Tab tab = getTab(tabIndex);
+        List<ToDo> toDoList = getToDoList(tabIndex);
         tab.setToDoList(toDoList);
         return tab;
     }

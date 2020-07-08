@@ -15,7 +15,8 @@ public class ToDo {
 
     private boolean isDone;
 
-    public ToDo(String content, boolean isDone){
+    public ToDo(int toDoOwnerIndex, String content, boolean isDone){
+        this.toDoOwnerIndex = toDoOwnerIndex;
         this.content = content;
         this.isDone = isDone;
     }
@@ -38,7 +39,6 @@ public class ToDo {
         isDone = done;
     }
 
-
     public int getToDoOwnerIndex() {
         return toDoOwnerIndex;
     }
@@ -53,5 +53,15 @@ public class ToDo {
 
     public void setToDoId(int toDoId) {
         this.toDoId = toDoId;
+    }
+
+    @Override
+    public String toString() {
+        return "ToDo{" +
+                "toDoId=" + toDoId +
+                ", toDoOwnerIndex=" + toDoOwnerIndex +
+                ", content='" + content + '\'' +
+                ", isDone=" + isDone +
+                '}';
     }
 }

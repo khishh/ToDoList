@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import com.example.todo.R;
 import com.example.todo.model.ToDo;
-import com.example.todo.model.ToDoCollection;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
 import com.example.todo.util.Util;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -55,8 +54,8 @@ public class ItemFragment extends Fragment {
     private FloatingActionButton addBtn;
     private FloatingActionButton deleteBtn;
 
-    // position of the Tab
-    private int position;
+    // tabId
+    private int tabIndex;
 
     // position of the item in a list clicked recently
     private int positionItem;
@@ -78,7 +77,9 @@ public class ItemFragment extends Fragment {
         Bundle bundle = getArguments();
 
         if(bundle != null)
-            position = bundle.getInt(ARG_OBJECT, 0);
+            tabIndex = bundle.getInt(ARG_OBJECT, 0);
+
+        Log.d(TAG, "tabIndex " + tabIndex );
 
         recyclerView = view.findViewById(R.id.list_recycler_view);
 
@@ -100,7 +101,7 @@ public class ItemFragment extends Fragment {
                     int reversePosition = adapter.getItemCount() - positionItem - 1;
                     updateBtn.setText("Update");
                     showKeyboard(editText);
-                    editText.setText(itemViewModel.getDoList().getValue().get(reversePosition).getContent());
+                    editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
                 }
                 else{
                     hideKeyboard(editText);
@@ -122,7 +123,8 @@ public class ItemFragment extends Fragment {
 
         // for test
         itemViewModel = new ViewModelProvider(this).get(ItemViewModel.class);
-        itemViewModel.setToDoList(position);
+        itemViewModel.loadToDoList(tabIndex);
+
         observeViewModel();
 
         frameLayout = view.findViewById(R.id.item_fragment_container);
@@ -200,28 +202,24 @@ public class ItemFragment extends Fragment {
     }
 
     private void addNewToDoItem(String newToDoContent){
-        ToDo newItem = new ToDo(newToDoContent, false);
-        ToDoCollection.getInstance().setNewSubCollectionAtPosition(newItem, position);
+        itemViewModel.addNewToDo(newToDoContent);
         Toast.makeText(linearLayout.getContext(), "new ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
-        itemViewModel.setToDoList(position);
     }
 
     private void updateToDoItem(String newToDoContent){
         // need to compute the reversePosition since displaying in the reversed order
         // -> if positionItem(user clicked position) is 0, then the item position needed to change is the last element in the List.
         int reversePosition = adapter.getItemCount() - positionItem - 1;
-        itemViewModel.getDoList().getValue().get(reversePosition).setContent(newToDoContent);
-        itemViewModel.setToDoList(position);
+        itemViewModel.updateToDoContentAtPosition(reversePosition, newToDoContent);
     }
 
     private void deleteAllDoneItems(){
-        ToDoCollection.getInstance().deleteAllDoneItemsAtPosition(position);
-        itemViewModel.setToDoList(position);
+        itemViewModel.removeAllDoneToDo();
     }
 
 
     private void observeViewModel(){
-        itemViewModel.getDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
+        itemViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
                 adapter.updateToDoList(toDos);

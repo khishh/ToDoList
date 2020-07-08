@@ -21,6 +21,11 @@ public class Tab {
     @Ignore
     private List<ToDo> toDoList = new ArrayList<>();
 
+    public Tab(int tabIndex, String tabTitle){
+        this.tabIndex = tabIndex;
+        this.tabTitle = tabTitle;
+    }
+
     //  getter and setter
 
     public int getTabId() {
@@ -53,5 +58,16 @@ public class Tab {
 
     public void setToDoList(List<ToDo> toDoList) {
         this.toDoList = toDoList;
+    }
+
+    @Override
+    public String toString() {
+        return "Tab{" +
+                "toDoListSize= " + toDoList.size() +
+                ", tabId=" + tabId +
+                ", tabIndex=" + tabIndex +
+                ", tabTitle='" + tabTitle + '\'' +
+                ", toDoList=" + toDoList +
+                '}';
     }
 }
