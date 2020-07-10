@@ -5,6 +5,8 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="white">#FFFFFF</color>
 
+    <color name="TealUnique">#71CCAE</color>
+
     <color name="Teal50">#E0F2F1</color>
     <color name="Teal100">#B2DFDB</color>
     <color name="Teal200">#80CBC4</color>
@@ -25,6 +27,11 @@
     <color name="white_bg">#FAFAFA</color>
 
     <color name="white_transparent">#80FAFAFA</color>
+
+    <color name="blueBlack">#394449</color>
+
+    <color name="cleanWhite">#FEFFFF</color>
+
 
 </resources>
 
