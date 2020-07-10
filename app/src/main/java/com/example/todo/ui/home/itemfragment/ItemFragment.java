@@ -109,16 +109,52 @@ public class ItemFragment extends Fragment {
                     int reversePosition = adapter.getItemCount() - positionItem - 1;
                     updateBtn.setText("Update");
 
-                    showKeyboard(editText);
-
                     if(positionItem != -1)
                         recyclerView.smoothScrollToPosition(positionItem);
 
                     editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
+
+//                    linearLayout.setVisibility(View.VISIBLE);
+//                    editText.setVisibility(View.VISIBLE);
+//                    updateBtn.setVisibility(View.VISIBLE);
+//
+//                    addBtn.setVisibility(View.GONE);
+//                    deleteBtn.setVisibility(View.GONE);
+//
+                    if(positionItem != -1)
+                        recyclerView.smoothScrollToPosition(positionItem);
+//
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            linearLayout.setVisibility(View.VISIBLE);
+//                            editText.setVisibility(View.VISIBLE);
+//                            updateBtn.setVisibility(View.VISIBLE);
+//                        }
+//                    }, 50);
+
+
+
+                    showKeyboard(editText);
                 }
                 else{
-                    showKeyboard(editText);
+
                     editText.clearFocus();
+
+//                    linearLayout.setVisibility(View.GONE);
+//                    editText.setVisibility(View.GONE);
+//                    updateBtn.setVisibility(View.GONE);
+//
+//
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            addBtn.setVisibility(View.VISIBLE);
+//                            deleteBtn.setVisibility(View.VISIBLE);
+//                        }
+//                    }, 50);
+
+                    hideKeyboard(editText);
                 }
             }
         });
@@ -248,7 +284,7 @@ public class ItemFragment extends Fragment {
     private void showKeyboard(View view){
         // how to show keyboard programmatically
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
-        Log.d(TAG, "Show keyboard");
+        Log.d(TAG, "Here Show keyboard");
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager != null)
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
@@ -294,8 +330,6 @@ public class ItemFragment extends Fragment {
 
                 }
                 else{
-
-
 
                     Log.d(TAG, "onGlobalLayout -- GONE passed");
                     linearLayout.setVisibility(View.GONE);

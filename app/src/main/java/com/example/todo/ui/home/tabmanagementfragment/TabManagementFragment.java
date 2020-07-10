@@ -1,4 +1,4 @@
-package com.example.todo.ui.home;
+package com.example.todo.ui.home.tabmanagementfragment;
 
 import android.os.Bundle;
 
@@ -10,33 +10,12 @@ import android.view.ViewGroup;
 
 import com.example.todo.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TabManagementFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TabManagementFragment extends Fragment {
 
 
     public TabManagementFragment() {
         // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TabManagementFragment.
-     */
-//    // TODO: Rename and change types and number of parameters
-//    public static TabManagementFragment newInstance() {
-//        TabManagementFragment fragment = new TabManagementFragment();
-//        Bundle args = new Bundle();
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

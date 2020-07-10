@@ -49,7 +49,7 @@
     </fragment>
     <fragment
         android:id="@+id/tabManagementFragment"
-        android:name="com.example.todo.ui.home.TabManagementFragment"
+        android:name="com.example.todo.ui.home.tabmanagementfragment.TabManagementFragment"
         android:label="fragment_tab_management"
         tools:layout="@layout/fragment_tab_management" />
 </navigation>

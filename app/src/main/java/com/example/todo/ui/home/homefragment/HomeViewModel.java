@@ -103,7 +103,7 @@ public class HomeViewModel extends AndroidViewModel {
             tabsRetrieved(tabs);
             Log.d(TAG, tabs.toString());
             Log.d(TAG, "data saved");
-            Toast.makeText(getApplication(), "Data saved into your local data", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplication(), "Data saved into your local data", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -118,7 +118,7 @@ public class HomeViewModel extends AndroidViewModel {
         @Override
         protected void onPostExecute(List<Tab> tabs) {
             tabsRetrieved(tabs);
-            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
         }
     }
 
