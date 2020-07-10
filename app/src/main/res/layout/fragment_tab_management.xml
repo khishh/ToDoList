@@ -9,14 +9,14 @@
 
     <RelativeLayout
         android:id="@+id/tab_manage_relativeLayout"
-        android:layout_height="75dp"
+        android:layout_height="60dp"
         android:layout_width="match_parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/tab_manage_close"
             android:layout_height="match_parent"
-            android:layout_width="75dp"
+            android:layout_width="60dp"
             android:padding="5dp"
             android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
             />
@@ -30,13 +30,77 @@
 
     </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tab_manage_recyclerView"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/tab_manage_relativeLayout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:scrollbars="vertical"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tab_management_add_text"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:text="      Add New Tab"
+                android:textColor="@color/colorPrimary"
+                android:padding="5dp"/>
+
+            <LinearLayout
+                android:id="@+id/tab_management_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/lightGrey"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/white_bg"
+                    android:hint="   Enter Tab Name"
+                    />
+
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_baseline_add_24"
+                    android:background="@color/colorPrimary"/>
+
+
+                <!--        <Button-->
+                <!--            android:layout_width="match_parent"-->
+                <!--            android:layout_height="wrap_content"-->
+                <!--            android:text="Add"-->
+                <!--            android:textSize="16sp"-->
+                <!--            android:textColor="@color/white_bg"-->
+                <!--            android:layout_marginStart="50dp"-->
+                <!--            android:layout_marginEnd="50dp"-->
+                <!--            android:background="@color/colorPrimary"/>-->
+
+
+
+            </LinearLayout>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tab_manage_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:nestedScrollingEnabled="false"
+                android:scrollbars="vertical"/>
+
+        </LinearLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
+
+
 
 
 

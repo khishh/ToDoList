@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +15,19 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.todo.R;
+import com.example.todo.model.Tab;
+import com.example.todo.ui.home.tabmanagementfragment.TabManagementAdapter;
+import com.example.todo.ui.home.tabmanagementfragment.TabManagementViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ItemEditFragment extends Fragment {
+
+
 
     private int position;
 
@@ -36,6 +46,10 @@ public class ItemEditFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+
+
 
         EditText editText = view.findViewById(R.id.edit_editText);
 

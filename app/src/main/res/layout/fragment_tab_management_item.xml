@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:orientation="horizontal">
+
+    <ImageButton
+        android:id="@+id/tab_management_delete"
+        android:layout_height="match_parent"
+        android:layout_width="50dp"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_delete"
+        android:background="@color/colorPrimary"/>
+
+    <TextView
+        android:id="@+id/tab_management_content"
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"/>
+
+    <ImageButton
+        android:id="@+id/tab_management_edit"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_baseline_edit_24"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:background="@color/white_bg"/>
+
+    <ImageButton
+        android:id="@+id/tab_management_sort"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_baseline_sort_24"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:background="@color/white_bg"/>
+
+</LinearLayout>
