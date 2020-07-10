@@ -81,9 +81,17 @@ public class ItemFragment extends Fragment {
 
         Log.d(TAG, "tabIndex " + tabIndex );
 
+        return view;
+    }
+
+
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         recyclerView = view.findViewById(R.id.list_recycler_view);
 
-        LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(view.getContext(), LinearLayoutManager.VERTICAL, false);
+        final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(view.getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
 
         adapter = new ItemAdapter(new ArrayList<ToDo>());
@@ -100,25 +108,21 @@ public class ItemFragment extends Fragment {
                     editText.requestFocus();
                     int reversePosition = adapter.getItemCount() - positionItem - 1;
                     updateBtn.setText("Update");
+
                     showKeyboard(editText);
+
+                    if(positionItem != -1)
+                        recyclerView.smoothScrollToPosition(positionItem);
+
                     editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
                 }
                 else{
-                    hideKeyboard(editText);
+                    showKeyboard(editText);
                     editText.clearFocus();
                 }
             }
         });
         recyclerView.setAdapter(adapter);
-
-        return view;
-    }
-
-
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
 
 
         // for test
@@ -128,6 +132,8 @@ public class ItemFragment extends Fragment {
         observeViewModel();
 
         frameLayout = view.findViewById(R.id.item_fragment_container);
+        setVisibilityListener();
+
         updateBtn = view.findViewById(R.id.update_btn);
         editText = view.findViewById(R.id.user_input_edit_text);
         addBtn = view.findViewById(R.id.btn_add_todo);
@@ -141,7 +147,19 @@ public class ItemFragment extends Fragment {
             }
         });
 
-        setVisibilityListener();
+
+//        linearLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                if(linearLayout.getVisibility() == View.VISIBLE){
+//                    hideKeyboard(editText);
+//                }
+//                else{
+//                    showKeyboard(editText);
+//                }
+//            }
+//        });
+
         attachOnClickListenerToViews();
     }
 
@@ -219,7 +237,7 @@ public class ItemFragment extends Fragment {
 
 
     private void observeViewModel(){
-        itemViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
+        itemViewModel.getMDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
                 adapter.updateToDoList(toDos);
@@ -239,6 +257,7 @@ public class ItemFragment extends Fragment {
     }
 
     private void hideKeyboard(View view){
+        Log.d(TAG, "Hide keyboard");
         View currentFocused = ((Activity)view.getContext()).getCurrentFocus();
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         assert inputMethodManager != null;
@@ -256,26 +275,13 @@ public class ItemFragment extends Fragment {
         frameLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                Log.d(TAG, "----- position " + tabIndex);
                 Log.d(TAG, frameLayout.getRootView().getHeight() + " " + frameLayout.getHeight());
                 int heightDiff = frameLayout.getRootView().getHeight() - frameLayout.getHeight();
-                if (heightDiff < Util.dpToPx(frameLayout.getContext(), 300)) {
-                    linearLayout.setVisibility(View.GONE);
-                    editText.setVisibility(View.GONE);
-                    updateBtn.setVisibility(View.GONE);
+                Log.d(TAG, "HeightDiff == " + heightDiff);
+                if (heightDiff > frameLayout.getHeight()/2) {
 
-
-
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            addBtn.setVisibility(View.VISIBLE);
-                            deleteBtn.setVisibility(View.VISIBLE);
-                        }
-                    }, 50);
-
-                }
-                else{
+                    Log.d(TAG, "onGlobalLayout -- VISIBLE passed");
                     linearLayout.setVisibility(View.VISIBLE);
                     editText.setVisibility(View.VISIBLE);
                     updateBtn.setVisibility(View.VISIBLE);
@@ -285,6 +291,25 @@ public class ItemFragment extends Fragment {
 
                     addBtn.setVisibility(View.GONE);
                     deleteBtn.setVisibility(View.GONE);
+
+                }
+                else{
+
+
+
+                    Log.d(TAG, "onGlobalLayout -- GONE passed");
+                    linearLayout.setVisibility(View.GONE);
+                    editText.setVisibility(View.GONE);
+                    updateBtn.setVisibility(View.GONE);
+
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            addBtn.setVisibility(View.VISIBLE);
+                            deleteBtn.setVisibility(View.VISIBLE);
+                        }
+                    }, 50);
                 }
             }
         });

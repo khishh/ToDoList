@@ -26,6 +26,10 @@ public class ItemViewModel extends AndroidViewModel {
 
     private AsyncTask<Integer, Void, List<ToDo>> retrieveToDoFromDatabase;
 
+    private AsyncTask<Integer, Void, Void> updateToDoIntoDatabase;
+
+    private boolean isUpdated = false;
+
     public ItemViewModel(@NonNull Application application) {
         super(application);
     }
@@ -65,10 +69,39 @@ public class ItemViewModel extends AndroidViewModel {
         }
     }
 
+    public void updateToDoList(){
+        updateToDoIntoDatabase = new UpdateToDoTask();
+        updateToDoIntoDatabase.execute(mTabIndex.getValue());
+    }
+
+    private class UpdateToDoTask extends AsyncTask<Integer, Void, Void>{
+
+
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            int tabIndex = integers[0];
+
+            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+
+            dao.deleteAllToDoOfIndex(tabIndex);
+            dao.insertToDoList(mDoList.getValue());
+
+//            dao.insertToDoList();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Toast.makeText(getApplication(), "Changed Info saved into database", Toast.LENGTH_SHORT);
+            this.cancel(true);
+            updateToDoIntoDatabase = null;
+        }
+    }
+
     private void toDoListRetrieved(List<ToDo> toDos){
         mDoList.setValue(toDos);
     }
-
 
 
 
@@ -84,6 +117,8 @@ public class ItemViewModel extends AndroidViewModel {
                 false
         ));
         mDoList.setValue(curList);
+        isUpdated = true;
+        updateToDoList();
     }
 
     public void updateToDoContentAtPosition(int position, String newToDoContent){
@@ -94,6 +129,8 @@ public class ItemViewModel extends AndroidViewModel {
                 false
         ));
         mDoList.setValue(curList);
+        isUpdated = true;
+        updateToDoList();
     }
 
     public void removeAllDoneToDo(){
@@ -108,17 +145,42 @@ public class ItemViewModel extends AndroidViewModel {
         }
 
         mDoList.setValue(curList);
+        isUpdated = true;
     }
 
     public void removeAllToDo(){
         List<ToDo> curList = mDoList.getValue();
         curList.clear();
         mDoList.setValue(curList);
+        isUpdated = true;
+        updateToDoList();
     }
 
     // getter and setter
 
-    public MutableLiveData<List<ToDo>> getmDoList() {
+    public MutableLiveData<List<ToDo>> getMDoList() {
         return mDoList;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+
+        if(isUpdated){
+            updateToDoList();
+        }
+
+        if(retrieveToDoFromDatabase != null){
+            retrieveToDoFromDatabase.cancel(true);
+            retrieveToDoFromDatabase = null;
+        }
+
+//        if(updateToDoIntoDatabase != null){
+//            updateToDoIntoDatabase.cancel(true);
+//            updateToDoIntoDatabase = null;
+//        }
+//        if(updateToDoIntoDatabase != null){
+//            Log.d(TAG, )
+//        }
     }
 }

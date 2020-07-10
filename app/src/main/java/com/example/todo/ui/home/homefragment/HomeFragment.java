@@ -89,9 +89,6 @@ public class HomeFragment extends Fragment {
 
         // test
 
-//        initializeTabFragments();
-
-//        pagerAdapter.addFragment(new ItemFragment(), "Hello", 0);
         viewPager.setAdapter(pagerAdapter);
 
         observeViewModel();
@@ -132,6 +129,7 @@ public class HomeFragment extends Fragment {
 
         public void updatePagerAdapter(List<String> tabTitles){
             mFragmentTitleList.clear();
+            mFragmentList.clear();
             mFragmentTitleList.addAll(tabTitles);
             initializeTabFragments();
             notifyDataSetChanged();

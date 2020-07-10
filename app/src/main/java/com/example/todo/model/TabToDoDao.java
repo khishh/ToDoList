@@ -3,8 +3,10 @@ package com.example.todo.model;
 import android.util.Log;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 
@@ -19,8 +21,17 @@ public abstract class TabToDoDao {
     @Insert
     public abstract void insertToDoList(List<ToDo> toDoList);
 
+    @Update
+    public abstract void updateTab(Tab tab);
+
+    @Update
+    public abstract  void updateToDoList(List<ToDo> toDos);
+
     @Query("SELECT * FROM Tab")
     public abstract List<Tab> getAllTab();
+
+    @Query("DELETE FROM ToDo where toDoOwnerIndex = :toDoOwnerIndex")
+    public abstract void deleteAllToDoOfIndex(int toDoOwnerIndex);
 
     @Query("SELECT * FROM Tab where tabIndex = :tabIndex")
     public abstract Tab getTab(int tabIndex);
