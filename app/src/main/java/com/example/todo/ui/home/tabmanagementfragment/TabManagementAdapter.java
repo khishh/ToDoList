@@ -42,7 +42,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
 
     @Override
     public int getItemCount() {
-        return 100;
+        return tabList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
