@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".ui.home.TabManagementFragment">
+    tools:context=".ui.home.tabmanagementfragment.TabManagementFragment">
 
     <RelativeLayout
         android:id="@+id/tab_manage_relativeLayout"
