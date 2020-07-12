@@ -114,45 +114,14 @@ public class ItemFragment extends Fragment {
 
                     editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
 
-//                    linearLayout.setVisibility(View.VISIBLE);
-//                    editText.setVisibility(View.VISIBLE);
-//                    updateBtn.setVisibility(View.VISIBLE);
-//
-//                    addBtn.setVisibility(View.GONE);
-//                    deleteBtn.setVisibility(View.GONE);
-//
                     if(positionItem != -1)
                         recyclerView.smoothScrollToPosition(positionItem);
-//
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            linearLayout.setVisibility(View.VISIBLE);
-//                            editText.setVisibility(View.VISIBLE);
-//                            updateBtn.setVisibility(View.VISIBLE);
-//                        }
-//                    }, 50);
-
-
 
                     showKeyboard(editText);
                 }
                 else{
 
                     editText.clearFocus();
-
-//                    linearLayout.setVisibility(View.GONE);
-//                    editText.setVisibility(View.GONE);
-//                    updateBtn.setVisibility(View.GONE);
-//
-//
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            addBtn.setVisibility(View.VISIBLE);
-//                            deleteBtn.setVisibility(View.VISIBLE);
-//                        }
-//                    }, 50);
 
                     hideKeyboard(editText);
                 }
@@ -182,19 +151,6 @@ public class ItemFragment extends Fragment {
                 Toast.makeText(v.getContext(), "LinearLayout touched", Toast.LENGTH_SHORT).show();
             }
         });
-
-
-//        linearLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                if(linearLayout.getVisibility() == View.VISIBLE){
-//                    hideKeyboard(editText);
-//                }
-//                else{
-//                    showKeyboard(editText);
-//                }
-//            }
-//        });
 
         attachOnClickListenerToViews();
     }
@@ -349,6 +305,20 @@ public class ItemFragment extends Fragment {
         });
     }
 
+    private void hideUserInput(){
+        linearLayout.setVisibility(View.GONE);
+        editText.setVisibility(View.GONE);
+        updateBtn.setVisibility(View.GONE);
+
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                addBtn.setVisibility(View.VISIBLE);
+                deleteBtn.setVisibility(View.VISIBLE);
+            }
+        }, 50);
+    }
 
 
     @Override
@@ -361,5 +331,15 @@ public class ItemFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "ItemFragment destroyed");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(linearLayout.getVisibility() == View.VISIBLE){
+            Log.d(TAG, "onPause hideUserInput called");
+            hideUserInput();
+        }
+
     }
 }

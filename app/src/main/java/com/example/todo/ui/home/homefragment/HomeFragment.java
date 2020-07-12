@@ -64,7 +64,7 @@ public class HomeFragment extends Fragment {
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         setHasOptionsMenu(true);
 
-        pagerAdapter = new HomeCollectionPagerAdapter(getChildFragmentManager());
+        pagerAdapter = new HomeCollectionPagerAdapter(getChildFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.pager);
         tabLayout.setupWithViewPager(viewPager);
@@ -123,9 +123,10 @@ public class HomeFragment extends Fragment {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
 
-        public HomeCollectionPagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
+        public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
+            super(fm, behavior);
         }
+
 
         public void updatePagerAdapter(List<String> tabTitles){
             mFragmentTitleList.clear();
