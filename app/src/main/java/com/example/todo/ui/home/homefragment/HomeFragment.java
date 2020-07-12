@@ -147,8 +147,9 @@ public class HomeFragment extends Fragment {
 //            mFragmentTitleList.add(position, String.valueOf(position+1));
 
             Fragment fragment = mFragmentList.get(position);
+            Log.d(TAG, "Pager position == " + position);
             Bundle bundle = new Bundle();
-            bundle.putInt(ItemFragment.ARG_OBJECT, homeViewModel.getTabIdAtPosition(position));
+            bundle.putInt(ItemFragment.ARG_OBJECT, position);
             fragment.setArguments(bundle);
 
             return fragment;

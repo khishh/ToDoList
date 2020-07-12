@@ -63,6 +63,8 @@ public class HomeViewModel extends AndroidViewModel {
             Random r = new Random();
             int rInt = r.nextInt(20)+1;
 
+            Log.d(TAG, "Position i = " + i + " size = " + rInt);
+
             for(int j = 0; j < rInt; j++){
                 if(j % 2 == 0)
                     subCollection.add(new ToDo(i, String.valueOf(j+1), false));
@@ -89,6 +91,7 @@ public class HomeViewModel extends AndroidViewModel {
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
             for (int i = 0; i < tabList.size(); i++){
+                Log.d(TAG, "Insert == " + tabList.get(i).getToDoList().size());
                 dao.insertToDoWithTab(tabList.get(i));
             }
 
