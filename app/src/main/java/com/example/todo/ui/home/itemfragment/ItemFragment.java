@@ -105,25 +105,37 @@ public class ItemFragment extends Fragment {
                 positionItem = position;
 
                 if(linearLayout.getVisibility() == View.GONE){
-                    editText.requestFocus();
+
+                    showUserInput();
+
+
+
                     int reversePosition = adapter.getItemCount() - positionItem - 1;
                     updateBtn.setText("Update");
 
                     if(positionItem != -1)
-                        recyclerView.smoothScrollToPosition(positionItem);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                recyclerView.smoothScrollToPosition(positionItem);
+                            }
+                        },300);
+
 
                     editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
 
                     if(positionItem != -1)
                         recyclerView.smoothScrollToPosition(positionItem);
 
-                    showKeyboard(editText);
+//                    showKeyboard(editText);
+                    if(positionItem != -1)
+                        recyclerView.smoothScrollToPosition(positionItem);
                 }
                 else{
 
-                    editText.clearFocus();
-
-                    hideKeyboard(editText);
+//                    editText.clearFocus();
+                    hideUserInput();
+//                    hideKeyboard(editText);
                 }
             }
         });
@@ -137,12 +149,28 @@ public class ItemFragment extends Fragment {
         observeViewModel();
 
         frameLayout = view.findViewById(R.id.item_fragment_container);
-        setVisibilityListener();
+//        setVisibilityListener();
 
         updateBtn = view.findViewById(R.id.update_btn);
         editText = view.findViewById(R.id.user_input_edit_text);
         addBtn = view.findViewById(R.id.btn_add_todo);
         deleteBtn = view.findViewById(R.id.btn_delete_todo);
+
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    Log.d(TAG, "EditText obtained focus");
+                    Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
+                    showKeyboard(editText);
+                }
+                else{
+                    Log.d(TAG, "EditText lost focus");
+                    Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
+                    hideKeyboard(editText);
+                }
+            }
+        });
 
         linearLayout = view.findViewById(R.id.user_input_linear_layout);
         linearLayout.setOnClickListener(new View.OnClickListener() {
@@ -167,8 +195,7 @@ public class ItemFragment extends Fragment {
 
                 // let position of item clicked -1 to distinguish from adding and updating a item.
                 positionItem = -1;
-                editText.requestFocus();
-                showKeyboard(linearLayout);
+                showUserInput();
             }
         });
 
@@ -195,20 +222,12 @@ public class ItemFragment extends Fragment {
                         updateToDoItem(newToDoContent);
                     }
 
-                    hideKeyboard(editText);
-                    editText.clearFocus();
+                    hideUserInput();
+//                    editText.clearFocus();
                 }
             }
         });
 
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus){
-
-                }
-            }
-        });
     }
 
     private void addNewToDoItem(String newToDoContent){
@@ -240,10 +259,12 @@ public class ItemFragment extends Fragment {
     private void showKeyboard(View view){
         // how to show keyboard programmatically
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
-        Log.d(TAG, "Here Show keyboard");
+
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
-        if(inputMethodManager != null)
+        if(inputMethodManager != null) {
+            Log.d(TAG, "Here Show keyboard");
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+        }
 //            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
     }
@@ -255,61 +276,74 @@ public class ItemFragment extends Fragment {
         assert inputMethodManager != null;
 
 
-//        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+//        inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
         editText.clearFocus();
     }
 
     // control the visibility of the user input area depending on the current size of the screen
     // --> if the height diff is more than 200(assuming that soft input is open already), so open the input area
     // --> else key board is hidden so set the input area gone
-    private void setVisibilityListener(){
-        frameLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Log.d(TAG, "----- position " + tabIndex);
-                Log.d(TAG, frameLayout.getRootView().getHeight() + " " + frameLayout.getHeight());
-                int heightDiff = frameLayout.getRootView().getHeight() - frameLayout.getHeight();
-                Log.d(TAG, "HeightDiff == " + heightDiff);
-                if (heightDiff > frameLayout.getHeight()/2) {
+//    private void setVisibilityListener(){
+//        frameLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                Log.d(TAG, "----- position " + tabIndex);
+//                Log.d(TAG, frameLayout.getRootView().getHeight() + " " + frameLayout.getHeight());
+//                int heightDiff = frameLayout.getRootView().getHeight() - frameLayout.getHeight();
+//                Log.d(TAG, "HeightDiff == " + heightDiff);
+//                if (heightDiff > frameLayout.getHeight()/2) {
+//
+//                    Log.d(TAG, "onGlobalLayout -- VISIBLE passed");
+//                    linearLayout.setVisibility(View.VISIBLE);
+//                    editText.setVisibility(View.VISIBLE);
+//                    updateBtn.setVisibility(View.VISIBLE);
+//
+//                    if(positionItem != -1)
+//                        recyclerView.smoothScrollToPosition(positionItem);
+//
+//                    addBtn.setVisibility(View.GONE);
+//                    deleteBtn.setVisibility(View.GONE);
+//
+//                }
+//                else{
+//
+//                    Log.d(TAG, "onGlobalLayout -- GONE passed");
+//                    linearLayout.setVisibility(View.GONE);
+//                    editText.setVisibility(View.GONE);
+//                    updateBtn.setVisibility(View.GONE);
+//
+//
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            addBtn.setVisibility(View.VISIBLE);
+//                            deleteBtn.setVisibility(View.VISIBLE);
+//                        }
+//                    }, 50);
+//                }
+//            }
+//        });
+//    }
 
-                    Log.d(TAG, "onGlobalLayout -- VISIBLE passed");
-                    linearLayout.setVisibility(View.VISIBLE);
-                    editText.setVisibility(View.VISIBLE);
-                    updateBtn.setVisibility(View.VISIBLE);
+    private void showUserInput(){
+        linearLayout.setVisibility(View.VISIBLE);
+        editText.setVisibility(View.VISIBLE);
+        updateBtn.setVisibility(View.VISIBLE);
 
-                    if(positionItem != -1)
-                        recyclerView.smoothScrollToPosition(positionItem);
+        editText.requestFocus();
 
-                    addBtn.setVisibility(View.GONE);
-                    deleteBtn.setVisibility(View.GONE);
+        addBtn.setVisibility(View.GONE);
+        deleteBtn.setVisibility(View.GONE);
 
-                }
-                else{
-
-                    Log.d(TAG, "onGlobalLayout -- GONE passed");
-                    linearLayout.setVisibility(View.GONE);
-                    editText.setVisibility(View.GONE);
-                    updateBtn.setVisibility(View.GONE);
-
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            addBtn.setVisibility(View.VISIBLE);
-                            deleteBtn.setVisibility(View.VISIBLE);
-                        }
-                    }, 50);
-                }
-            }
-        });
     }
 
-    private void hideUserInput(){
+    public void hideUserInput(){
         linearLayout.setVisibility(View.GONE);
         editText.setVisibility(View.GONE);
         updateBtn.setVisibility(View.GONE);
 
+        editText.clearFocus();
 
         new Handler().postDelayed(new Runnable() {
             @Override

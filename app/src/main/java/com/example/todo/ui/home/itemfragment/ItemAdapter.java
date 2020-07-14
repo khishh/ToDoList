@@ -81,7 +81,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Touched at " + position, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(v.getContext(), "Touched at " + position, Toast.LENGTH_SHORT).show();
 
                 Log.d(TAG, v.getClass().toString() + " " + v.getId());
 

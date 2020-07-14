@@ -71,7 +71,7 @@ public class HomeFragment extends Fragment {
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                hideKeyboard(view);
+//                hideKeyboard(view);
             }
 
             @Override
@@ -82,15 +82,10 @@ public class HomeFragment extends Fragment {
             @Override
             public void onPageScrollStateChanged(int state) {
                 // when the tab page changed, close the keyboard
-                 hideKeyboard(view);
             }
         });
 
-
-        // test
-
         viewPager.setAdapter(pagerAdapter);
-
         observeViewModel();
 
     }
@@ -169,8 +164,13 @@ public class HomeFragment extends Fragment {
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-//            return "List " + (position + 1);
             return mFragmentTitleList.get(position);
+        }
+
+        public void callFragmentHideUserInput(){
+            int position = viewPager.getCurrentItem();
+            ItemFragment curFragment = (ItemFragment) mFragmentList.get(position);
+            curFragment.hideUserInput();
         }
     }
 
@@ -202,16 +202,8 @@ public class HomeFragment extends Fragment {
 
             case R.id.add_newTab:
                 Toast.makeText(getContext(), "hello", Toast.LENGTH_SHORT).show();
-//                ToDoCollection.getInstance().incrementSizeOfCollection();
-
-                // temporary title
-//                String newTabTitle = "New";
-//                pagerAdapter.addFragment(new ItemFragment(), newTabTitle, pagerAdapter.getCount());
-//                homeViewModel.incrementTabSize(newTabTitle);
-//                pagerAdapter.notifyDataSetChanged();
 
                 hideKeyboard(getView());
-//                HomeFragmentDirections.ActionNavigationHomeToItemEditFragment  action = HomeFragmentDirections.actionNavigationHomeToItemEditFragment();
                 Navigation.findNavController(this.getView()).navigate(R.id.MoveToTabManagement);
 
                 break;

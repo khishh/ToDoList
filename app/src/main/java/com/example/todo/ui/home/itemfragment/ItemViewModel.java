@@ -175,12 +175,5 @@ public class ItemViewModel extends AndroidViewModel {
             retrieveToDoFromDatabase = null;
         }
 
-//        if(updateToDoIntoDatabase != null){
-//            updateToDoIntoDatabase.cancel(true);
-//            updateToDoIntoDatabase = null;
-//        }
-//        if(updateToDoIntoDatabase != null){
-//            Log.d(TAG, )
-//        }
     }
 }
