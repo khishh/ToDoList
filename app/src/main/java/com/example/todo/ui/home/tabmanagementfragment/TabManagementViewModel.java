@@ -15,41 +15,64 @@ import com.example.todo.model.TabToDoDataBase;
 import com.example.todo.model.ToDo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+
+// *-----------------------------------------------------------
+//  TabManagementViewModel class
+//  Fields:
+//      1. mTabList -> store all tabs retrieved from Room Database
+//      2. retrievedTabFromDatabase -> the instance to RetrieveTabFromDatabase class extends to AsyncTask to get All Tabs from Room Database
+//      3. updateTabIntoDatabase
 
 public class TabManagementViewModel extends AndroidViewModel {
 
+    // *---  fields ---*
+
     private static final String TAG = "TabManagementViewModel";
 
+    //  store all tabs retrieved from Room Database
     MutableLiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
+    //  the instance of RetrieveTabFromDatabase class extends to AsyncTask to get All Tabs from Room Database
     private AsyncTask<Void, Void, List<Tab>> retrieveTabFromDatabase;
 
+    // the instance of UpdateTabIntoDatabase class extends to AsyncTask to save all UPDATED Tabs into Room Database
     private AsyncTask<List<Tab>, Void, List<Tab>> updateTabIntoDatabase;
 
+    // default constructor
     public TabManagementViewModel(@NonNull Application application) {
         super(application);
     }
 
+    // retrieving all Tabs in Room database by calling execute()
     public void retrieveTabList(){
         retrieveTabFromDatabase = new RetrieveTabFromDatabase();
         retrieveTabFromDatabase.execute();
     }
 
+    // When users sort Tab from screen, Tab stored in Room will be also sorted accordingly.
+    // - fromPos -> the position of Tab in RecyclerView where users started dragging from
+    // - toPos   -> the position of Tab in RecyclerView where users sending dragging at
     public void updateTabList(int fromPos, int toPos){
 
-        Log.d(TAG, "fromPos == " + fromPos + " toPos == " + toPos);
+        // Log.d(TAG, "fromPos == " + fromPos + " toPos == " + toPos);
 
+        // update the order of mTabList based on fromPos and toPos
         swapTabOrder(fromPos, toPos);
 
+        // create ArrayList to store two sorted Tab
         List<Tab> tabs = new ArrayList<>();
         tabs.add(mTabList.getValue().get(fromPos));
         tabs.add(mTabList.getValue().get(toPos));
+
         updateTabIntoDatabase = new UpdateTabIntoDatabase();
         updateTabIntoDatabase.execute(tabs);
     }
 
+    // RetrieveTabFromDataBase class
+    // gets all Tabs stored in Room in doInBackground()
+    // call setValue() method on mTabList to assign retrieved List<Tab> after finish retrieval
     private class RetrieveTabFromDatabase extends AsyncTask<Void, Void, List<Tab>>{
 
         @Override
@@ -64,6 +87,8 @@ public class TabManagementViewModel extends AndroidViewModel {
         }
     }
 
+    // UpdateTabIntoDatabase class
+    // updates given Tab(s) in Room database in doInBackground()
     private class UpdateTabIntoDatabase extends AsyncTask<List<Tab>, Void, List<Tab>>{
 
         @Override
@@ -71,17 +96,20 @@ public class TabManagementViewModel extends AndroidViewModel {
 
 //            Log.d(TAG, "UpdateTabIntoDatabase doInBackground started");
 
+            // get Tab(s) to be updated
             List<Tab> tabList = lists[0];
 
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
+            // get the original tabIds from two Tabs before sorting
             int fromPosId = tabList.get(0).getTabId();
             int toPosId = tabList.get(1).getTabId();
 
-            // get All List<To-Do> with indexes of swapped tabs
+            // get All List<To-Do> with tabIds of two Tabs before sorting
             List<ToDo> fromPosToDoList = dao.getToDoList(fromPosId);
             List<ToDo> toPosToDoList = dao.getToDoList(toPosId);
 
+            // change each To-Do's ownerId to toPosId and call updateToDoList() to reflect the changes
 //            Log.d(TAG, "fromPosToDoList Size " + fromPosToDoList.size());
             for(ToDo todo : fromPosToDoList){
                 todo.setToDoOwnerId(toPosId);
@@ -92,7 +120,7 @@ public class TabManagementViewModel extends AndroidViewModel {
 
 //            Log.d(TAG, "toPosToDoList Size " + toPosToDoList.size());
 
-
+            // change each To-Do's ownerId to toPosId and call updateToDoList() to reflect the changes
             for(ToDo todo : toPosToDoList){
                 todo.setToDoOwnerId(fromPosId);
 //                Log.d(TAG, "toPosToDoList newOwnerId = " + fromPosId);
@@ -100,7 +128,7 @@ public class TabManagementViewModel extends AndroidViewModel {
             dao.updateToDoList(toPosToDoList);
 
 
-            //update tabIndex
+            //update tabId of two Tabs
             int tabIndexKeep = fromPosId;
 
             Log.d(TAG, "Before = 0's title = " + tabList.get(0).getTabTitle() + " 1's title " + tabList.get(1).getTabTitle());
