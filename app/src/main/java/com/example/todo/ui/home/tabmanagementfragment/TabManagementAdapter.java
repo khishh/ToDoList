@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.media.Image;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -28,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdapter.ViewHolder> {
+
+    private static final String TAG = "TabManagementAdapter";
 
     private ArrayList<Tab> tabList;
 
@@ -67,6 +70,11 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
+        Tab tab = tabList.get(position);
+
+        holder.content.setText(tab.getTabTitle());
+
+
         if(!holderList.containsKey(position)){
             holderList.put(position, holder);
         }
@@ -74,8 +82,11 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
 //        holder.linearLayout.bringToFront();
 
         holder.sortButton.setOnTouchListener(new View.OnTouchListener() {
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                int action = event.getAction();
 
                 if(deleteMovedPos != -1){
                     if(listener != null){
@@ -84,12 +95,44 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                     }
                 }
 
-                if(event.getActionMasked() == MotionEvent.ACTION_DOWN){
-                    if(listener != null){
-                        listener.onClick(holder);
-                    }
+//                if(action == MotionEvent.ACTION_DOWN){
+//                    Log.d(TAG, "DOWN");
+//                    if(listener != null){
+//                        listener.onClick(holder);
+//                    }
+//                }
+//                else if(action == MotionEvent.ACTION_UP){
+//
+//                    Log.d(TAG, "UP");
+//                    if(listener != null){
+//
+//                    }
+//                }
+
+                switch (action){
+                    case MotionEvent.ACTION_DOWN:
+                        Log.d(TAG, "DOWN");
+                        if(listener != null){
+                            listener.onClick(holder);
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        Log.d(TAG, "MOVE");
+
+                        return true;
+
+                    case MotionEvent.ACTION_CANCEL:
+                        Log.d(TAG, "CANCEL");
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                        Log.d(TAG, "UP");
+                        return true;
+
+                    default:
+                        return false;
                 }
-                return false;
             }
         });
 
@@ -134,6 +177,14 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
         return tabList.size();
     }
 
+    public void swapTabList(int fromPos, int toPos){
+        Log.d(TAG, "before swapped : " + tabList.get(fromPos).getTabTitle() + " " + tabList.get(toPos).getTabTitle());
+        Tab a = tabList.get(fromPos);
+        tabList.set(fromPos, tabList.get(toPos));
+        tabList.set(toPos, a);
+        Log.d(TAG, "after swapped : " + tabList.get(fromPos).getTabTitle() + " " + tabList.get(toPos).getTabTitle());
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         public View itemView;
@@ -141,6 +192,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
         public ImageButton editBtn;
         public ImageButton sortButton;
         public Button deleteMsg;
+        public TextView content;
         public LinearLayout linearLayout;
 
         public ViewHolder(@NonNull View itemView) {
@@ -152,6 +204,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             editBtn = itemView.findViewById(R.id.tab_management_edit);
             sortButton = itemView.findViewById(R.id.tab_management_sort);
             deleteMsg = itemView.findViewById(R.id.tab_management_delete_msg);
+            content = itemView.findViewById(R.id.tab_management_content);
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.todo.ui.home.tabmanagementfragment;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,11 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.example.todo.R;
 import com.example.todo.model.Tab;
@@ -61,10 +58,21 @@ public class TabManagementFragment extends Fragment {
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             final int fromPos = viewHolder.getAbsoluteAdapterPosition();
             final int toPos = target.getAbsoluteAdapterPosition();
+            adapter.swapTabList(fromPos, toPos);
             adapter.notifyItemMoved(fromPos, toPos);
+
+            Log.d(TAG, fromPos + " " + toPos);
+
+
+            viewModel.updateTabList(fromPos, toPos);
             return true;
         }
 
+        @Override
+        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+            Log.d(TAG, "MOVE finished");
+        }
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
@@ -94,50 +102,45 @@ public class TabManagementFragment extends Fragment {
             return false;
         }
 
-//        @Override
-//        public boolean isItemViewSwipeEnabled() {
-//            return false;
-//        }
-
         @Override
         public int convertToAbsoluteDirection(int flags, int layoutDirection) {
             return super.convertToAbsoluteDirection(flags, layoutDirection);
         }
 
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-            View itemView = viewHolder.itemView;
-            int backgroundCornerOffset = 20;
-
-            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
-            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
-            int iconBottom = iconTop + icon.getIntrinsicHeight();
-
-            if(dX < 0){
-
-                itemView.setTranslationX(dX/7);
-                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
-                int iconRight = itemView.getRight() - iconMargin;
-                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
-
-                Log.d(TAG, "dx == " + dX);
-
-                if(dX <= -100f){
-                    dX = -100f;
-                }
-
-
-                background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
-                        itemView.getTop(), itemView.getRight(), itemView.getBottom());
-            }
-            else{
-                background.setBounds(0,0,0,0);
-            }
-            background.draw(c);
-            icon.draw(c);
-        }
+//        @Override
+//        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+//            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+//
+//            View itemView = viewHolder.itemView;
+//            int backgroundCornerOffset = 20;
+//
+//            int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+//            int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+//            int iconBottom = iconTop + icon.getIntrinsicHeight();
+//
+//            if(dX < 0){
+//
+//                itemView.setTranslationX(dX/7);
+//                int iconLeft = itemView.getRight() - iconMargin - icon.getIntrinsicWidth();
+//                int iconRight = itemView.getRight() - iconMargin;
+//                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+//
+//                Log.d(TAG, "dx == " + dX);
+//
+//                if(dX <= -100f){
+//                    dX = -100f;
+//                }
+//
+//
+//                background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset,
+//                        itemView.getTop(), itemView.getRight(), itemView.getBottom());
+//            }
+//            else{
+//                background.setBounds(0,0,0,0);
+//            }
+//            background.draw(c);
+//            icon.draw(c);
+//        }
 
 
     }
@@ -166,7 +169,7 @@ public class TabManagementFragment extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
 
         viewModel = new ViewModelProvider(this).get(TabManagementViewModel.class);
-        viewModel.updateTabList();
+        viewModel.retrieveTabList();
 
         recyclerView = view.findViewById(R.id.tab_manage_recyclerView);
 
@@ -197,7 +200,7 @@ public class TabManagementFragment extends Fragment {
 
         callBack = new TabManagementItemCallBack(
                 ItemTouchHelper.DOWN | ItemTouchHelper.UP,
-                ItemTouchHelper.LEFT);
+                0);
         helper = new ItemTouchHelper(callBack);
         helper.attachToRecyclerView(recyclerView);
 

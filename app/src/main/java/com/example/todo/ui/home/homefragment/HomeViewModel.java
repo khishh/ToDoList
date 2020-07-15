@@ -91,12 +91,15 @@ public class HomeViewModel extends AndroidViewModel {
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
             for (int i = 0; i < tabList.size(); i++){
-                Log.d(TAG, "Insert == " + tabList.get(i).getToDoList().size());
+                Log.d(TAG, "Insert == " + tabList.get(i).getTabIndex());
                 dao.insertToDoWithTab(tabList.get(i));
             }
 
-            // after save dogs into database, record the current time
+            // after save Tabs into database, record the current time
             sharedPreferencesHelper.saveUpdateTime(System.nanoTime());
+
+            List<Tab> res = dao.getAllTab();
+            Log.d(TAG, "saved Tab == " + res.toString());
 
             return tabList;
         }
@@ -121,6 +124,7 @@ public class HomeViewModel extends AndroidViewModel {
         @Override
         protected void onPostExecute(List<Tab> tabs) {
             tabsRetrieved(tabs);
+            Log.d(TAG, "RETRIEVED " + tabs.toString());
 //            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
         }
     }
@@ -145,6 +149,6 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     public int getTabIdAtPosition(int position){
-        return mTabList.getValue().get(position).getTabIndex();
+        return mTabList.getValue().get(position).getTabId();
     }
 }

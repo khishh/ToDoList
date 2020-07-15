@@ -91,9 +91,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void observeViewModel() {
-        homeViewModel.getTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
+                homeViewModel.getTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
+                Log.d(TAG, "onChanged called");
                 List<String> tabTitles = new ArrayList<>();
                 for(int i = 0; i < tabs.size(); i++){
                     tabTitles.add(tabs.get(i).getTabTitle());
@@ -124,6 +125,8 @@ public class HomeFragment extends Fragment {
 
 
         public void updatePagerAdapter(List<String> tabTitles){
+
+            Log.d(TAG, "UPDATED ADAPETR " + tabTitles.toString());
             mFragmentTitleList.clear();
             mFragmentList.clear();
             mFragmentTitleList.addAll(tabTitles);
@@ -143,9 +146,10 @@ public class HomeFragment extends Fragment {
 //            mFragmentTitleList.add(position, String.valueOf(position+1));
 
             Fragment fragment = mFragmentList.get(position);
-            Log.d(TAG, "Pager position == " + position);
+            int tabId = homeViewModel.getTabIdAtPosition(position);
+            Log.d(TAG, "Pager position == " + position + " its tabId == " + tabId);
             Bundle bundle = new Bundle();
-            bundle.putInt(ItemFragment.ARG_OBJECT, position);
+            bundle.putInt(ItemFragment.ARG_OBJECT, tabId);
             fragment.setArguments(bundle);
 
             return fragment;
@@ -213,5 +217,8 @@ public class HomeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 }

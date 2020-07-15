@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,7 +28,6 @@ import android.widget.Toast;
 import com.example.todo.R;
 import com.example.todo.model.ToDo;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
-import com.example.todo.util.Util;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -55,7 +53,7 @@ public class ItemFragment extends Fragment {
     private FloatingActionButton deleteBtn;
 
     // tabId
-    private int tabIndex;
+    private int tabId;
 
     // position of the item in a list clicked recently
     private int positionItem;
@@ -77,9 +75,9 @@ public class ItemFragment extends Fragment {
         Bundle bundle = getArguments();
 
         if(bundle != null)
-            tabIndex = bundle.getInt(ARG_OBJECT, 0);
+            tabId = bundle.getInt(ARG_OBJECT, 0);
 
-        Log.d(TAG, "tabIndex " + tabIndex );
+        Log.d(TAG, "tabId " + tabId);
 
         return view;
     }
@@ -144,7 +142,7 @@ public class ItemFragment extends Fragment {
 
         // for test
         itemViewModel = new ViewModelProvider(this).get(ItemViewModel.class);
-        itemViewModel.loadToDoList(tabIndex);
+        itemViewModel.loadToDoList(tabId);
 
         observeViewModel();
 
