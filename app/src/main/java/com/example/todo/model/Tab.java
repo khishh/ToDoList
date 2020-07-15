@@ -32,8 +32,8 @@ public class Tab {
         return tabId;
     }
 
-    public void setTabId(int tabIndex) {
-        this.tabIndex = tabIndex;
+    public void setTabId(int tabId) {
+        this.tabId = tabId;
     }
 
     public int getTabIndex() {
