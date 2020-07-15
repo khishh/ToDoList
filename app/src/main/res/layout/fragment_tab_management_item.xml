@@ -31,6 +31,8 @@
                 android:id="@+id/tab_management_content"
                 android:layout_height="match_parent"
                 android:layout_width="0dp"
+                android:gravity="center_vertical"
+                android:padding="5dp"
                 android:layout_weight="1"/>
 
             <ImageButton
