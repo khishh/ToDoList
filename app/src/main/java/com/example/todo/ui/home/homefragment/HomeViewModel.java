@@ -33,6 +33,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
+        Log.d(TAG, "HomeViewModel created");
     }
 
     public void initializeData(){
@@ -63,7 +64,7 @@ public class HomeViewModel extends AndroidViewModel {
             Random r = new Random();
             int rInt = r.nextInt(20)+1;
 
-            Log.d(TAG, "Position i = " + i + " size = " + rInt);
+//            Log.d(TAG, "Position i = " + i + " size = " + rInt);
 
             for(int j = 0; j < rInt; j++){
                 if(j % 2 == 0)
@@ -76,7 +77,7 @@ public class HomeViewModel extends AndroidViewModel {
             tabList.add(tab);
         }
 
-        Log.d(TAG, tabList.toString());
+//        Log.d(TAG, tabList.toString());
 
         return tabList;
     }
@@ -91,7 +92,7 @@ public class HomeViewModel extends AndroidViewModel {
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
             for (int i = 0; i < tabList.size(); i++){
-                Log.d(TAG, "Insert == " + tabList.get(i).getTabIndex());
+//                Log.d(TAG, "Insert == " + tabList.get(i).getTabIndex());
                 dao.insertToDoWithTab(tabList.get(i));
             }
 
@@ -99,7 +100,7 @@ public class HomeViewModel extends AndroidViewModel {
             sharedPreferencesHelper.saveUpdateTime(System.nanoTime());
 
             List<Tab> res = dao.getAllTab();
-            Log.d(TAG, "saved Tab == " + res.toString());
+//            Log.d(TAG, "saved Tab == " + res.toString());
 
             return tabList;
         }
@@ -150,5 +151,21 @@ public class HomeViewModel extends AndroidViewModel {
 
     public int getTabIdAtPosition(int position){
         return mTabList.getValue().get(position).getTabId();
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        Log.d(TAG, "HomeViewModel onCleared");
+
+        if(insertTabsIntoDatabase != null){
+            insertTabsIntoDatabase.cancel(true);
+            insertTabsIntoDatabase = null;
+        }
+
+        if(retrieveTabsFromDatabase != null){
+            retrieveTabsFromDatabase.cancel(true);
+            retrieveTabsFromDatabase = null;
+        }
     }
 }
