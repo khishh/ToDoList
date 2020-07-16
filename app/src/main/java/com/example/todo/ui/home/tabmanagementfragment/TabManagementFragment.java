@@ -214,7 +214,7 @@ public class TabManagementFragment extends Fragment {
                 hideKeyboard(userInputTab);
             }
         });
-        
+
         callBack = new TabManagementItemCallBack(
                 ItemTouchHelper.DOWN | ItemTouchHelper.UP,
                 0);
