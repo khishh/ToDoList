@@ -60,6 +60,11 @@ public class ItemFragment extends Fragment {
 
     private ItemViewModel itemViewModel;
 
+    public ItemFragment(int tabId){
+        this.tabId = tabId;
+        Log.d(TAG, "ItemFragment created TabId = " + tabId);
+    }
+
 
     public ItemFragment() {
         // Required empty public constructor
@@ -69,6 +74,8 @@ public class ItemFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Log.d(TAG, "onCreateView");
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_item, container, false);
 
@@ -77,7 +84,7 @@ public class ItemFragment extends Fragment {
         if(bundle != null)
             tabId = bundle.getInt(ARG_OBJECT, 0);
 
-        Log.d(TAG, "tabId " + tabId);
+//        Log.d(TAG, "tabId " + tabId);
 
         return view;
     }
@@ -86,6 +93,8 @@ public class ItemFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        Log.d(TAG, "onViewCreated tabId = " + tabId);
 
         recyclerView = view.findViewById(R.id.list_recycler_view);
 
@@ -97,7 +106,7 @@ public class ItemFragment extends Fragment {
         adapter.setListener(new ItemAdapter.Listener() {
             @Override
             public void onClick(final int position) {
-                Log.d(TAG, "position = " + position);
+//                Log.d(TAG, "position = " + position);
 
                 // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
                 positionItem = position;
@@ -147,7 +156,6 @@ public class ItemFragment extends Fragment {
         observeViewModel();
 
         frameLayout = view.findViewById(R.id.item_fragment_container);
-//        setVisibilityListener();
 
         updateBtn = view.findViewById(R.id.update_btn);
         editText = view.findViewById(R.id.user_input_edit_text);
@@ -158,12 +166,12 @@ public class ItemFragment extends Fragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if(hasFocus){
-                    Log.d(TAG, "EditText obtained focus");
+//                    Log.d(TAG, "EditText obtained focus");
                     Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
                     showKeyboard(editText);
                 }
                 else{
-                    Log.d(TAG, "EditText lost focus");
+//                    Log.d(TAG, "EditText lost focus");
                     Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
                     hideKeyboard(editText);
                 }
@@ -187,7 +195,7 @@ public class ItemFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                Log.d(TAG, String.valueOf(positionItem));
+                // Log.d(TAG, String.valueOf(positionItem));
                 editText.setText("");
                 updateBtn.setText("Add");
 
@@ -221,7 +229,6 @@ public class ItemFragment extends Fragment {
                     }
 
                     hideUserInput();
-//                    editText.clearFocus();
                 }
             }
         });
@@ -249,6 +256,8 @@ public class ItemFragment extends Fragment {
         itemViewModel.getMDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
+                Log.d(TAG, "onChanged called = " + tabId);
+                Log.d(TAG, toDos.toString());
                 adapter.updateToDoList(toDos);
             }
         });
@@ -260,7 +269,7 @@ public class ItemFragment extends Fragment {
 
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager != null) {
-            Log.d(TAG, "Here Show keyboard");
+//            Log.d(TAG, "Here Show keyboard");
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
         }
 //            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -268,7 +277,7 @@ public class ItemFragment extends Fragment {
     }
 
     private void hideKeyboard(View view){
-        Log.d(TAG, "Hide keyboard");
+//        Log.d(TAG, "Hide keyboard");
         View currentFocused = ((Activity)view.getContext()).getCurrentFocus();
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         assert inputMethodManager != null;
@@ -276,7 +285,6 @@ public class ItemFragment extends Fragment {
 
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 //        inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-        editText.clearFocus();
     }
 
     // control the visibility of the user input area depending on the current size of the screen
@@ -352,6 +360,27 @@ public class ItemFragment extends Fragment {
         }, 50);
     }
 
+    public void updateTabId(int tabId){
+        this.tabId = tabId;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "ItemFragment onStart");
+
+        Log.d(TAG, "tabId == " + tabId + " mTabId == " + itemViewModel.getmTabId().getValue());
+        if(itemViewModel != null && tabId != itemViewModel.getmTabId().getValue()){
+            Log.d(TAG, "ItemFragment onStart entered");
+            itemViewModel.loadToDoList(tabId);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "ItemFragment onResume");
+    }
 
     @Override
     public void onStop() {
@@ -369,9 +398,19 @@ public class ItemFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if(linearLayout.getVisibility() == View.VISIBLE){
-            Log.d(TAG, "onPause hideUserInput called");
+//            Log.d(TAG, "onPause hideUserInput called");
             hideUserInput();
         }
-
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "ItemFragment onDestroyView");
+    }
+
+    public int getTabId() {
+        return tabId;
+    }
+
 }

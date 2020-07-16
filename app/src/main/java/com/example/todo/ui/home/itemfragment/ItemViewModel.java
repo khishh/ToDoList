@@ -29,30 +29,29 @@ public class ItemViewModel extends AndroidViewModel {
 
     public ItemViewModel(@NonNull Application application) {
         super(application);
+        Log.d(TAG, "ItemViewModel created");
     }
 
-
     public void loadToDoList(int tabId){
+
         mTabId.setValue(tabId);
 
         retrieveToDoFromDatabase = new RetrieveToDoTask();
         retrieveToDoFromDatabase.execute(tabId);
     }
 
-
     private class RetrieveToDoTask extends AsyncTask<Integer, Void, List<ToDo>>{
-
 
         @Override
         protected List<ToDo> doInBackground(Integer... integers) {
             int tabId = integers[0];
 
-            Log.d(TAG, "tabId == " + tabId);
+//            Log.d(TAG, "tabId == " + tabId);
 
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
             List<ToDo> toDoList = dao.getToDoList(tabId);
 
-            Log.d(TAG, toDoList.size() + " " + toDoList.toString());
+//            Log.d(TAG, toDoList.size() + " " + toDoList.toString());
 
             return toDoList;
         }
@@ -60,7 +59,7 @@ public class ItemViewModel extends AndroidViewModel {
         @Override
         protected void onPostExecute(List<ToDo> toDos) {
             toDoListRetrieved(toDos);
-            Log.d(TAG, toDos.toString());
+//            Log.d(TAG, toDos.toString());
             Log.d(TAG, "data loaded");
             Toast.makeText(getApplication(), "ToDoList retrieved from your database", Toast.LENGTH_SHORT).show();
         }
@@ -78,7 +77,7 @@ public class ItemViewModel extends AndroidViewModel {
         protected Void doInBackground(Integer... integers) {
             int tabId = integers[0];
 
-            Log.d(TAG, "UPDATE tabId == " + tabId);
+//            Log.d(TAG, "UPDATE tabId == " + tabId);
 
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
@@ -160,9 +159,18 @@ public class ItemViewModel extends AndroidViewModel {
         return mDoList;
     }
 
+    public MutableLiveData<Integer> getmTabId() {
+        return mTabId;
+    }
+
+    public void setMTabId(int tabId){
+        mTabId.setValue(tabId);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();
+        Log.d(TAG, "ItemViewModel onCleared");
 
         if(isUpdated){
             updateToDoList();
@@ -173,5 +181,11 @@ public class ItemViewModel extends AndroidViewModel {
             retrieveToDoFromDatabase = null;
         }
 
+        if(updateToDoIntoDatabase != null){
+            updateToDoIntoDatabase.cancel(true);
+            updateToDoIntoDatabase = null;
+        }
+
     }
+
 }
