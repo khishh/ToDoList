@@ -40,6 +40,10 @@ public class TabManagementViewModel extends AndroidViewModel {
     // the instance of UpdateTabIntoDatabase class extends to AsyncTask to save all UPDATED Tabs into Room Database
     private AsyncTask<List<Tab>, Void, List<Tab>> updateTabIntoDatabase;
 
+    private AsyncTask<Tab, Void, Tab> deleteTabFromDatabase;
+
+    private AsyncTask<Tab, Void, List<Tab>> addNewTabIntoDatabase;
+
     // default constructor
     public TabManagementViewModel(@NonNull Application application) {
         super(application);
@@ -68,6 +72,23 @@ public class TabManagementViewModel extends AndroidViewModel {
 
         updateTabIntoDatabase = new UpdateTabIntoDatabase();
         updateTabIntoDatabase.execute(tabs);
+    }
+
+    public void deleteTab(int deletePos){
+
+        Tab deleteTab = deleteTabAtPosition(deletePos);
+
+        deleteTabFromDatabase = new DeleteTabFromDataBase();
+        deleteTabFromDatabase.execute(deleteTab);
+
+    }
+
+    public void addNewTab(String newTabTitle){
+
+        Tab newTab = new Tab(mTabList.getValue().size(), newTabTitle);
+
+        addNewTabIntoDatabase = new AddNewTabIntoDatabase();
+        addNewTabIntoDatabase.execute(newTab);
     }
 
     // RetrieveTabFromDataBase class
@@ -151,9 +172,61 @@ public class TabManagementViewModel extends AndroidViewModel {
         }
     }
 
+    private class DeleteTabFromDataBase extends AsyncTask<Tab, Void, Tab>{
+
+        @Override
+        protected Tab doInBackground(Tab... tabs) {
+
+            Log.d(TAG, "DELETE started");
+            Tab deleteTab = tabs[0];
+
+            int deleteTabId = deleteTab.getTabId();
+
+            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+
+            dao.deleteTab(deleteTab);
+            dao.deleteAllToDoOfId(deleteTabId);
+
+            return deleteTab;
+        }
+
+        @Override
+        protected void onPostExecute(Tab tab) {
+            deletedTab(tab);
+        }
+    }
+
+    private class AddNewTabIntoDatabase extends AsyncTask<Tab, Void, List<Tab>>{
+
+        @Override
+        protected List<Tab> doInBackground(Tab... tabs) {
+            Tab newTab = tabs[0];
+
+            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+
+            dao.insertTab(newTab);
+
+            return dao.getAllTab();
+        }
+
+        @Override
+        protected void onPostExecute(List<Tab> tabs) {
+            retrievedTabList(tabs);
+            Log.d(TAG, tabs.toString());
+        }
+    }
+
     private void retrievedTabList(List<Tab> tabs){
         mTabList.setValue(tabs);
     }
+
+    private void deletedTab(Tab tab){
+        List<Tab> cur = mTabList.getValue();
+        cur.remove(tab);
+        mTabList.setValue(cur);
+    }
+
+
 
     public MutableLiveData<List<Tab>> getmTabList() {
         return mTabList;
@@ -166,6 +239,16 @@ public class TabManagementViewModel extends AndroidViewModel {
 
         mTabList.getValue().set(toTabIndex, fromTab);
         mTabList.getValue().set(fromTabIndex, toTab);
+    }
+
+    public Tab deleteTabAtPosition(int deleteTabIndex){
+
+        Tab deleteTab = mTabList.getValue().get(deleteTabIndex);
+
+        Log.d(TAG, "Delete Tab == " + deleteTab.getTabTitle());
+        mTabList.getValue().remove(deleteTab);
+
+        return deleteTab;
     }
 
 }
