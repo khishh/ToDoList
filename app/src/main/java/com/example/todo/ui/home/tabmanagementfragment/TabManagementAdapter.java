@@ -43,6 +43,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
     interface Listener{
         void onClick(ViewHolder viewHolder);
         void onSwipeDeleteBack(int position);
+        void deleteTabAtPosition(int position);
     }
 
     public void setListener(Listener listener) {
@@ -94,20 +95,6 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                         deleteMovedPos = -1;
                     }
                 }
-
-//                if(action == MotionEvent.ACTION_DOWN){
-//                    Log.d(TAG, "DOWN");
-//                    if(listener != null){
-//                        listener.onClick(holder);
-//                    }
-//                }
-//                else if(action == MotionEvent.ACTION_UP){
-//
-//                    Log.d(TAG, "UP");
-//                    if(listener != null){
-//
-//                    }
-//                }
 
                 switch (action){
                     case MotionEvent.ACTION_DOWN:
@@ -162,6 +149,16 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                         listener.onSwipeDeleteBack(deleteMovedPos);
                         deleteMovedPos = -1;
                     }
+                }
+            }
+        });
+
+        holder.deleteMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "deleteMsg Clicked");
+                if(listener != null){
+                    listener.deleteTabAtPosition(position);
                 }
             }
         });
