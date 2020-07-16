@@ -22,7 +22,7 @@ public abstract class TabToDoDao {
     public abstract List<Long> insertToDoList(List<ToDo> toDoList);
 
     @Delete
-    public abstract void deleteTab(List<Tab> tabs);
+    public abstract void deleteTab(Tab tab);
 
     @Update
     public abstract void updateTab(Tab tab);
@@ -33,8 +33,8 @@ public abstract class TabToDoDao {
     @Query("SELECT * FROM Tab")
     public abstract List<Tab> getAllTab();
 
-    @Query("DELETE FROM Tab where tabIndex = :tabIndex")
-    public abstract  void deleteTabOfIndex(int tabIndex);
+    @Query("DELETE FROM Tab where tabId = :tabId")
+    public abstract  void deleteTabOfId(int tabId);
 
     @Query("DELETE FROM ToDo where toDoOwnerId = :toDoOwnerId")
     public abstract void deleteAllToDoOfId(int toDoOwnerId);
@@ -50,22 +50,21 @@ public abstract class TabToDoDao {
         int tabId = insertTab(tab).intValue();
         tab.setTabId(tabId);
 
-
         List<ToDo> toDoList = tab.getToDoList();
 
-        Log.d(TAG, "tab's index == " + tab.getTabIndex() + " tabId == "+tab.getTabId());
+//        Log.d(TAG, "tab's index == " + tab.getTabIndex() + " tabId == "+tab.getTabId());
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoOwnerId(tab.getTabId());
-            Log.d(TAG, "i = " + i + " " + tab.getTabId() + " " + toDoList.get(i).getToDoOwnerId());
+//            Log.d(TAG, "i = " + i + " " + tab.getTabId() + " " + toDoList.get(i).getToDoOwnerId());
         }
 
-        Log.d(TAG, "Size of toDoList == " + toDoList.size());
+//        Log.d(TAG, "Size of toDoList == " + toDoList.size());
 
         List<Long> toDoIds = insertToDoList(toDoList);
 
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoId(toDoIds.get(i).intValue());
-            Log.d(TAG, "toDoId at " + i + " " + toDoIds.get(i).intValue());
+//            Log.d(TAG, "toDoId at " + i + " " + toDoIds.get(i).intValue());
         }
     }
 
