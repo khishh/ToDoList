@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_height="50dp"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/tab_management_linear_layout"
+            xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+            android:layout_height="50dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="horizontal"
+            android:elevation="10dp"
+            >
+
+            <ImageButton
+                android:id="@+id/tab_management_delete"
+                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_delete"
+                android:background="@color/colorPrimary"/>
+
+            <TextView
+                android:id="@+id/tab_management_content"
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:gravity="center_vertical"
+                android:padding="5dp"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/tab_management_edit"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_baseline_edit_24"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:background="@color/white_bg"/>
+
+            <ImageButton
+                android:id="@+id/tab_management_sort"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_baseline_sort_24"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:background="@color/white_bg"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/tab_management_delete_msg"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:text="Delete"
+            android:textColor="@color/white_bg"
+            android:background="@android:color/holo_red_light"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:layout_alignParentEnd="true"
+            android:visibility="visible"/>
+
+    </RelativeLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

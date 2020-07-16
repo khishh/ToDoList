@@ -65,7 +65,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
         // able to display the newly added item in the List shows on top of the recyclerview
         int reversePosition = getItemCount() - position - 1;
-        Log.d(TAG, "position: " + reversePosition);
+//        Log.d(TAG, "position: " + reversePosition);
         tv.setText(doList.get(reversePosition).getContent());
 
         if(doList.get(reversePosition).isDone()){
@@ -81,9 +81,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(v.getContext(), "Touched at " + position, Toast.LENGTH_SHORT).show();
 
-                Log.d(TAG, v.getClass().toString() + " " + v.getId());
+//                Log.d(TAG, v.getClass().toString() + " " + v.getId());
 
                 if(listener != null){
                     listener.onClick(position);

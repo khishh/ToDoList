@@ -9,14 +9,14 @@ public class ToDo {
     @PrimaryKey (autoGenerate = true)
     private int toDoId;
 
-    private int toDoOwnerIndex;
+    private int toDoOwnerId;
 
     private String content;
 
     private boolean isDone;
 
-    public ToDo(int toDoOwnerIndex, String content, boolean isDone){
-        this.toDoOwnerIndex = toDoOwnerIndex;
+    public ToDo(int toDoOwnerId, String content, boolean isDone){
+        this.toDoOwnerId = toDoOwnerId;
         this.content = content;
         this.isDone = isDone;
     }
@@ -39,12 +39,12 @@ public class ToDo {
         isDone = done;
     }
 
-    public int getToDoOwnerIndex() {
-        return toDoOwnerIndex;
+    public int getToDoOwnerId() {
+        return toDoOwnerId;
     }
 
-    public void setToDoOwnerIndex(int toDoOwnerIndex) {
-        this.toDoOwnerIndex = toDoOwnerIndex;
+    public void setToDoOwnerId(int toDoOwnerId) {
+        this.toDoOwnerId = toDoOwnerId;
     }
 
     public int getToDoId() {
@@ -59,7 +59,7 @@ public class ToDo {
     public String toString() {
         return "ToDo{" +
                 "toDoId=" + toDoId +
-                ", toDoOwnerIndex=" + toDoOwnerIndex +
+                ", toDoOwnerId=" + toDoOwnerId +
                 ", content='" + content + '\'' +
                 ", isDone=" + isDone +
                 '}';

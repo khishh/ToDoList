@@ -11,45 +11,21 @@
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
         <action
-            android:id="@+id/action_navigation_home_to_itemEditFragment"
-            app:destination="@id/itemEditFragment"
-            app:enterAnim="@anim/fragment_fade_enter" />
-        <action
             android:id="@+id/MoveToTabManagement"
-            app:destination="@id/tabManagementFragment" />
+            app:destination="@id/tabManagementFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_home" />
     </fragment>
 
-    <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.todo.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
-
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.todo.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
-    <fragment
-        android:id="@+id/itemEditFragment"
-        android:name="com.example.todo.ui.home.ItemEditFragment"
-        android:label="fragment_item_edit"
-        tools:layout="@layout/fragment_item_edit" >
-        <argument
-            android:name="editText"
-            app:argType="string"
-            android:defaultValue='""' />
-        <action
-            android:id="@+id/action_itemEditFragment_to_navigation_home"
-            app:destination="@id/navigation_home" />
-        <argument
-            android:name="position"
-            app:argType="integer"
-            android:defaultValue="0" />
-    </fragment>
     <fragment
         android:id="@+id/tabManagementFragment"
         android:name="com.example.todo.ui.home.tabmanagementfragment.TabManagementFragment"
         android:label="fragment_tab_management"
-        tools:layout="@layout/fragment_tab_management" />
+        tools:layout="@layout/fragment_tab_management" >
+        <action
+            android:id="@+id/action_tabManagementFragment_to_navigation_home"
+            app:destination="@id/navigation_home"
+            app:popUpTo="@id/tabManagementFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>
