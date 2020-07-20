@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.model.Tab;
 import com.example.todo.ui.home.itemfragment.ItemFragment;
@@ -45,6 +46,11 @@ public class HomeFragment extends Fragment {
     private Toolbar toolbar;
 
     private TabLayout tabLayout;
+
+    public static HomeFragment getInstance(){
+        HomeFragment homeFragment = new HomeFragment();
+        return homeFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -224,7 +230,7 @@ public class HomeFragment extends Fragment {
             case R.id.add_newTab:
 
                 hideKeyboard(getView());
-                Navigation.findNavController(getView()).navigate(R.id.MoveToTabManagement);
+                ((MainActivity)getActivity()).createTabManagementFragment();
 
                 break;
         }

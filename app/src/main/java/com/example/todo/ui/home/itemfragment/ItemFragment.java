@@ -284,53 +284,8 @@ public class ItemFragment extends Fragment {
 
 
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-//        inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     }
 
-    // control the visibility of the user input area depending on the current size of the screen
-    // --> if the height diff is more than 200(assuming that soft input is open already), so open the input area
-    // --> else key board is hidden so set the input area gone
-//    private void setVisibilityListener(){
-//        frameLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                Log.d(TAG, "----- position " + tabIndex);
-//                Log.d(TAG, frameLayout.getRootView().getHeight() + " " + frameLayout.getHeight());
-//                int heightDiff = frameLayout.getRootView().getHeight() - frameLayout.getHeight();
-//                Log.d(TAG, "HeightDiff == " + heightDiff);
-//                if (heightDiff > frameLayout.getHeight()/2) {
-//
-//                    Log.d(TAG, "onGlobalLayout -- VISIBLE passed");
-//                    linearLayout.setVisibility(View.VISIBLE);
-//                    editText.setVisibility(View.VISIBLE);
-//                    updateBtn.setVisibility(View.VISIBLE);
-//
-//                    if(positionItem != -1)
-//                        recyclerView.smoothScrollToPosition(positionItem);
-//
-//                    addBtn.setVisibility(View.GONE);
-//                    deleteBtn.setVisibility(View.GONE);
-//
-//                }
-//                else{
-//
-//                    Log.d(TAG, "onGlobalLayout -- GONE passed");
-//                    linearLayout.setVisibility(View.GONE);
-//                    editText.setVisibility(View.GONE);
-//                    updateBtn.setVisibility(View.GONE);
-//
-//
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            addBtn.setVisibility(View.VISIBLE);
-//                            deleteBtn.setVisibility(View.VISIBLE);
-//                        }
-//                    }, 50);
-//                }
-//            }
-//        });
-//    }
 
     private void showUserInput(){
         linearLayout.setVisibility(View.VISIBLE);

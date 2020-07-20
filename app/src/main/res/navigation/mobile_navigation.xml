@@ -2,30 +2,4 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
-
-    <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.todo.ui.home.homefragment.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/MoveToTabManagement"
-            app:destination="@id/tabManagementFragment"
-            app:launchSingleTop="true"
-            app:popUpTo="@id/navigation_home" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/tabManagementFragment"
-        android:name="com.example.todo.ui.home.tabmanagementfragment.TabManagementFragment"
-        android:label="fragment_tab_management"
-        tools:layout="@layout/fragment_tab_management" >
-        <action
-            android:id="@+id/action_tabManagementFragment_to_navigation_home"
-            app:destination="@id/navigation_home"
-            app:popUpTo="@id/tabManagementFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
-</navigation>
+    android:id="@+id/mobile_navigation"/>

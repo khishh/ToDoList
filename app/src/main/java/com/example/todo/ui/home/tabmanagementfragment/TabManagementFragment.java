@@ -30,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.model.Tab;
 
@@ -58,6 +59,11 @@ public class TabManagementFragment extends Fragment {
 
     // ui components
     private RecyclerView recyclerView;
+
+    public static TabManagementFragment getInstance(){
+        TabManagementFragment fragment = new TabManagementFragment();
+        return fragment;
+    }
 
     public class TabManagementItemCallBack extends ItemTouchHelper.SimpleCallback {
 
@@ -131,13 +137,18 @@ public class TabManagementFragment extends Fragment {
 
         }
 
-        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
-            }
-        };
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+//        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+//            @Override
+//            public void handleOnBackPressed() {
+//////                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
+////                int count = getParentFragmentManager().getBackStackEntryCount();
+////                getParentFragmentManager().getBackStackEntryAt(count-1);
+////
+////                Toast.makeText(getContext(), "# of fragments is " + count, Toast.LENGTH_SHORT).show();
+////                ((MainActivity)getActivity()).recreateHomeFragment();
+//            }
+//        };
+//        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
@@ -191,7 +202,7 @@ public class TabManagementFragment extends Fragment {
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
+//                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
             }
         });
 
