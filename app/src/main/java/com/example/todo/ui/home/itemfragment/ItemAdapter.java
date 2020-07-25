@@ -64,7 +64,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         ImageButton ib = holder.view.findViewById(R.id.item_image);
 
         // able to display the newly added item in the List shows on top of the recyclerview
-        int reversePosition = getItemCount() - position - 1;
+        final int reversePosition = getItemCount() - position - 1;
 //        Log.d(TAG, "position: " + reversePosition);
         tv.setText(doList.get(reversePosition).getContent());
 
@@ -99,14 +99,14 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                     ((ImageButton)v).setTag(R.drawable.ic_check_item);
 
                     // change To-Do's isDone to be true
-                    doList.get(position).setDone(true);
+                    doList.get(reversePosition).setDone(true);
                 }
                 else{
                     ((ImageButton)v).setImageResource(R.drawable.item_circle);
                     ((ImageButton)v).setTag(R.drawable.item_circle);
 
                     // change To-Do's isDone to be true
-                    doList.get(position).setDone(false);
+                    doList.get(reversePosition).setDone(false);
                 }
 
             }
