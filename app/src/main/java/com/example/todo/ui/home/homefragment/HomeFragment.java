@@ -215,6 +215,12 @@ public class HomeFragment extends Fragment {
                 ((MainActivity)getActivity()).createTabManagementFragment();
 
                 break;
+
+            case R.id.edit_todo:
+                hideKeyboard(getView());
+                int currentTabIndex = binding.pager.getCurrentItem();
+                Log.d(TAG, "currentTabIndex == " + currentTabIndex);
+                ((MainActivity)getActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(currentTabIndex));
         }
         return super.onOptionsItemSelected(item);
     }

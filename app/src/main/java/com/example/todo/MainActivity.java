@@ -3,13 +3,18 @@ package com.example.todo;
 import android.os.Bundle;
 import android.util.Log;
 
-
 import com.example.todo.ui.home.homefragment.HomeFragment;
+import com.example.todo.ui.home.itemmanagementfragment.ItemManagementFragment;
 import com.example.todo.ui.home.tabmanagementfragment.TabManagementFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
+/**
+ *  MainActivity
+ *  Simple activity holding a FrameLayout
+ *  Only Managing fragment translation in this activity
+ */
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,27 +33,40 @@ public class MainActivity extends AppCompatActivity {
         createHomeFragment();
     }
 
+    /**
+     * show HomeFragment (default fragment)
+     * only called when the app starts
+     */
     public void createHomeFragment(){
         HomeFragment fragment = HomeFragment.getInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.container, fragment).commit();
     }
 
+    /**
+     * show TabManagementFragment
+     */
     public void createTabManagementFragment(){
         TabManagementFragment fragment = TabManagementFragment.getInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.container, fragment).addToBackStack(KEY_TAB_MANAGEMENT).commit();
+        ft.setCustomAnimations(R.anim.slide_from_down, R.anim.slide_to_up).replace(R.id.container, fragment).commit();
     }
 
-    public void recreateHomeFragment(){
-        HomeFragment newFragment = HomeFragment.getInstance();
+    public void createItemManagementFragment(int tabId){
+        ItemManagementFragment fragment = ItemManagementFragment.newInstance(tabId);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment).commit();
+    }
 
-        Fragment oldFragment = getSupportFragmentManager().findFragmentByTag(KEY_HOME_FRAGMENT);
-        if(oldFragment != null){
-            Log.d(TAG, "HomeFragment already exists");
-            ft.detach(oldFragment).add(R.id.container, newFragment).commit();
-        }
+    /**
+     * show HomeFragment called from other fragments to come back
+     * using replace to show the up-to-date data
+     */
+    public void updateHomeFragment(){
+        Log.d(TAG, "updateHomeFragment");
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_from_top, R.anim.slide_to_down).replace(R.id.container, fragment).commit();
     }
 
       // for later use

@@ -1,11 +1,11 @@
 package com.example.todo.ui.home.itemfragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,11 +21,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.todo.R;
+import com.example.todo.databinding.FragmentItemBinding;
 import com.example.todo.model.ToDo;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -39,13 +39,129 @@ import java.util.List;
 public class ItemFragment extends Fragment {
 
     private static final String TAG = "ItemFragment";
-
     public static final String ARG_OBJECT = "object";
 
-    private FrameLayout frameLayout;
-
-    private RecyclerView recyclerView;
+    private FragmentItemBinding binding;
+    private ItemViewModel itemViewModel;
     private ItemAdapter adapter;
+
+    /**
+     * =====  Listeners  =====
+     */
+
+    /**
+     * onClick(position) will be triggered when a user click an item in the recyclerview.
+     * onClick(position) will handle the visibility of LinearLayout containing EditText where
+     * a user can add/update To-Do class.
+     * If LinearLayout is not visible, display it and let its EditText have a content of To-Do class.
+     * If already visible, hide it from screen.
+     */
+    private ItemAdapter.Listener userClickListener = new ItemAdapter.Listener() {
+        @Override
+        public void onClick(int position) {
+            // Log.d(TAG, "position = " + position);
+
+            // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
+            positionItem = position;
+
+            if(linearLayout.getVisibility() == View.GONE){
+
+                showUserInput();
+
+                // showing recent items on the top and old items on the bottom
+                int reversePosition = adapter.getItemCount() - positionItem - 1;
+                updateBtn.setText("Update");
+
+                if(positionItem != -1)
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recyclerView.smoothScrollToPosition(positionItem);
+                        }
+                    },300);
+
+                editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
+
+            }
+            else
+                hideUserInput();
+        }
+    };
+
+    /**
+     * onFocusChange(v, hasFocus) will be called when EditText inside LinearLayout gains or loses a focus.
+     * This will handle show/hide softInput according to the state of a focus.
+     * If EditText lost a focus, call a method to hide soft input.
+     * If EditText gained a focus, call a method to open soft input.
+     */
+    private View.OnFocusChangeListener editTextFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus){
+                    Log.d(TAG, "EditText obtained focus");
+                Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
+                showKeyboard(editText);
+            }
+            else{
+                    Log.d(TAG, "EditText lost focus");
+                Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
+                hideKeyboard(editText);
+            }
+        }
+    };
+
+    /**
+     * When add Button is clicked, set up texts of EditText and Button before show them on the screen
+     * followed by showUserInput()
+     */
+    private View.OnClickListener addBtnOnCLickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // Log.d(TAG, String.valueOf(positionItem));
+            editText.setText("");
+            updateBtn.setText("Add");
+
+            // let position of item clicked -1 to distinguish from adding and updating a item.
+            positionItem = -1;
+            showUserInput();
+        }
+    };
+
+    /**
+     * Delete Button click will delete all To-Do items in Recyclerview with a check-mark
+     */
+    private View.OnClickListener deleteBtnOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            deleteAllDoneItems();
+        }
+    };
+
+    private View.OnClickListener updateBtnOnCLickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(!TextUtils.isEmpty(editText.getText().toString())){
+
+                String newToDoContent = editText.getText().toString();
+
+                // add new To-Do Item
+                if(positionItem == -1){
+                    addNewToDoItem(newToDoContent);
+                }
+                // update existing To-Do Item
+                else{
+                    updateToDoItem(newToDoContent);
+                }
+
+                hideUserInput();
+            }
+        }
+    };
+
+    /**
+     * =====  Layout components  =====
+     */
+    private RecyclerView recyclerView;
     private LinearLayout linearLayout;
     private EditText editText;
     private Button updateBtn;
@@ -58,186 +174,94 @@ public class ItemFragment extends Fragment {
     // position of the item in a list clicked recently
     private int positionItem;
 
-    private ItemViewModel itemViewModel;
+    public ItemFragment() {
+        // Required empty public constructor
+        Log.d(TAG, "ItemFragment created");
+    }
 
     public ItemFragment(int tabId){
         this.tabId = tabId;
         Log.d(TAG, "ItemFragment created TabId = " + tabId);
     }
 
-
-    public ItemFragment() {
-        // Required empty public constructor
-        Log.d(TAG, "ItemFragment created");
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         Log.d(TAG, "onCreateView");
-        // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_item, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_item, container, false);
+
+        recyclerView = binding.listRecyclerView;
+        updateBtn = binding.updateBtn;
+        editText = binding.userInputEditText;
+        addBtn = binding.btnAddTodo;
+        deleteBtn = binding.btnDeleteTodo;
+        linearLayout = binding.userInputLinearLayout;
 
         Bundle bundle = getArguments();
-
         if(bundle != null)
             tabId = bundle.getInt(ARG_OBJECT, 0);
-
 //        Log.d(TAG, "tabId " + tabId);
 
-        return view;
+        return binding.getRoot();
     }
-
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         Log.d(TAG, "onViewCreated tabId = " + tabId);
 
-        recyclerView = view.findViewById(R.id.list_recycler_view);
+        setUpRecyclerView();
 
-        final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(view.getContext(), LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
-
-        adapter = new ItemAdapter(new ArrayList<ToDo>());
-
-        adapter.setListener(new ItemAdapter.Listener() {
-            @Override
-            public void onClick(final int position) {
-//                Log.d(TAG, "position = " + position);
-
-                // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
-                positionItem = position;
-
-                if(linearLayout.getVisibility() == View.GONE){
-
-                    showUserInput();
-
-
-
-                    int reversePosition = adapter.getItemCount() - positionItem - 1;
-                    updateBtn.setText("Update");
-
-                    if(positionItem != -1)
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                recyclerView.smoothScrollToPosition(positionItem);
-                            }
-                        },300);
-
-
-                    editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
-
-                    if(positionItem != -1)
-                        recyclerView.smoothScrollToPosition(positionItem);
-
-//                    showKeyboard(editText);
-                    if(positionItem != -1)
-                        recyclerView.smoothScrollToPosition(positionItem);
-                }
-                else{
-
-//                    editText.clearFocus();
-                    hideUserInput();
-//                    hideKeyboard(editText);
-                }
-            }
-        });
-        recyclerView.setAdapter(adapter);
-
-
-        // for test
         itemViewModel = new ViewModelProvider(this).get(ItemViewModel.class);
         itemViewModel.loadToDoList(tabId);
 
         observeViewModel();
 
-        frameLayout = view.findViewById(R.id.item_fragment_container);
-
-        updateBtn = view.findViewById(R.id.update_btn);
-        editText = view.findViewById(R.id.user_input_edit_text);
-        addBtn = view.findViewById(R.id.btn_add_todo);
-        deleteBtn = view.findViewById(R.id.btn_delete_todo);
-
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
-//                    Log.d(TAG, "EditText obtained focus");
-                    Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
-                    showKeyboard(editText);
-                }
-                else{
-//                    Log.d(TAG, "EditText lost focus");
-                    Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
-                    hideKeyboard(editText);
-                }
-            }
-        });
-
-        linearLayout = view.findViewById(R.id.user_input_linear_layout);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "LinearLayout touched", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         attachOnClickListenerToViews();
+    }
+
+
+
+    private void setUpRecyclerView(){
+        final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(getContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new ItemAdapter(new ArrayList<ToDo>());
+        adapter.setListener(userClickListener);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void observeViewModel(){
+        itemViewModel.getMDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
+            @Override
+            public void onChanged(List<ToDo> toDos) {
+                Log.d(TAG, "onChanged called = " + tabId);
+                Log.d(TAG, toDos.toString());
+                adapter.updateToDoList(toDos);
+            }
+        });
     }
 
     private void attachOnClickListenerToViews(){
 
-        addBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // Log.d(TAG, String.valueOf(positionItem));
-                editText.setText("");
-                updateBtn.setText("Add");
-
-                // let position of item clicked -1 to distinguish from adding and updating a item.
-                positionItem = -1;
-                showUserInput();
-            }
-        });
-
-        deleteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                deleteAllDoneItems();
-            }
-        });
-
-        updateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!TextUtils.isEmpty(editText.getText().toString())){
-
-                    String newToDoContent = editText.getText().toString();
-
-                    // add new To-Do Item
-                    if(positionItem == -1){
-                        addNewToDoItem(newToDoContent);
-                    }
-                    // update existing To-Do Item
-                    else{
-                        updateToDoItem(newToDoContent);
-                    }
-
-                    hideUserInput();
-                }
-            }
-        });
-
+        editText.setOnFocusChangeListener(editTextFocusChangeListener);
+        addBtn.setOnClickListener(addBtnOnCLickListener);
+        deleteBtn.setOnClickListener(deleteBtnOnClickListener);
+        updateBtn.setOnClickListener(updateBtnOnCLickListener);
     }
+
+//    public void setUpAddBtn(){
+//        // Log.d(TAG, String.valueOf(positionItem));
+//        editText.setText("");
+//        updateBtn.setText("Add");
+//
+//        // let position of item clicked -1 to distinguish from adding and updating a item.
+//        positionItem = -1;
+//        showUserInput();
+//    }
 
     private void addNewToDoItem(String newToDoContent){
         itemViewModel.addNewToDo(newToDoContent);
-        Toast.makeText(linearLayout.getContext(), "new ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
+        Toast.makeText(linearLayout.getContext(), "New ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
     }
 
     private void updateToDoItem(String newToDoContent){
@@ -251,18 +275,6 @@ public class ItemFragment extends Fragment {
         itemViewModel.removeAllDoneToDo();
     }
 
-
-    private void observeViewModel(){
-        itemViewModel.getMDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
-            @Override
-            public void onChanged(List<ToDo> toDos) {
-                Log.d(TAG, "onChanged called = " + tabId);
-                Log.d(TAG, toDos.toString());
-                adapter.updateToDoList(toDos);
-            }
-        });
-    }
-
     private void showKeyboard(View view){
         // how to show keyboard programmatically
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
@@ -272,17 +284,11 @@ public class ItemFragment extends Fragment {
 //            Log.d(TAG, "Here Show keyboard");
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
         }
-//            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-
     }
 
     private void hideKeyboard(View view){
 //        Log.d(TAG, "Hide keyboard");
-        View currentFocused = ((Activity)view.getContext()).getCurrentFocus();
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert inputMethodManager != null;
-
-
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
@@ -296,10 +302,9 @@ public class ItemFragment extends Fragment {
 
         addBtn.setVisibility(View.GONE);
         deleteBtn.setVisibility(View.GONE);
-
     }
 
-    public void hideUserInput(){
+    private void hideUserInput(){
         linearLayout.setVisibility(View.GONE);
         editText.setVisibility(View.GONE);
         updateBtn.setVisibility(View.GONE);
@@ -315,20 +320,18 @@ public class ItemFragment extends Fragment {
         }, 50);
     }
 
-    public void updateTabId(int tabId){
-        this.tabId = tabId;
-    }
-
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "ItemFragment onStart");
 
+        /*
         Log.d(TAG, "tabId == " + tabId + " mTabId == " + itemViewModel.getmTabId().getValue());
         if(itemViewModel != null && tabId != itemViewModel.getmTabId().getValue()){
             Log.d(TAG, "ItemFragment onStart entered");
             itemViewModel.loadToDoList(tabId);
         }
+         */
     }
 
     @Override
@@ -353,7 +356,6 @@ public class ItemFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if(linearLayout.getVisibility() == View.VISIBLE){
-//            Log.d(TAG, "onPause hideUserInput called");
             hideUserInput();
         }
     }
@@ -363,9 +365,4 @@ public class ItemFragment extends Fragment {
         super.onDestroyView();
         Log.d(TAG, "ItemFragment onDestroyView");
     }
-
-    public int getTabId() {
-        return tabId;
-    }
-
 }

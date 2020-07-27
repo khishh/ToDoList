@@ -24,6 +24,9 @@ public abstract class TabToDoDao {
     @Delete
     public abstract void deleteTab(Tab tab);
 
+    @Delete
+    public abstract void deleteToDos(List<ToDo> toDos);
+
     @Update
     public abstract void updateTab(Tab tab);
 

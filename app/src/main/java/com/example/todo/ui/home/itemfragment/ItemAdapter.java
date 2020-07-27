@@ -5,29 +5,41 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.BindingAdapter;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.todo.R;
+import com.example.todo.databinding.ItemTodoBinding;
 import com.example.todo.model.ToDo;
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
+public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
+    implements ListItemOnClickListener{
 
     private static final String TAG = "ItemAdapter";
 
     private Listener listener;
-
     private List<ToDo> doList;
 
-    private List<ToDo> toDoCollection = new ArrayList<>();
+    @Override
+    public void onListItemClick(View view) {
+        if(listener != null){
+            LinearLayout linearLayout = (LinearLayout) view.getParent();
+            TextView tv = linearLayout.findViewById(R.id.item_index);
+            int position = Integer.parseInt(tv.getText().toString());
+            Log.d(TAG, "onListItemClick at " + position);
+            listener.onClick(position);
+        }
+    }
 
-    private int[] test = {5, 4, 6, 8, 10, 15, 8, 3, 12, 2};
 
     interface  Listener{
         void onClick(int position);
@@ -52,63 +64,43 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.item_todo, parent, false);
+//        View view = inflater.inflate(R.layout.item_todo, parent, false);
+        ItemTodoBinding binding = DataBindingUtil.inflate(inflater, R.layout.item_todo, parent, false);
 
-        return new ViewHolder(view);
+        return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
 
-        TextView tv = holder.view.findViewById(R.id.item_text_view);
-        ImageButton ib = holder.view.findViewById(R.id.item_image);
+        final int reversePosition = getItemCount() - position - 1;
+        final ToDo toDo = doList.get(reversePosition);
+        holder.binding.setToDo(doList.get(reversePosition));
+        holder.binding.setItemListener(this);
+        holder.binding.setPosition(position);
+
+        Log.d(TAG, holder.binding.getToDo().toString());
+
+        TextView tv = holder.binding.itemTextView;
+        ImageButton ib = holder.binding.itemImage;
 
         // able to display the newly added item in the List shows on top of the recyclerview
-        final int reversePosition = getItemCount() - position - 1;
-//        Log.d(TAG, "position: " + reversePosition);
+        // Log.d(TAG, "position: " + reversePosition);
         tv.setText(doList.get(reversePosition).getContent());
-
-        if(doList.get(reversePosition).isDone()){
-            ib.setImageResource(R.drawable.ic_check_item);
-            ib.setTag(R.drawable.ic_check_item);
-        }
-        else{
-            ib.setImageResource(R.drawable.item_circle);
-            ib.setTag(R.drawable.item_circle);
-        }
-
-//        LinearLayout linearLayout = holder.view.findViewById(R.id.item_linear_layout);
-        tv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-//                Log.d(TAG, v.getClass().toString() + " " + v.getId());
-
-                if(listener != null){
-                    listener.onClick(position);
-                }
-            }
-        });
 
         ib.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer res = (Integer)((ImageButton)v).getTag();
-                if(res == null || res == R.drawable.item_circle){
+                if(!toDo.isDone()){
                     ((ImageButton)v).setImageResource(R.drawable.ic_check_item);
-                    ((ImageButton)v).setTag(R.drawable.ic_check_item);
-
                     // change To-Do's isDone to be true
                     doList.get(reversePosition).setDone(true);
                 }
                 else{
                     ((ImageButton)v).setImageResource(R.drawable.item_circle);
-                    ((ImageButton)v).setTag(R.drawable.item_circle);
-
                     // change To-Do's isDone to be true
                     doList.get(reversePosition).setDone(false);
                 }
-
             }
         });
     }
@@ -120,14 +112,21 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private View view;
+        private ItemTodoBinding binding;
 
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            this.view = itemView;
+        public ViewHolder(@NonNull ItemTodoBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 
-
-
+    @BindingAdapter("android:src")
+    public static void setToDoItemDrawable(ImageButton ib, boolean isDone){
+        if(isDone){
+            ib.setImageResource(R.drawable.ic_check_item);
+        }
+        else{
+            ib.setImageResource(R.drawable.item_circle);
+        }
+    }
 }

@@ -67,13 +67,8 @@ public class TabManagementFragment extends Fragment {
 
     public class TabManagementItemCallBack extends ItemTouchHelper.SimpleCallback {
 
-        private Drawable icon;
-        private ColorDrawable background;
-
         public TabManagementItemCallBack(int dragDirs, int swipeDirs) {
             super(dragDirs, swipeDirs);
-            icon = ContextCompat.getDrawable(recyclerView.getContext(), R.drawable.ic_delete);
-            background = new ColorDrawable(Color.RED);
         }
 
         @Override
@@ -99,9 +94,7 @@ public class TabManagementFragment extends Fragment {
         }
 
         @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-        }
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
 
         @Override
         public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
@@ -137,18 +130,13 @@ public class TabManagementFragment extends Fragment {
 
         }
 
-//        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
-//            @Override
-//            public void handleOnBackPressed() {
-//////                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
-////                int count = getParentFragmentManager().getBackStackEntryCount();
-////                getParentFragmentManager().getBackStackEntryAt(count-1);
-////
-////                Toast.makeText(getContext(), "# of fragments is " + count, Toast.LENGTH_SHORT).show();
-////                ((MainActivity)getActivity()).recreateHomeFragment();
-//            }
-//        };
-//        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                ((MainActivity)getActivity()).updateHomeFragment();
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
@@ -178,7 +166,7 @@ public class TabManagementFragment extends Fragment {
 
         adapter.setListener(new TabManagementAdapter.Listener() {
             @Override
-            public void onClick(TabManagementAdapter.ViewHolder viewHolder) {
+            public void onSortBtnClick(TabManagementAdapter.ViewHolder viewHolder) {
                 startDragging(viewHolder);
             }
 
@@ -202,7 +190,7 @@ public class TabManagementFragment extends Fragment {
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
+                ((MainActivity)getActivity()).updateHomeFragment();
             }
         });
 

@@ -1,18 +1,11 @@
 package com.example.todo.ui.home.tabmanagementfragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.media.Image;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -41,7 +34,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
     private HashMap<Integer, TabManagementAdapter.ViewHolder> holderList = new HashMap<>();
 
     interface Listener{
-        void onClick(ViewHolder viewHolder);
+        void onSortBtnClick(ViewHolder viewHolder);
         void onSwipeDeleteBack(int position);
         void deleteTabAtPosition(int position);
     }
@@ -100,7 +93,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                     case MotionEvent.ACTION_DOWN:
                         Log.d(TAG, "DOWN");
                         if(listener != null){
-                            listener.onClick(holder);
+                            listener.onSortBtnClick(holder);
                         }
                         return true;
 

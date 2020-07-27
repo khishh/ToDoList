@@ -251,4 +251,23 @@ public class TabManagementViewModel extends AndroidViewModel {
         return deleteTab;
     }
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+
+        if(updateTabIntoDatabase != null){
+            updateTabIntoDatabase.cancel(true);
+            updateTabIntoDatabase = null;
+        }
+
+        if(deleteTabFromDatabase != null){
+            deleteTabFromDatabase.cancel(true);
+            deleteTabFromDatabase = null;
+        }
+
+        if(addNewTabIntoDatabase != null){
+            addNewTabIntoDatabase.cancel(true);
+            addNewTabIntoDatabase = null;
+        }
+    }
 }
