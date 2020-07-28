@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     public void createItemManagementFragment(int tabId){
         ItemManagementFragment fragment = ItemManagementFragment.newInstance(tabId);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container, fragment).commit();
+        ft.setCustomAnimations(R.anim.slide_from_left, R.anim.slide_to_right).replace(R.id.container, fragment).commit();
     }
 
     /**
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "updateHomeFragment");
         HomeFragment fragment = HomeFragment.getInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container, fragment).commit();
+        ft.setCustomAnimations(R.anim.slide_from_right, R.anim.slide_to_left).replace(R.id.container, fragment).commit();
     }
 
       // for later use
