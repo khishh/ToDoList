@@ -81,7 +81,6 @@ public class ItemFragment extends Fragment {
                     },300);
 
                 editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
-
             }
             else
                 hideUserInput();
@@ -152,7 +151,6 @@ public class ItemFragment extends Fragment {
                 else{
                     updateToDoItem(newToDoContent);
                 }
-
                 hideUserInput();
             }
         }
@@ -216,7 +214,6 @@ public class ItemFragment extends Fragment {
         itemViewModel.loadToDoList(tabId);
 
         observeViewModel();
-
         attachOnClickListenerToViews();
     }
 
@@ -242,22 +239,11 @@ public class ItemFragment extends Fragment {
     }
 
     private void attachOnClickListenerToViews(){
-
         editText.setOnFocusChangeListener(editTextFocusChangeListener);
         addBtn.setOnClickListener(addBtnOnCLickListener);
         deleteBtn.setOnClickListener(deleteBtnOnClickListener);
         updateBtn.setOnClickListener(updateBtnOnCLickListener);
     }
-
-//    public void setUpAddBtn(){
-//        // Log.d(TAG, String.valueOf(positionItem));
-//        editText.setText("");
-//        updateBtn.setText("Add");
-//
-//        // let position of item clicked -1 to distinguish from adding and updating a item.
-//        positionItem = -1;
-//        showUserInput();
-//    }
 
     private void addNewToDoItem(String newToDoContent){
         itemViewModel.addNewToDo(newToDoContent);
@@ -280,16 +266,14 @@ public class ItemFragment extends Fragment {
         // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
 
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
-        if(inputMethodManager != null) {
-//            Log.d(TAG, "Here Show keyboard");
+        if(inputMethodManager != null)
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-        }
     }
 
     private void hideKeyboard(View view){
-//        Log.d(TAG, "Hide keyboard");
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if(inputMethodManager != null)
+            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
 

@@ -2,6 +2,7 @@ package com.example.todo.model;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -36,6 +37,9 @@ public abstract class TabToDoDao {
     @Query("SELECT * FROM Tab")
     public abstract List<Tab> getAllTab();
 
+    @Query("SELECT * FROM Tab")
+    public abstract LiveData<List<Tab>> getAllLiveTab();
+
     @Query("DELETE FROM Tab where tabId = :tabId")
     public abstract  void deleteTabOfId(int tabId);
 
@@ -48,6 +52,9 @@ public abstract class TabToDoDao {
     @Query("SELECT * FROM ToDo where toDoOwnerId = :toDoOwnerId")
     public abstract List<ToDo> getToDoList(int toDoOwnerId);
 
+    @Query("SELECT * FROM ToDo where toDoOwnerId = :toDoOwnerId")
+    public abstract LiveData<List<ToDo>> getLiveToDoList(int toDoOwnerId);
+
     public void insertToDoWithTab(Tab tab){
 
         int tabId = insertTab(tab).intValue();
@@ -55,19 +62,14 @@ public abstract class TabToDoDao {
 
         List<ToDo> toDoList = tab.getToDoList();
 
-//        Log.d(TAG, "tab's index == " + tab.getTabIndex() + " tabId == "+tab.getTabId());
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoOwnerId(tab.getTabId());
-//            Log.d(TAG, "i = " + i + " " + tab.getTabId() + " " + toDoList.get(i).getToDoOwnerId());
         }
-
-//        Log.d(TAG, "Size of toDoList == " + toDoList.size());
 
         List<Long> toDoIds = insertToDoList(toDoList);
 
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoId(toDoIds.get(i).intValue());
-//            Log.d(TAG, "toDoId at " + i + " " + toDoIds.get(i).intValue());
         }
     }
 
