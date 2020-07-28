@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/edit_todo"
+        android:title="Edit your ToDo"
+        android:icon="@drawable/ic_baseline_format_edit_24"
+        app:showAsAction="ifRoom|withText"/>
+
+    <item
         android:id="@+id/add_newTab"
         android:title="Add a new tab"
         android:icon="@drawable/ic_baseline_tab_24"

@@ -98,7 +98,9 @@
                 android:layout_weight="1"
                 android:layout_marginTop="10dp"
                 android:nestedScrollingEnabled="false"
-                android:scrollbars="vertical"/>
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                android:paddingBottom="?android:actionBarSize"/>
 
         </LinearLayout>
 

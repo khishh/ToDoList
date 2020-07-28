@@ -1,20 +1,14 @@
 package com.example.todo.ui.home.tabmanagementfragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.model.Tab;
 
@@ -59,15 +54,15 @@ public class TabManagementFragment extends Fragment {
     // ui components
     private RecyclerView recyclerView;
 
-    public class TabManagementItemCallBack extends ItemTouchHelper.SimpleCallback {
+    public static TabManagementFragment getInstance(){
+        TabManagementFragment fragment = new TabManagementFragment();
+        return fragment;
+    }
 
-        private Drawable icon;
-        private ColorDrawable background;
+    public class TabManagementItemCallBack extends ItemTouchHelper.SimpleCallback {
 
         public TabManagementItemCallBack(int dragDirs, int swipeDirs) {
             super(dragDirs, swipeDirs);
-            icon = ContextCompat.getDrawable(recyclerView.getContext(), R.drawable.ic_delete);
-            background = new ColorDrawable(Color.RED);
         }
 
         @Override
@@ -93,9 +88,7 @@ public class TabManagementFragment extends Fragment {
         }
 
         @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-        }
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
 
         @Override
         public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
@@ -134,7 +127,7 @@ public class TabManagementFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
+                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -167,7 +160,7 @@ public class TabManagementFragment extends Fragment {
 
         adapter.setListener(new TabManagementAdapter.Listener() {
             @Override
-            public void onClick(TabManagementAdapter.ViewHolder viewHolder) {
+            public void onSortBtnClick(TabManagementAdapter.ViewHolder viewHolder) {
                 startDragging(viewHolder);
             }
 
@@ -191,7 +184,7 @@ public class TabManagementFragment extends Fragment {
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigation.findNavController(tabCloseBtn).navigate(R.id.action_tabManagementFragment_to_navigation_home);
+                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
             }
         });
 

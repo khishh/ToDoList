@@ -1,32 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/item_linear_layout"
-    android:orientation="horizontal"
-    android:background="?android:attr/selectableItemBackground"
-    android:gravity="center_vertical"
-    >
 
-    <TextView
-        android:id="@+id/item_text_view"
-        android:layout_height="match_parent"
-        android:layout_width="0dp"
-        android:width="0dp"
-        android:layout_weight="5"
-        android:textSize="20sp"
-        android:padding="10dp"
-        />
+<layout>
 
-    <ImageButton
-        android:id="@+id/item_image"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:src="@drawable/item_circle"
-        android:background="@android:color/transparent"
-        android:layout_weight="1"
-        android:layout_marginStart="10dp"
-        />
+    <data>
+        <variable
+            name="toDo"
+            type="com.example.todo.model.ToDo" />
+        
+        <variable
+            name="itemListener"
+            type="com.example.todo.ui.home.itemfragment.ListItemOnClickListener" />
+
+        <variable
+            name="position"
+            type="Integer" />
+    </data>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_linear_layout"
+        android:orientation="horizontal"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        >
+
+        <TextView
+            android:id="@+id/item_text_view"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:textSize="20sp"
+            android:padding="10dp"
+            android:onClick="@{itemListener::onListItemClick}"
+            />
+        
+
+        <ImageButton
+            android:id="@+id/item_image"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src="@{toDo.done}"
+            android:background="@android:color/transparent"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            />
+
+        <TextView
+            android:id="@+id/item_index"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@{String.valueOf(position)}"
+            android:visibility="gone"/>
 
 
-</LinearLayout>
+    </LinearLayout>
+
+</layout>

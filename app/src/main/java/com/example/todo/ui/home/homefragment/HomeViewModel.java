@@ -3,7 +3,6 @@ package com.example.todo.ui.home.homefragment;
 import android.app.Application;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -50,7 +49,6 @@ public class HomeViewModel extends AndroidViewModel {
             retrieveTabsFromDatabase = new RetrieveTabsFromDataBase();
             retrieveTabsFromDatabase.execute();
         }
-
     }
 
     private List<Tab> setUpToDoItems(){
@@ -64,8 +62,6 @@ public class HomeViewModel extends AndroidViewModel {
             Random r = new Random();
             int rInt = r.nextInt(20)+1;
 
-//            Log.d(TAG, "Position i = " + i + " size = " + rInt);
-
             for(int j = 0; j < rInt; j++){
                 if(j % 2 == 0)
                     subCollection.add(new ToDo(i, String.valueOf(j+1), false));
@@ -76,8 +72,6 @@ public class HomeViewModel extends AndroidViewModel {
 
             tabList.add(tab);
         }
-
-//        Log.d(TAG, tabList.toString());
 
         return tabList;
     }
@@ -92,7 +86,6 @@ public class HomeViewModel extends AndroidViewModel {
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
             for (int i = 0; i < tabList.size(); i++){
-//                Log.d(TAG, "Insert == " + tabList.get(i).getTabIndex());
                 dao.insertToDoWithTab(tabList.get(i));
             }
 
@@ -100,8 +93,6 @@ public class HomeViewModel extends AndroidViewModel {
             sharedPreferencesHelper.saveUpdateTime(System.nanoTime());
 
             List<Tab> res = dao.getAllTab();
-//            Log.d(TAG, "saved Tab == " + res.toString());
-
             return tabList;
         }
 
@@ -110,10 +101,8 @@ public class HomeViewModel extends AndroidViewModel {
             tabsRetrieved(tabs);
             Log.d(TAG, tabs.toString());
             Log.d(TAG, "data saved");
-//            Toast.makeText(getApplication(), "Data saved into your local data", Toast.LENGTH_LONG).show();
         }
     }
-
 
     private class RetrieveTabsFromDataBase extends AsyncTask<Void, Void, List<Tab>>{
 
@@ -126,14 +115,12 @@ public class HomeViewModel extends AndroidViewModel {
         protected void onPostExecute(List<Tab> tabs) {
             tabsRetrieved(tabs);
             Log.d(TAG, "RETRIEVED " + tabs.toString());
-//            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
         }
     }
 
     private void tabsRetrieved(List<Tab> tabs) {
         mTabList.setValue(tabs);
     }
-
 
     // getter and setter
 

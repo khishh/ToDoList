@@ -1,38 +1,27 @@
 package com.example.todo;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
-import com.example.todo.util.Util;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.todo.ui.home.homefragment.HomeFragment;
+import com.example.todo.ui.home.itemmanagementfragment.ItemManagementFragment;
+import com.example.todo.ui.home.tabmanagementfragment.TabManagementFragment;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.fragment.app.FragmentTransaction;
+
+/**
+ *  MainActivity
+ *  Simple activity holding a FrameLayout
+ *  Only Managing fragment translation in this activity
+ */
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private NavController navController;
-
-    private ConstraintLayout rootView;
-
-    private BottomNavigationView navView;
-
-//    private Toolbar toolbar;
+    private static final String KEY_HOME_FRAGMENT = "home_fragment";
+    private static final String KEY_TAB_MANAGEMENT = "tab_management";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,72 +30,74 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "MainActivity created");
 
-        rootView = findViewById(R.id.main_container);
-
-
-        // for later features  bottom navigation
-//        navView = findViewById(R.id.nav_view);
-//        // Passing each menu ID as a set of Ids because each
-//        // menu should be considered as top level destinations.
-//        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-//                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-//                .build();
-//        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-//        NavigationUI.setupWithNavController(navView, navController);
-
-//        setKeyBoardOpenListener();
+        createHomeFragment();
     }
 
+    /**
+     * show HomeFragment (default fragment)
+     * only called when the app starts
+     */
+    public void createHomeFragment(){
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.container, fragment).commit();
+    }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.main_menu, menu);
-//        return true;
+    /**
+     * show TabManagementFragment
+     */
+    public void createTabManagementFragment(){
+        TabManagementFragment fragment = TabManagementFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_from_down, R.anim.slide_to_up).replace(R.id.container, fragment).commit();
+    }
+
+    public void createItemManagementFragment(int tabId){
+        ItemManagementFragment fragment = ItemManagementFragment.newInstance(tabId);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_from_left, R.anim.slide_to_right).replace(R.id.container, fragment).commit();
+    }
+
+    /**
+     * show HomeFragment called from other fragments to come back
+     * using replace to show the up-to-date data
+     */
+    public void updateHomeFragmentFromTabManagement(){
+        Log.d(TAG, "updateHomeFragment");
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_from_top, R.anim.slide_to_down).replace(R.id.container, fragment).commit();
+    }
+
+    public void updateHomeFragmentFromItemManagement(){
+        Log.d(TAG, "updateHomeFragment");
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_from_right, R.anim.slide_to_left).replace(R.id.container, fragment).commit();
+    }
+
+      // for later use
+//    //    detect if screen shows keyboard
+//    //    https://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
+//    private void setKeyBoardOpenListener(){
+//        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                Log.d(TAG, String.valueOf(rootView.getRootView().getHeight()) + " " + rootView.getHeight());
+//                int heightDiff = rootView.getRootView().getHeight() - rootView.getHeight();
+//                if(heightDiff > Util.dpToPx(rootView.getContext(), 200)){
+//                    navView.setVisibility(View.GONE);
+//                }
+//                else{
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            navView.setVisibility(View.VISIBLE);
+//                        }
+//                    }, 50);
+//
+//                }
+//            }
+//        });
 //    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//
-//        switch (item.getItemId()){
-//
-//            case R.id.add_newTab:
-//                Toast.makeText(this, "hello", Toast.LENGTH_SHORT).show();
-//                ToDoCollection.getInstance().incrementSizeOfCollection();
-//                break;
-//
-//
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        return NavigationUI.navigateUp(navController, (DrawerLayout)null);
-    }
-
-    //    detect if screen shows keyboard
-    //    https://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
-    private void setKeyBoardOpenListener(){
-        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Log.d(TAG, String.valueOf(rootView.getRootView().getHeight()) + " " + rootView.getHeight());
-                int heightDiff = rootView.getRootView().getHeight() - rootView.getHeight();
-                if(heightDiff > Util.dpToPx(rootView.getContext(), 200)){
-                    navView.setVisibility(View.GONE);
-                }
-                else{
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            navView.setVisibility(View.VISIBLE);
-                        }
-                    }, 50);
-
-                }
-            }
-        });
-    }
 }

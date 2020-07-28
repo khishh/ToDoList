@@ -14,13 +14,11 @@ public abstract class TabToDoDataBase extends RoomDatabase {
     public static TabToDoDataBase getInstance(Context context){
 
         if(instance == null){
-
             instance = Room.databaseBuilder(
                     context.getApplicationContext(),
                     TabToDoDataBase.class,
                     "tabtododatabase"
             ).build();
-
         }
 
         return instance;

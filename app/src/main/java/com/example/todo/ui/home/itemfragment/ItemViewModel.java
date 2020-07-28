@@ -132,6 +132,8 @@ public class ItemViewModel extends AndroidViewModel {
     public void removeAllDoneToDo(){
         List<ToDo> curList = mDoList.getValue();
 
+        Log.d(TAG, curList.toString());
+
         int i = 0;
         while(i < curList.size()){
             if(curList.get(i).isDone()){
@@ -139,6 +141,8 @@ public class ItemViewModel extends AndroidViewModel {
             }
             else ++i;
         }
+
+        Log.d(TAG, curList.toString());
 
         mDoList.setValue(curList);
         isUpdated = true;
