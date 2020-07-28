@@ -18,15 +18,22 @@ import java.util.List;
  */
 public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
 
+    // List of Tab's titles
     private final List<Fragment> mFragmentList = new ArrayList<>();
+
+    // List of Fragment instances created
     private final List<String> mFragmentTitleList = new ArrayList<>();
+
     private final List<Integer> mFragmentTabIdList = new ArrayList<>();
 
     public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
     }
 
+    // LiveData object will notify whenever any changes to the data will occur
     public void updatePagerAdapter(List<Integer> newTabIds, List<String> newTabTitles){
+
+        // clean up the previous lists
         mFragmentTitleList.clear();
         mFragmentTabIdList.clear();
         mFragmentList.clear();
@@ -58,6 +65,8 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = mFragmentList.get(position);
         int tabId = mFragmentTabIdList.get(position);
         Bundle bundle = new Bundle();
+
+        // pass tabId to the fragment to show To-Do items belong to Tab which has that tabId
         bundle.putInt(ItemFragment.ARG_OBJECT, tabId);
         fragment.setArguments(bundle);
 
@@ -69,6 +78,9 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         return mFragmentList.size();
     }
 
+    /**
+     * Keep the record of Fragment instances, tabIds, and tab's titles.
+     */
     public void addFragment(Fragment fragment, String title, int tabId,  int position) {
         mFragmentList.add(position, fragment);
         mFragmentTitleList.add(position, title);

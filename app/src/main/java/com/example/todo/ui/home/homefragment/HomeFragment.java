@@ -14,10 +14,8 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,7 +25,6 @@ import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentHomeBinding;
 import com.example.todo.model.Tab;
-import com.example.todo.ui.home.itemfragment.ItemFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +71,6 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "HomeFragment onCreateView");
-//        return inflater.inflate(R.layout.fragment_home, container, false);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
         return binding.getRoot();
     }
@@ -90,12 +86,15 @@ public class HomeFragment extends Fragment {
         ((AppCompatActivity)getActivity()).setSupportActionBar(binding.toolbar);
         setHasOptionsMenu(true);
 
-//        Log.d(TAG, "adapter created");
+        setUpViewPager();
+
+        observeViewModel();
+    }
+
+    private void setUpViewPager(){
         pagerAdapter = new HomeCollectionPagerAdapter(getChildFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         binding.pager.addOnPageChangeListener(listener);
         binding.pager.setAdapter(pagerAdapter);
-
-        observeViewModel();
     }
 
 
@@ -103,12 +102,8 @@ public class HomeFragment extends Fragment {
         homeViewModel.getTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
-//                Log.d(TAG, "HomeFragment onChanged");
                 Log.d(TAG, tabs.toString());
 
-                /*
-                pagerAdapter.updatePagerAdapter();
-                 */
                 List<Integer> newTabIds = new ArrayList<>();
                 List<String> newTabTitles = new ArrayList<>();
                 for(Tab tab : tabs){
@@ -120,77 +115,6 @@ public class HomeFragment extends Fragment {
             }
         });
     }
-
-
-
-    /**
-     * PagerAdapter class for TabLayout
-     */
-
-    /*
-    public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter{
-
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-        private final List<Integer> mFragmentTabIdList = new ArrayList<>();
-
-        public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
-            super(fm, behavior);
-        }
-
-
-        public void updatePagerAdapter(){
-            mFragmentTitleList.clear();
-            mFragmentTabIdList.clear();
-            mFragmentList.clear();
-            initializeTabFragments();
-            notifyDataSetChanged();
-        }
-
-        private void initializeTabFragments(){
-//        Log.d(TAG, "initializeTabFragments called");
-            for(int i = 0; i < homeViewModel.getTabListSize(); i++){
-                ItemFragment fragment = new ItemFragment(homeViewModel.getTabIdAtPosition(i));
-                pagerAdapter.addFragment(fragment,
-                        homeViewModel.getTabTitleWithPosition(i),
-                        homeViewModel.getTabIdAtPosition(i),
-                        i);
-            }
-        }
-
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-
-            Fragment fragment = mFragmentList.get(position);
-            int tabId = mFragmentTabIdList.get(position);
-            Bundle bundle = new Bundle();
-            bundle.putInt(ItemFragment.ARG_OBJECT, tabId);
-            fragment.setArguments(bundle);
-
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title, int tabId,  int position) {
-            mFragmentList.add(position, fragment);
-            mFragmentTitleList.add(position, title);
-            mFragmentTabIdList.add(position, tabId);
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-    }
-
-     */
 
     private void hideKeyboard(View view){
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
