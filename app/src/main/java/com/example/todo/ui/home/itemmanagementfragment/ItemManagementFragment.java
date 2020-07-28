@@ -1,10 +1,8 @@
 package com.example.todo.ui.home.itemmanagementfragment;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -19,7 +17,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 
 import com.example.todo.MainActivity;
 import com.example.todo.R;
@@ -30,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ItemManagementFragment extends Fragment {
+public class ItemManagementFragment extends Fragment{
 
     private static final String TAG = "ItemManagementFragment";
 
@@ -45,6 +42,14 @@ public class ItemManagementFragment extends Fragment {
     private FragmentItemManagementBinding binding;
     ItemManagementAdapter adapter;
     ItemTouchHelper helper;
+
+    private MoveToDoDialogClickListener dialogClickListener = new MoveToDoDialogClickListener() {
+        @Override
+        public void onDialogClick(int targetTabId) {
+            Log.d(TAG, "onDialogClick clicked");
+            itemManagementViewModel.moveToDoToOtherTab(targetTabId);
+        }
+    };
 
     public ItemManagementFragment() {
         // Required empty public constructor
@@ -73,7 +78,7 @@ public class ItemManagementFragment extends Fragment {
             final int totalNumOfToDo = adapter.getItemCount();
             final int reversedFromPos = totalNumOfToDo - fromPos - 1;
             final int reversedToPos = totalNumOfToDo - toPos - 1;
-            // TODO update swap in viewmodel
+
             itemManagementViewModel.updateToDoList(reversedFromPos, reversedToPos);
 
             return true;
@@ -119,7 +124,7 @@ public class ItemManagementFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                ((MainActivity)getActivity()).updateHomeFragment();
+                ((MainActivity)getActivity()).updateHomeFragmentFromItemManagement();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -138,6 +143,7 @@ public class ItemManagementFragment extends Fragment {
 
         itemManagementViewModel = new ViewModelProvider(this).get(ItemManagementViewModel.class);
         itemManagementViewModel.loadToDoList(tabId);
+        itemManagementViewModel.loadTabs();
 
         recyclerView = binding.itemManagementRecyclerView;
 
@@ -145,6 +151,15 @@ public class ItemManagementFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 itemManagementViewModel.deleteSelectedToDo();
+            }
+        });
+
+        binding.itemManagementMoveTodoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MoveToDoDialog dialog = new MoveToDoDialog(itemManagementViewModel.getTabList());
+                dialog.setListener(dialogClickListener);
+                dialog.show(getChildFragmentManager(), null);
             }
         });
 
@@ -160,8 +175,6 @@ public class ItemManagementFragment extends Fragment {
             public void onSortBtnClick(ItemManagementAdapter.ViewHolder viewHolder) {
                 startDragging(viewHolder);
             }
-
-
         });
         recyclerView.setAdapter(adapter);
 
@@ -185,13 +198,6 @@ public class ItemManagementFragment extends Fragment {
 
     private void startDragging(ItemManagementAdapter.ViewHolder viewHolder){
         helper.startDrag(viewHolder);
-    }
-
-    private void hideKeyboard(View view){
-        InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert inputMethodManager != null;
-
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
 }

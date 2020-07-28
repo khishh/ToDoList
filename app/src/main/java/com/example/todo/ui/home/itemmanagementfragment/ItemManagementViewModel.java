@@ -22,7 +22,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
     private static final String TAG = "ItemManagementViewModel";
 
     private MutableLiveData<List<ToDo>> mDoList = new MutableLiveData<>();
-    private MutableLiveData<Tab> tabs = new MutableLiveData<>();
+    private MutableLiveData<List<Tab>> tabs = new MutableLiveData<>();
     private MutableLiveData<Integer> mTabId = new MutableLiveData<>();
 
     private AsyncTask<Integer, Void, List<ToDo>> retrieveToDoFromDatabase;
@@ -32,6 +32,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     private AsyncTask<List<ToDo>, Void, Void> removeDoneToDo;
 
+    private AsyncTask<Void, Void, List<Tab>> retrieveTabsFromDatabase;
+
+    private AsyncTask<Integer, Void, List<ToDo>> insertToDoIntoTab;
 
     public ItemManagementViewModel(@NonNull Application application) {
         super(application);
@@ -41,6 +44,11 @@ public class ItemManagementViewModel extends AndroidViewModel {
         mTabId.setValue(tabId);
         retrieveToDoFromDatabase = new RetrieveToDoTask();
         retrieveToDoFromDatabase.execute(tabId);
+    }
+
+    public void loadTabs(){
+        retrieveTabsFromDatabase = new RetrieveTabsFromDataBase();
+        retrieveTabsFromDatabase.execute();
     }
 
     public void updateToDoList(int fromPos, int toPos){
@@ -64,13 +72,17 @@ public class ItemManagementViewModel extends AndroidViewModel {
         removeDoneToDo.execute(doneToDos);
     }
 
+    public void moveToDoToOtherTab(int targetTabId){
+        insertToDoIntoTab = new InsertToDoTask();
+        insertToDoIntoTab.execute(targetTabId);
+    }
+
     private class RetrieveToDoTask extends AsyncTask<Integer, Void, List<ToDo>>{
 
         @Override
         protected List<ToDo> doInBackground(Integer... integers) {
             int tabId = integers[0];
 
-//            Log.d(TAG, "tabId == " + tabId);
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
             List<ToDo> toDoList = dao.getToDoList(tabId);
 
@@ -121,6 +133,64 @@ public class ItemManagementViewModel extends AndroidViewModel {
         }
     }
 
+    private class RetrieveTabsFromDataBase extends AsyncTask<Void, Void, List<Tab>>{
+
+        @Override
+        protected List<Tab> doInBackground(Void... voids) {
+            return TabToDoDataBase.getInstance(getApplication()).tabToDoDao().getAllTab();
+        }
+
+        @Override
+        protected void onPostExecute(List<Tab> tabs) {
+            tabsRetrieved(tabs);
+            Log.d(TAG, "RETRIEVED " + tabs.toString());
+//            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class InsertToDoTask extends AsyncTask<Integer, Void, List<ToDo>>{
+
+        @Override
+        protected List<ToDo> doInBackground(Integer... integers) {
+
+            Log.d(TAG, "InsertToDoTask started");
+            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+
+            int targetTabId = integers[0];
+            List<ToDo> curList = mDoList.getValue();
+            List<ToDo> insertList = new ArrayList<>();
+
+            Log.d(TAG, curList.toString());
+
+            int i = 0;
+
+            while(i < curList.size()){
+                ToDo todo = curList.get(i);
+                if(todo.isDone()) {
+                    Log.d(TAG, todo.toString());
+                    todo.setToDoOwnerId(targetTabId);
+                    todo.setDone(false);
+                    insertList.add(todo);
+                    curList.remove(todo);
+                }
+                else
+                    ++i;
+            }
+
+            Log.d(TAG, insertList.toString());
+            dao.updateToDoList(insertList);
+            return curList;
+        }
+
+        @Override
+        protected void onPostExecute(List<ToDo> toDos) {
+            toDoListRetrieved(toDos);
+        }
+    }
+
+    private void tabsRetrieved(List<Tab> tabs) {
+        this.tabs.setValue(tabs);
+    }
 
     public void swapToDoList(ToDo fromToDo, ToDo toToDo){
         String contentKeep = fromToDo.getContent();
@@ -137,12 +207,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
         List<ToDo> curList = mDoList.getValue();
         List<ToDo> doneList = new ArrayList<>();
 
-//        for(ToDo toDo : curList){
-//            if(toDo.isDone()){
-//                doneList.add(toDo);
-//                curList.remove(toDo);
-//            }
-//        }
         int i = 0;
         while(i < curList.size()){
             if(curList.get(i).isDone()){
@@ -158,6 +222,10 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     public MutableLiveData<List<ToDo>> getmDoList() {
         return mDoList;
+    }
+
+    public List<Tab> getTabList(){
+        return tabs.getValue();
     }
 
     @Override
@@ -177,6 +245,16 @@ public class ItemManagementViewModel extends AndroidViewModel {
         if(updateToDoList != null){
             updateToDoList.cancel(true);
             updateToDoList = null;
+        }
+
+        if(retrieveTabsFromDatabase != null){
+            retrieveTabsFromDatabase.cancel(true);
+            retrieveTabsFromDatabase = null;
+        }
+
+        if(insertToDoIntoTab != null){
+            insertToDoIntoTab.cancel(true);
+            insertToDoIntoTab = null;
         }
     }
 }

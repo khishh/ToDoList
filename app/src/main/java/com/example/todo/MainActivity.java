@@ -62,11 +62,18 @@ public class MainActivity extends AppCompatActivity {
      * show HomeFragment called from other fragments to come back
      * using replace to show the up-to-date data
      */
-    public void updateHomeFragment(){
+    public void updateHomeFragmentFromTabManagement(){
         Log.d(TAG, "updateHomeFragment");
         HomeFragment fragment = HomeFragment.getInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.slide_from_top, R.anim.slide_to_down).replace(R.id.container, fragment).commit();
+    }
+
+    public void updateHomeFragmentFromItemManagement(){
+        Log.d(TAG, "updateHomeFragment");
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment).commit();
     }
 
       // for later use
