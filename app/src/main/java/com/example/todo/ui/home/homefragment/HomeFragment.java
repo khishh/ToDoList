@@ -2,6 +2,7 @@ package com.example.todo.ui.home.homefragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentHomeBinding;
 import com.example.todo.model.Tab;
+import com.example.todo.util.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +37,12 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
-
     private HomeViewModel homeViewModel;
-
     private HomeCollectionPagerAdapter pagerAdapter;
+
+    private SharedPreferencesHelper helper;
+    private int lastPagerTabIndex;
+
 
     private ViewPager.OnPageChangeListener listener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -72,6 +76,8 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "HomeFragment onCreateView");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
+        helper = SharedPreferencesHelper.getInstance(getContext());
+        lastPagerTabIndex = helper.getLastVisitedPagerTabIndex();
         return binding.getRoot();
     }
 
@@ -104,6 +110,7 @@ public class HomeFragment extends Fragment {
             public void onChanged(List<Tab> tabs) {
                 Log.d(TAG, tabs.toString());
 
+                binding.pager.setCurrentItem(lastPagerTabIndex);
                 List<Integer> newTabIds = new ArrayList<>();
                 List<String> newTabTitles = new ArrayList<>();
                 for(Tab tab : tabs){
@@ -112,6 +119,13 @@ public class HomeFragment extends Fragment {
                 }
 
                 pagerAdapter.updatePagerAdapter(newTabIds, newTabTitles);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        binding.pager.setCurrentItem(lastPagerTabIndex);
+                    }
+                }, 200);
             }
         });
     }
@@ -134,10 +148,8 @@ public class HomeFragment extends Fragment {
         switch (item.getItemId()){
 
             case R.id.add_newTab:
-
                 hideKeyboard(getView());
                 ((MainActivity)getActivity()).createTabManagementFragment();
-
                 break;
 
             case R.id.edit_todo:
@@ -164,6 +176,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        // save the last shown index of Pager
+        helper.saveLastVisitedPagerTabIndex(binding.pager.getCurrentItem());
         Log.d(TAG, "HomeFragment onPause");
     }
 

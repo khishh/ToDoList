@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
 
     interface  Listener{
         void onClick(int position);
+        void onIsDoneClick();
     }
 
     public void setListener(Listener listener){
@@ -95,11 +97,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
                     ((ImageButton)v).setImageResource(R.drawable.ic_check_item);
                     // change To-Do's isDone to be true
                     doList.get(reversePosition).setDone(true);
+                    listener.onIsDoneClick();
                 }
                 else{
                     ((ImageButton)v).setImageResource(R.drawable.item_circle);
                     // change To-Do's isDone to be true
                     doList.get(reversePosition).setDone(false);
+                    listener.onIsDoneClick();
                 }
             }
         });

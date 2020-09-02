@@ -20,13 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemBinding;
 import com.example.todo.model.ToDo;
+import com.example.todo.util.CustomEditText;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -85,6 +85,11 @@ public class ItemFragment extends Fragment {
             else
                 hideUserInput();
         }
+
+        @Override
+        public void onIsDoneClick() {
+            itemViewModel.updateToDoList();
+        }
     };
 
     /**
@@ -97,13 +102,11 @@ public class ItemFragment extends Fragment {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if(hasFocus){
-                    Log.d(TAG, "EditText obtained focus");
-                Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "EditText obtained focus");
                 showKeyboard(editText);
             }
             else{
-                    Log.d(TAG, "EditText lost focus");
-                Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "EditText lost focus");
                 hideKeyboard(editText);
             }
         }
@@ -156,12 +159,20 @@ public class ItemFragment extends Fragment {
         }
     };
 
+    private CustomEditText.Listener customEditTextListener = new CustomEditText.Listener() {
+        @Override
+        public void onKeyboardDownClicked() {
+            Log.e(TAG, "onKeyboardDownClicked called");
+            hideUserInput();
+        }
+    };
+
     /**
      * =====  Layout components  =====
      */
     private RecyclerView recyclerView;
     private LinearLayout linearLayout;
-    private EditText editText;
+    private CustomEditText editText;
     private Button updateBtn;
     private FloatingActionButton addBtn;
     private FloatingActionButton deleteBtn;
@@ -190,10 +201,12 @@ public class ItemFragment extends Fragment {
 
         recyclerView = binding.listRecyclerView;
         updateBtn = binding.updateBtn;
-        editText = binding.userInputEditText;
         addBtn = binding.btnAddTodo;
         deleteBtn = binding.btnDeleteTodo;
         linearLayout = binding.userInputLinearLayout;
+        editText = binding.userInputEditText;
+
+        editText.setListener(customEditTextListener);
 
         Bundle bundle = getArguments();
         if(bundle != null)
@@ -217,8 +230,6 @@ public class ItemFragment extends Fragment {
         attachOnClickListenerToViews();
     }
 
-
-
     private void setUpRecyclerView(){
         final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -234,6 +245,13 @@ public class ItemFragment extends Fragment {
                 Log.d(TAG, "onChanged called = " + tabId);
                 Log.d(TAG, toDos.toString());
                 adapter.updateToDoList(toDos);
+
+                if(toDos.size() == 0){
+                    binding.todoEmptyMsg.setVisibility(View.VISIBLE);
+                }
+                else{
+                    binding.todoEmptyMsg.setVisibility(View.GONE);
+                }
             }
         });
     }

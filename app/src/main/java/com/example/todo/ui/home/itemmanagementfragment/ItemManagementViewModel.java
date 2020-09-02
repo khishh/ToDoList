@@ -29,11 +29,8 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     // the instance of UpdateTabIntoDatabase class extends to AsyncTask to save all UPDATED Tabs into Room Database
     private AsyncTask<List<ToDo>, Void, Void> updateToDoList;
-
-    private AsyncTask<List<ToDo>, Void, Void> removeDoneToDo;
-
+    private AsyncTask<List<ToDo>, Void, Void> removeSelectedToDos;
     private AsyncTask<Void, Void, List<Tab>> retrieveTabsFromDatabase;
-
     private AsyncTask<Integer, Void, List<ToDo>> insertToDoIntoTab;
 
     public ItemManagementViewModel(@NonNull Application application) {
@@ -66,10 +63,10 @@ public class ItemManagementViewModel extends AndroidViewModel {
     }
 
     public void deleteSelectedToDo(){
-        List<ToDo> doneToDos = removeAllDoneToDos();
+        List<ToDo> selectedToDos = removeAllSelectedToDos();
 
-        removeDoneToDo = new RemoveDoneToDo();
-        removeDoneToDo.execute(doneToDos);
+        removeSelectedToDos = new RemoveSelectedToDo();
+        removeSelectedToDos.execute(selectedToDos);
     }
 
     public void moveToDoToOtherTab(int targetTabId){
@@ -93,7 +90,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
         protected void onPostExecute(List<ToDo> toDos) {
             toDoListRetrieved(toDos);
             Log.d(TAG, "data loaded");
-            Toast.makeText(getApplication(), "ToDoList retrieved from your database", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -111,14 +107,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
             return null;
         }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Toast.makeText(getApplication(), "ToDoList updated into your database", Toast.LENGTH_SHORT).show();
-        }
     }
 
-    private class RemoveDoneToDo extends AsyncTask<List<ToDo>, Void, Void>{
+    private class RemoveSelectedToDo extends AsyncTask<List<ToDo>, Void, Void>{
 
         @Override
         protected Void doInBackground(List<ToDo>... lists) {
@@ -144,7 +135,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
         protected void onPostExecute(List<Tab> tabs) {
             tabsRetrieved(tabs);
             Log.d(TAG, "RETRIEVED " + tabs.toString());
-//            Toast.makeText(getApplication(), "Data retrieved from your local data", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -166,10 +156,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
             while(i < curList.size()){
                 ToDo todo = curList.get(i);
-                if(todo.isDone()) {
+                if(todo.isSelected()) {
                     Log.d(TAG, todo.toString());
                     todo.setToDoOwnerId(targetTabId);
-                    todo.setDone(false);
                     insertList.add(todo);
                     curList.remove(todo);
                 }
@@ -203,21 +192,21 @@ public class ItemManagementViewModel extends AndroidViewModel {
         toToDo.setContent(contentKeep);
     }
 
-    public List<ToDo> removeAllDoneToDos(){
+    public List<ToDo> removeAllSelectedToDos(){
         List<ToDo> curList = mDoList.getValue();
-        List<ToDo> doneList = new ArrayList<>();
+        List<ToDo> selectedList = new ArrayList<>();
 
         int i = 0;
         while(i < curList.size()){
-            if(curList.get(i).isDone()){
-                doneList.add(curList.get(i));
+            if(curList.get(i).isSelected()){
+                selectedList.add(curList.get(i));
                 curList.remove(i);
             }
             else ++i;
         }
 
         mDoList.setValue(curList);
-        return doneList;
+        return selectedList;
     }
 
     public MutableLiveData<List<ToDo>> getmDoList() {
@@ -226,6 +215,22 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     public List<Tab> getTabList(){
         return tabs.getValue();
+    }
+
+    public boolean isToDoSelected(){
+        List<ToDo> curList = mDoList.getValue();
+
+        boolean isAtLeastOneSelected = false;
+        int count = 0;
+
+        while(!isAtLeastOneSelected && count < curList.size()){
+            if(curList.get(count).isSelected()){
+                isAtLeastOneSelected = true;
+            }
+            count++;
+        }
+
+        return isAtLeastOneSelected;
     }
 
     @Override
@@ -237,9 +242,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
             retrieveToDoFromDatabase = null;
         }
 
-        if(removeDoneToDo != null){
-            removeDoneToDo.cancel(true);
-            removeDoneToDo = null;
+        if(removeSelectedToDos != null){
+            removeSelectedToDos.cancel(true);
+            removeSelectedToDos = null;
         }
 
         if(updateToDoList != null){

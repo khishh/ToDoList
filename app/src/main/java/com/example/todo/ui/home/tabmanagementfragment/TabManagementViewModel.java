@@ -104,7 +104,6 @@ public class TabManagementViewModel extends AndroidViewModel {
         @Override
         protected void onPostExecute(List<Tab> tabs) {
             retrievedTabList(tabs);
-//            Toast.makeText(getApplication(), "TabList retrieved from database", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -164,11 +163,6 @@ public class TabManagementViewModel extends AndroidViewModel {
             dao.updateTab(tabList.get(1));
 
             return tabList;
-        }
-
-        @Override
-        protected void onPostExecute(List<Tab> tabs) {
-            Toast.makeText(getApplication(), "updated TabList", Toast.LENGTH_SHORT).show();
         }
     }
 
