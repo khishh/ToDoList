@@ -46,7 +46,7 @@
                     android:scrollbars="vertical"
                     android:padding="5dp">
 
-                    <EditText
+                    <com.example.todo.util.CustomEditText
                         android:id="@+id/user_input_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

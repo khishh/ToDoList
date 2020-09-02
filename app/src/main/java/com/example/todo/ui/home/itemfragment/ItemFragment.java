@@ -14,19 +14,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemBinding;
 import com.example.todo.model.ToDo;
+import com.example.todo.util.CustomEditText;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -156,12 +161,20 @@ public class ItemFragment extends Fragment {
         }
     };
 
+    private CustomEditText.Listener customEditTextListener = new CustomEditText.Listener() {
+        @Override
+        public void onKeyboardDownClicked() {
+            Log.e(TAG, "onKeyboardDownClicked called");
+            hideUserInput();
+        }
+    };
+
     /**
      * =====  Layout components  =====
      */
     private RecyclerView recyclerView;
     private LinearLayout linearLayout;
-    private EditText editText;
+    private CustomEditText editText;
     private Button updateBtn;
     private FloatingActionButton addBtn;
     private FloatingActionButton deleteBtn;
@@ -190,10 +203,12 @@ public class ItemFragment extends Fragment {
 
         recyclerView = binding.listRecyclerView;
         updateBtn = binding.updateBtn;
-        editText = binding.userInputEditText;
         addBtn = binding.btnAddTodo;
         deleteBtn = binding.btnDeleteTodo;
         linearLayout = binding.userInputLinearLayout;
+        editText = binding.userInputEditText;
+
+        editText.setListener(customEditTextListener);
 
         Bundle bundle = getArguments();
         if(bundle != null)
@@ -216,8 +231,6 @@ public class ItemFragment extends Fragment {
         observeViewModel();
         attachOnClickListenerToViews();
     }
-
-
 
     private void setUpRecyclerView(){
         final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(getContext(), LinearLayoutManager.VERTICAL, false);

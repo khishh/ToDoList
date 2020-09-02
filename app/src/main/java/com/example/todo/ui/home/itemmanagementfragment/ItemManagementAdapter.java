@@ -59,8 +59,6 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
-
-
         int reversePosition = getItemCount() - position - 1;
         final ToDo toDo = toDoList.get(reversePosition);
 
