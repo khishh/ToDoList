@@ -17,6 +17,7 @@ import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemManagementItemBinding;
 import com.example.todo.model.ToDo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAdapter.ViewHolder> {
@@ -26,6 +27,7 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
     FragmentItemManagementItemBinding binding;
 
     private List<ToDo> toDoList;
+    private List<Boolean> isSelected = new ArrayList<>();
 
     private Listener listener;
 
@@ -45,6 +47,8 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         toDoList.clear();
         toDoList.addAll(toDos);
         notifyDataSetChanged();
+
+        isSelected.clear();
     }
 
     @NonNull
@@ -64,7 +68,7 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
 
         holder.content.setText(toDo.getContent());
 
-        if(toDo.isDone()){
+        if(toDo.isSelected()){
             holder.checkBtn.setImageResource(R.drawable.ic_baseline_check_circle_outline_24);
             holder.checkBtn.setBackgroundColor(holder.checkBtn.getResources().getColor(R.color.colorPrimary));
         }
@@ -109,15 +113,16 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         holder.checkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(toDo.isDone()){
+                if(toDo.isSelected()){
                     holder.checkBtn.setImageResource(R.drawable.ic_baseline_radio_button_unchecked_24);
                     holder.checkBtn.setBackgroundColor(v.getResources().getColor(R.color.white_bg));
-                    toDo.setDone(false);
+                    toDo.setSelected(false);
+
                 }
                 else{
                     holder.checkBtn.setImageResource(R.drawable.ic_baseline_check_circle_outline_24);
                     holder.checkBtn.setBackgroundColor(v.getResources().getColor(R.color.colorPrimary));
-                    toDo.setDone(true);
+                    toDo.setSelected(true);
                 }
             }
         });

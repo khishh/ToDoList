@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.todo.MainActivity;
 import com.example.todo.R;
@@ -139,7 +140,7 @@ public class ItemManagementFragment extends Fragment{
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
 
         itemManagementViewModel = new ViewModelProvider(this).get(ItemManagementViewModel.class);
         itemManagementViewModel.loadToDoList(tabId);
@@ -147,19 +148,43 @@ public class ItemManagementFragment extends Fragment{
 
         recyclerView = binding.itemManagementRecyclerView;
 
-        binding.itemManagementDeleteTodoBtn.setOnClickListener(new View.OnClickListener() {
+        binding.itemManagementTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                itemManagementViewModel.deleteSelectedToDo();
+                ((MainActivity)getActivity()).updateHomeFragmentFromItemManagement();
             }
         });
 
         binding.itemManagementMoveTodoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MoveToDoDialog dialog = new MoveToDoDialog(itemManagementViewModel.getTabList());
-                dialog.setListener(dialogClickListener);
-                dialog.show(getChildFragmentManager(), null);
+
+                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected();
+
+                if (isAtLeastOneSelected) {
+                    MoveToDoDialog dialog = new MoveToDoDialog(itemManagementViewModel.getTabList());
+                    dialog.setListener(dialogClickListener);
+                    dialog.show(getChildFragmentManager(), null);
+                }
+                else{
+                    Toast.makeText(getContext(), "Please select at least one ToDo make an action", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+        binding.itemManagementDeleteTodoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected();
+
+                if(isAtLeastOneSelected) {
+                    itemManagementViewModel.deleteSelectedToDo();
+                }
+                else {
+                    Toast.makeText(getContext(), "Please select at least one ToDo make an action", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

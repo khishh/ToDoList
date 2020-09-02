@@ -148,10 +148,8 @@ public class HomeFragment extends Fragment {
         switch (item.getItemId()){
 
             case R.id.add_newTab:
-
                 hideKeyboard(getView());
                 ((MainActivity)getActivity()).createTabManagementFragment();
-
                 break;
 
             case R.id.edit_todo:

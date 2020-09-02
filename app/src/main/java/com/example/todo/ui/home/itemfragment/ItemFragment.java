@@ -85,6 +85,11 @@ public class ItemFragment extends Fragment {
             else
                 hideUserInput();
         }
+
+        @Override
+        public void onIsDoneClick() {
+            itemViewModel.updateToDoList();
+        }
     };
 
     /**
@@ -97,13 +102,11 @@ public class ItemFragment extends Fragment {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if(hasFocus){
-                    Log.d(TAG, "EditText obtained focus");
-                Toast.makeText(getContext(), "EditText obtained focus", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "EditText obtained focus");
                 showKeyboard(editText);
             }
             else{
-                    Log.d(TAG, "EditText lost focus");
-                Toast.makeText(getContext(), "EditText lost focus", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "EditText lost focus");
                 hideKeyboard(editText);
             }
         }
@@ -242,6 +245,13 @@ public class ItemFragment extends Fragment {
                 Log.d(TAG, "onChanged called = " + tabId);
                 Log.d(TAG, toDos.toString());
                 adapter.updateToDoList(toDos);
+
+                if(toDos.size() == 0){
+                    binding.todoEmptyMsg.setVisibility(View.VISIBLE);
+                }
+                else{
+                    binding.todoEmptyMsg.setVisibility(View.GONE);
+                }
             }
         });
     }

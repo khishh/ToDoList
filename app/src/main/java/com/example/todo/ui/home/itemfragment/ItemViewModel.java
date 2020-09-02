@@ -22,7 +22,6 @@ public class ItemViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> mTabId = new MutableLiveData<>();
 
     private AsyncTask<Integer, Void, List<ToDo>> retrieveToDoFromDatabase;
-
     private AsyncTask<Integer, Void, Void> updateToDoIntoDatabase;
 
     private boolean isUpdated = false;
@@ -60,8 +59,7 @@ public class ItemViewModel extends AndroidViewModel {
         protected void onPostExecute(List<ToDo> toDos) {
             toDoListRetrieved(toDos);
 //            Log.d(TAG, toDos.toString());
-            Log.d(TAG, "data loaded");
-            Toast.makeText(getApplication(), "ToDoList retrieved from your database", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "data loaded");
         }
     }
 
@@ -71,7 +69,6 @@ public class ItemViewModel extends AndroidViewModel {
     }
 
     private class UpdateToDoTask extends AsyncTask<Integer, Void, Void>{
-
 
         @Override
         protected Void doInBackground(Integer... integers) {
@@ -83,22 +80,13 @@ public class ItemViewModel extends AndroidViewModel {
 
             dao.deleteAllToDoOfId(tabId);
             dao.insertToDoList(mDoList.getValue());
-
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Toast.makeText(getApplication(), "Changed Info saved into database", Toast.LENGTH_SHORT);
-            this.cancel(true);
-            updateToDoIntoDatabase = null;
         }
     }
 
     private void toDoListRetrieved(List<ToDo> toDos){
         mDoList.setValue(toDos);
     }
-
 
 
     public String getToDoContentAtPosition(int position){
