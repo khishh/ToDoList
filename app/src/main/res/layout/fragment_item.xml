@@ -31,14 +31,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:clipToPadding="false"
-                    android:paddingBottom="80dp">
+                    >
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/list_recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scrollbars="vertical"/>
+                        android:scrollbars="vertical"
+                        android:clipToPadding="false"
+                        android:paddingBottom="80dp"/>
 
                     <TextView
                         android:id="@+id/todo_empty_msg"
