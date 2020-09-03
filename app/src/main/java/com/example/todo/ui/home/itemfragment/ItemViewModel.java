@@ -25,16 +25,13 @@ public class ItemViewModel extends AndroidViewModel {
 
     private static final String TAG = "ItemViewModel";
     private LiveData<List<ToDo>> mDoList = new MutableLiveData<>();
-//    private MutableLiveData<Integer> mTabId = new MutableLiveData<>();
 
     private int curTabId ;
 
-    private AsyncTask<Integer, Void, List<ToDo>> retrieveToDoFromDatabase;
-    private AsyncTask<Integer, Void, Void> updateToDoIntoDatabase;
+    private AsyncTask<Void, Void, Void> updateToDoIntoDatabase;
 
     private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
-    private boolean isUpdated = false;
     private List<ToDo> modifiedToDos = new ArrayList<>();
     private ActionType actionType;
 
@@ -44,44 +41,84 @@ public class ItemViewModel extends AndroidViewModel {
     }
 
     public void loadToDoList(int tabId){
-
-//        mTabId.setValue(tabId);
         curTabId = tabId;
         mDoList = dao.getLiveToDoList(tabId);
-
-//        retrieveToDoFromDatabase = new RetrieveToDoTask();
-//        retrieveToDoFromDatabase.execute(tabId);
     }
 
-//    private class RetrieveToDoTask extends AsyncTask<Integer, Void, List<ToDo>>{
-//
-//        @Override
-//        protected List<ToDo> doInBackground(Integer... integers) {
-//            int tabId = integers[0];
-//            List<ToDo> toDoList = dao.getToDoList(tabId);
-//            return toDoList;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<ToDo> toDos) {
-//            toDoListRetrieved(toDos);
-////            Log.d(TAG, toDos.toString());
-//            Log.e(TAG, "data loaded");
-//        }
-//    }
-
-    public void updateToDoList(){
+    public void updateToDoList() {
         updateToDoIntoDatabase = new UpdateToDoTask();
-        updateToDoIntoDatabase.execute(curTabId);
+        updateToDoIntoDatabase.execute();
     }
 
-    private class UpdateToDoTask extends AsyncTask<Integer, Void, Void>{
+    public void addNewToDo(String newToDoContent){
+
+        ToDo newToDo = new ToDo(
+                curTabId,
+                newToDoContent,
+                false);
+
+        actionType = ActionType.Insert;
+        modifiedToDos.add(newToDo);
+        updateToDoList();
+
+    }
+
+    public void updateToDoContentAtPosition(int position, String newToDoContent){
+
+        ToDo updatedToDo = mDoList.getValue().get(position);
+        updatedToDo.setContent(newToDoContent);
+        modifiedToDos.add(updatedToDo);
+        actionType = ActionType.Update;
+        updateToDoList();
+
+    }
+
+    public void updateToDoIsDoneAtPosition(int position, boolean newIsDone){
+
+        ToDo updatedToDo = mDoList.getValue().get(position);
+
+        Log.e(TAG, updatedToDo.toString());
+        updatedToDo.setDone(newIsDone);
+        Log.e(TAG, updatedToDo.toString());
+        modifiedToDos.add(updatedToDo);
+        actionType = ActionType.Update;
+        updateToDoList();
+
+    }
+
+    public void removeAllDoneToDo(){
+
+        List<ToDo> curList = mDoList.getValue();
+        Log.d(TAG, curList.toString());
+
+        int i = 0;
+        while(i < curList.size()){
+            if(curList.get(i).isDone()){
+                modifiedToDos.add(curList.get(i));
+            }
+            i++;
+        }
+
+        Log.d(TAG, modifiedToDos.toString());
+        actionType = ActionType.Delete;
+        updateToDoList();
+
+    }
+
+    /*
+    public void removeAllToDo(){
+        List<ToDo> curList = mDoList.getValue();
+        curList.clear();
+        mDoList.setValue(curList);
+        isUpdated = true;
+        updateToDoList();
+    }
+     */
+
+    private class UpdateToDoTask extends AsyncTask<Void, Void, Void>{
 
         @Override
-        protected Void doInBackground(Integer... integers) {
-//            int tabId = integers[0];
-
-//            Log.d(TAG, "UPDATE tabId == " + tabId);
+        protected Void doInBackground(Void... voids) {
 
             switch (actionType){
 
@@ -105,116 +142,23 @@ public class ItemViewModel extends AndroidViewModel {
             }
 
             modifiedToDos.clear();
-
-//            dao.deleteAllToDoOfId(tabId);
-//            dao.insertToDoList(mDoList.getValue());
             return null;
         }
     }
 
-//    private void toDoListRetrieved(List<ToDo> toDos){
-//        mDoList.setValue(toDos);
-//    }
-
+    // getter and setter
+    public LiveData<List<ToDo>> getmDoList() {
+        return mDoList;
+    }
 
     public String getToDoContentAtPosition(int position){
         return mDoList.getValue().get(position).getContent();
-    }
-
-    public void addNewToDo(String newToDoContent){
-//        List<ToDo> curList = mDoList.getValue();
-//        curList.add(new ToDo(
-//                mTabId.getValue(),
-//                newToDoContent,
-//                false
-//        ));
-
-        ToDo newToDo = new ToDo(
-                curTabId,
-                newToDoContent,
-                false);
-
-        actionType = ActionType.Insert;
-        modifiedToDos.add(newToDo);
-        updateToDoList();
-    }
-
-    public void updateToDoContentAtPosition(int position, String newToDoContent){
-//        List<ToDo> curList = mDoList.getValue();
-//        curList.set(position, new ToDo(
-//                curTabId,
-//                newToDoContent,
-//                false
-//        ));
-//        mDoList.setValue(curList);
-//        isUpdated = true;
-//        updateToDoList();
-
-        ToDo updatedToDo = mDoList.getValue().get(position);
-        updatedToDo.setContent(newToDoContent);
-        modifiedToDos.add(updatedToDo);
-        actionType = ActionType.Update;
-        updateToDoList();
-    }
-
-    public void updateToDoIsDoneAtPosition(int position, boolean newIsDone){
-        ToDo updatedToDo = mDoList.getValue().get(position);
-
-        Log.e(TAG, updatedToDo.toString());
-        updatedToDo.setDone(newIsDone);
-        Log.e(TAG, updatedToDo.toString());
-        modifiedToDos.add(updatedToDo);
-        actionType = ActionType.Update;
-        updateToDoList();
-    }
-
-
-
-    public void removeAllDoneToDo(){
-        List<ToDo> curList = mDoList.getValue();
-
-        Log.d(TAG, curList.toString());
-
-        int i = 0;
-        while(i < curList.size()){
-            if(curList.get(i).isDone()){
-                modifiedToDos.add(curList.get(i));
-            }
-            i++;
-        }
-
-        Log.d(TAG, modifiedToDos.toString());
-        actionType = ActionType.Delete;
-        updateToDoList();
-//        mDoList.setValue(curList);
-//        isUpdated = true;
-//        updateToDoList();
-    }
-
-//    public void removeAllToDo(){
-//        List<ToDo> curList = mDoList.getValue();
-//        curList.clear();
-//        mDoList.setValue(curList);
-//        isUpdated = true;
-//        updateToDoList();
-//    }
-
-    // getter and setter
-
-
-    public LiveData<List<ToDo>> getmDoList() {
-        return mDoList;
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
         Log.d(TAG, "ItemViewModel onCleared");
-
-        if(retrieveToDoFromDatabase != null){
-            retrieveToDoFromDatabase.cancel(true);
-            retrieveToDoFromDatabase = null;
-        }
 
         if(updateToDoIntoDatabase != null){
             updateToDoIntoDatabase.cancel(true);

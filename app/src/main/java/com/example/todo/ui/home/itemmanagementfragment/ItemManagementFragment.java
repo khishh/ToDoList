@@ -35,6 +35,7 @@ public class ItemManagementFragment extends Fragment{
     private static final String KEY_TAB_ID = "tabId";
 
     private int tabId;
+    private boolean needToRedraw;
 
     private ItemManagementViewModel itemManagementViewModel;
 
@@ -48,6 +49,7 @@ public class ItemManagementFragment extends Fragment{
         @Override
         public void onDialogClick(int targetTabId) {
             Log.d(TAG, "onDialogClick clicked");
+            needToRedraw = true;
             itemManagementViewModel.moveToDoToOtherTab(targetTabId);
         }
     };
@@ -80,6 +82,7 @@ public class ItemManagementFragment extends Fragment{
             final int reversedFromPos = totalNumOfToDo - fromPos - 1;
             final int reversedToPos = totalNumOfToDo - toPos - 1;
 
+            needToRedraw = false;
             itemManagementViewModel.updateToDoList(reversedFromPos, reversedToPos);
 
             return true;
@@ -180,6 +183,7 @@ public class ItemManagementFragment extends Fragment{
                 boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected();
 
                 if(isAtLeastOneSelected) {
+                    needToRedraw = true;
                     itemManagementViewModel.deleteSelectedToDo();
                 }
                 else {
@@ -194,6 +198,8 @@ public class ItemManagementFragment extends Fragment{
 
     private void setUpRecyclerView(){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        needToRedraw = true;
         adapter = new ItemManagementAdapter(new ArrayList<ToDo>());
         adapter.setListener(new ItemManagementAdapter.Listener() {
             @Override
@@ -216,7 +222,7 @@ public class ItemManagementFragment extends Fragment{
         itemManagementViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
-                adapter.updateToDos(toDos);
+                adapter.updateToDos(toDos, needToRedraw);
             }
         });
     }

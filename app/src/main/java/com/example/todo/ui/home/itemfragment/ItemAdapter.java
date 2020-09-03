@@ -39,7 +39,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         }
     }
 
-
     interface  Listener{
         void onClick(int position);
         void onIsDoneClick(int position, boolean isDone);

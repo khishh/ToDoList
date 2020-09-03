@@ -213,7 +213,6 @@ public class ItemFragment extends Fragment {
         Bundle bundle = getArguments();
         if(bundle != null)
             tabId = bundle.getInt(ARG_OBJECT, 0);
-//        Log.d(TAG, "tabId " + tabId);
 
         return binding.getRoot();
     }
@@ -281,10 +280,9 @@ public class ItemFragment extends Fragment {
         itemViewModel.removeAllDoneToDo();
     }
 
+    // how to show keyboard programmatically
+    // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
     private void showKeyboard(View view){
-        // how to show keyboard programmatically
-        // https://stackoverflow.com/questions/39228245/how-to-show-soft-keyboard-perfectly-in-fragment-in-android
-
         InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager != null)
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
@@ -328,14 +326,6 @@ public class ItemFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "ItemFragment onStart");
-
-        /*
-        Log.d(TAG, "tabId == " + tabId + " mTabId == " + itemViewModel.getmTabId().getValue());
-        if(itemViewModel != null && tabId != itemViewModel.getmTabId().getValue()){
-            Log.d(TAG, "ItemFragment onStart entered");
-            itemViewModel.loadToDoList(tabId);
-        }
-         */
     }
 
     @Override
