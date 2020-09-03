@@ -125,7 +125,7 @@ public class ItemManagementFragment extends Fragment{
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                ((MainActivity)getActivity()).updateHomeFragmentFromItemManagement();
+                ((MainActivity)getActivity()).popOffFragment();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -151,7 +151,7 @@ public class ItemManagementFragment extends Fragment{
         binding.itemManagementTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).updateHomeFragmentFromItemManagement();
+                ((MainActivity)getActivity()).popOffFragment();
             }
         });
 

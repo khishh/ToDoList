@@ -87,8 +87,10 @@ public class ItemFragment extends Fragment {
         }
 
         @Override
-        public void onIsDoneClick() {
-            itemViewModel.updateToDoList();
+        public void onIsDoneClick(int position, boolean isDone) {
+            adapter.setModifiedToDoPos(position);
+            int reversePosition = adapter.getItemCount() - position - 1;
+            itemViewModel.updateToDoIsDoneAtPosition(reversePosition, isDone);
         }
     };
 
@@ -239,7 +241,7 @@ public class ItemFragment extends Fragment {
     }
 
     private void observeViewModel(){
-        itemViewModel.getMDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
+        itemViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
                 Log.d(TAG, "onChanged called = " + tabId);

@@ -103,7 +103,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
         protected Void doInBackground(List<ToDo>... lists) {
 
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
-            dao.updateToDoList(lists[0]);
+            dao.updateToDoList(lists[0].toArray(new ToDo[0]));
 
             return null;
         }
@@ -114,7 +114,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
         @Override
         protected Void doInBackground(List<ToDo>... lists) {
             TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
-            dao.deleteToDos(lists[0]);
+            dao.deleteToDos(lists[0].toArray(new ToDo[0]));
             return null;
         }
 
@@ -167,7 +167,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
             }
 
             Log.d(TAG, insertList.toString());
-            dao.updateToDoList(insertList);
+            dao.updateToDoList(insertList.toArray(new ToDo[0]));
             return curList;
         }
 

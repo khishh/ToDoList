@@ -3,6 +3,7 @@ package com.example.todo.model;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -20,19 +21,19 @@ public abstract class TabToDoDao {
     public abstract Long insertTab(Tab tab);
 
     @Insert
-    public abstract List<Long> insertToDoList(List<ToDo> toDoList);
+    public abstract List<Long> insertToDoList(ToDo... toDoList);
 
     @Delete
     public abstract void deleteTab(Tab tab);
 
     @Delete
-    public abstract void deleteToDos(List<ToDo> toDos);
+    public abstract void deleteToDos(ToDo... toDos);
 
     @Update
     public abstract void updateTab(Tab tab);
 
     @Update
-    public abstract void updateToDoList(List<ToDo> toDos);
+    public abstract void updateToDoList(ToDo... toDos);
 
     @Query("SELECT * FROM Tab")
     public abstract List<Tab> getAllTab();
@@ -66,7 +67,7 @@ public abstract class TabToDoDao {
             toDoList.get(i).setToDoOwnerId(tab.getTabId());
         }
 
-        List<Long> toDoIds = insertToDoList(toDoList);
+        List<Long> toDoIds = insertToDoList(toDoList.toArray(new ToDo[0]));
 
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoId(toDoIds.get(i).intValue());

@@ -136,7 +136,7 @@ public class TabManagementViewModel extends AndroidViewModel {
 //                Log.d(TAG, "fromPosToDoList newOwnerId = " + toPosId);
             }
 
-            dao.updateToDoList(fromPosToDoList);
+            dao.updateToDoList(fromPosToDoList.toArray(new ToDo[0]));
 
 //            Log.d(TAG, "toPosToDoList Size " + toPosToDoList.size());
 
@@ -145,7 +145,7 @@ public class TabManagementViewModel extends AndroidViewModel {
                 todo.setToDoOwnerId(fromPosId);
 //                Log.d(TAG, "toPosToDoList newOwnerId = " + fromPosId);
             }
-            dao.updateToDoList(toPosToDoList);
+            dao.updateToDoList(toPosToDoList.toArray(new ToDo[0]));
 
 
             //update tabId of two Tabs

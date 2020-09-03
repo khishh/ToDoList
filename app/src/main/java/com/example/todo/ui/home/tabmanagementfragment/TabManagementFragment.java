@@ -127,7 +127,7 @@ public class TabManagementFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
+                ((MainActivity)requireActivity()).popOffFragment();
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -184,7 +184,7 @@ public class TabManagementFragment extends Fragment {
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
+                ((MainActivity)requireActivity()).popOffFragment();
             }
         });
 

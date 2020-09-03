@@ -30,6 +30,7 @@ import com.example.todo.util.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class HomeFragment extends Fragment {
@@ -40,17 +41,13 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private HomeCollectionPagerAdapter pagerAdapter;
 
-    private SharedPreferencesHelper helper;
-    private int lastPagerTabIndex;
-
-
     private ViewPager.OnPageChangeListener listener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
         @Override
         public void onPageSelected(int position) {
-            hideKeyboard(getView());
+            hideKeyboard(requireView());
         }
 
         // when the tab page changed, close the keyboard
@@ -62,8 +59,7 @@ public class HomeFragment extends Fragment {
      * return HomeFragment instance
      */
     public static HomeFragment getInstance(){
-        HomeFragment homeFragment = new HomeFragment();
-        return homeFragment;
+        return new HomeFragment();
     }
 
     @Override
@@ -76,8 +72,6 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "HomeFragment onCreateView");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
-        helper = SharedPreferencesHelper.getInstance(getContext());
-        lastPagerTabIndex = helper.getLastVisitedPagerTabIndex();
         return binding.getRoot();
     }
 
@@ -89,7 +83,7 @@ public class HomeFragment extends Fragment {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         homeViewModel.initializeData();
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(binding.toolbar);
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(binding.toolbar);
         setHasOptionsMenu(true);
 
         setUpViewPager();
@@ -105,12 +99,13 @@ public class HomeFragment extends Fragment {
 
 
     private void observeViewModel() {
-        homeViewModel.getTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
+        homeViewModel.getmTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
-                Log.d(TAG, tabs.toString());
+                Log.e(TAG, "Tab onChanged");
+                Log.e(TAG, tabs.toString());
 
-                binding.pager.setCurrentItem(lastPagerTabIndex);
+//                binding.pager.setCurrentItem(lastPagerTabIndex);
                 List<Integer> newTabIds = new ArrayList<>();
                 List<String> newTabTitles = new ArrayList<>();
                 for(Tab tab : tabs){
@@ -120,12 +115,12 @@ public class HomeFragment extends Fragment {
 
                 pagerAdapter.updatePagerAdapter(newTabIds, newTabTitles);
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        binding.pager.setCurrentItem(lastPagerTabIndex);
-                    }
-                }, 200);
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        binding.pager.setCurrentItem(lastPagerTabIndex);
+//                    }
+//                }, 200);
             }
         });
     }
@@ -148,15 +143,15 @@ public class HomeFragment extends Fragment {
         switch (item.getItemId()){
 
             case R.id.add_newTab:
-                hideKeyboard(getView());
-                ((MainActivity)getActivity()).createTabManagementFragment();
+                hideKeyboard(requireView());
+                ((MainActivity)requireActivity()).createTabManagementFragment();
                 break;
 
             case R.id.edit_todo:
-                hideKeyboard(getView());
+                hideKeyboard(requireView());
                 int currentTabIndex = binding.pager.getCurrentItem();
                 Log.d(TAG, "currentTabIndex == " + currentTabIndex);
-                ((MainActivity)getActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(currentTabIndex));
+                ((MainActivity)requireActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(currentTabIndex));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -177,7 +172,6 @@ public class HomeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         // save the last shown index of Pager
-        helper.saveLastVisitedPagerTabIndex(binding.pager.getCurrentItem());
         Log.d(TAG, "HomeFragment onPause");
     }
 
