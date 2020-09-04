@@ -15,7 +15,8 @@
             android:name=".MainActivity"
             android:configChanges="keyboardHidden"
             android:label="@string/app_name"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,3 +26,4 @@
     </application>
 
 </manifest>
+

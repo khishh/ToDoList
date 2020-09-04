@@ -29,7 +29,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
     private LiveData<List<Tab>> tabs = new MutableLiveData<>();
 
     private int curTabId;
-    private int moveTargetTabId;
     private List<ToDo> selectedToDos = new ArrayList<>();
     private ActionType actionType;
 
@@ -57,6 +56,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
         updateToDoIntoDatabase.execute();
     }
 
+    /*
     public void swapToDos(int fromPos, int toPos){
         ToDo fromToDo = mDoList.getValue().get(fromPos);
         ToDo toToDo = mDoList.getValue().get(toPos);
@@ -81,8 +81,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
         toToDo.setContent(contentKeep);
     }
 
+     */
+
     public void deleteSelectedToDo(List<ToDo> curList){
-//        List<ToDo> curList = mDoList.getValue();
         int i = 0;
         while(i < curList.size()){
             if(curList.get(i).isSelected()){
@@ -103,11 +104,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
     }
 
     public void moveToDoToOtherTab(int targetTabId, List<ToDo> curList){
-//        insertToDoIntoTab = new InsertToDoTask();
-//        insertToDoIntoTab.execute(targetTabId);
-        this.moveTargetTabId = targetTabId;
-//        List<ToDo> curList = mDoList.getValue();
-
         int i = 0;
         while(i < curList.size()){
             ToDo todo = curList.get(i);
@@ -166,19 +162,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
         }
     }
 
-    private class RetrieveToDoTask extends AsyncTask<Integer, Void, List<ToDo>>{
-
-        @Override
-        protected List<ToDo> doInBackground(Integer... integers) {
-            int tabId = integers[0];
-
-            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
-            List<ToDo> toDoList = dao.getToDoList(tabId);
-
-            return toDoList;
-        }
-    }
-
 
     public LiveData<List<ToDo>> getmDoList() {
         return mDoList;
@@ -193,7 +176,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
     }
 
     public boolean isToDoSelected(List<ToDo> curList){
-//        List<ToDo> curList = mDoList.getValue();
 
         boolean isAtLeastOneSelected = false;
         int count = 0;

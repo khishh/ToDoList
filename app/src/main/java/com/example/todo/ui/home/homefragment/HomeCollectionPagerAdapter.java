@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
-import com.example.todo.ui.home.itemfragment.ItemAdapter;
 import com.example.todo.ui.home.itemfragment.ItemFragment;
 
 import java.util.ArrayList;
@@ -26,6 +25,16 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     private final List<String> mFragmentTitleList = new ArrayList<>();
 
     private final List<Integer> mFragmentTabIdList = new ArrayList<>();
+
+    private Listener listener;
+
+    interface Listener{
+        void keyboardVisibilityChange(boolean willBeShown);
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
 
     public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
@@ -51,6 +60,15 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     private void initializeTabFragments(List<Integer> newTabIds, List<String> newTabTitles){
         for(int i = 0; i < newTabIds.size(); i++){
             ItemFragment fragment = new ItemFragment(newTabIds.get(i));
+            fragment.setListener(new ItemFragment.Listener() {
+                @Override
+                public void keyboardVisibilityChange(boolean willBeShown) {
+                    if(listener != null){
+                        listener.keyboardVisibilityChange(willBeShown);
+                    }
+                }
+            });
+
             addFragment(fragment,
                     newTabTitles.get(i),
                     newTabIds.get(i),
@@ -90,6 +108,16 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     public void closeUserInput(int position){
         Fragment targetFragment = mFragmentList.get(position);
         ((ItemFragment)targetFragment).hideUserInput();
+    }
+
+    public void addNewBtnClicked(int position){
+        Fragment targetFragment = mFragmentList.get(position);
+        ((ItemFragment)targetFragment).showAddNewItemInput();
+    }
+
+    public void deleteButtonClicked(int position){
+        Fragment targetFragment = mFragmentList.get(position);
+        ((ItemFragment)targetFragment).deleteAllDoneItems();
     }
 
     @Nullable

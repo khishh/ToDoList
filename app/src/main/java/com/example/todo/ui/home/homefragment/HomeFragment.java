@@ -10,11 +10,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -26,11 +28,11 @@ import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentHomeBinding;
 import com.example.todo.model.Tab;
-import com.example.todo.util.SharedPreferencesHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
 
 
 public class HomeFragment extends Fragment {
@@ -40,6 +42,10 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private HomeViewModel homeViewModel;
     private HomeCollectionPagerAdapter pagerAdapter;
+
+    private ConstraintLayout constraintLayout;
+    private FloatingActionButton addBtn;
+    private FloatingActionButton deleteBtn;
 
     private ViewPager.OnPageChangeListener listener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -72,6 +78,23 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "HomeFragment onCreateView");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
+        constraintLayout = binding.homeContainer;
+        addBtn = binding.btnAddTodo;
+        deleteBtn = binding.btnDeleteTodo;
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pagerAdapter.addNewBtnClicked(binding.pager.getCurrentItem());
+            }
+        });
+
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pagerAdapter.deleteButtonClicked(binding.pager.getCurrentItem());
+            }
+        });
         return binding.getRoot();
     }
 
@@ -87,12 +110,30 @@ public class HomeFragment extends Fragment {
         setHasOptionsMenu(true);
 
         setUpViewPager();
-
         observeViewModel();
     }
 
     private void setUpViewPager(){
         pagerAdapter = new HomeCollectionPagerAdapter(getChildFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        pagerAdapter.setListener(new HomeCollectionPagerAdapter.Listener() {
+            @Override
+            public void keyboardVisibilityChange(boolean willBeShown) {
+                if(willBeShown){
+                    addBtn.setVisibility(View.GONE);
+                    deleteBtn.setVisibility(View.GONE);
+                }
+                else{
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            addBtn.setVisibility(View.VISIBLE);
+                            deleteBtn.setVisibility(View.VISIBLE);
+                        }
+                    }, 350);
+
+                }
+            }
+        });
         binding.pager.addOnPageChangeListener(listener);
         binding.pager.setAdapter(pagerAdapter);
     }
@@ -105,7 +146,6 @@ public class HomeFragment extends Fragment {
                 Log.e(TAG, "Tab onChanged");
                 Log.e(TAG, tabs.toString());
 
-//                binding.pager.setCurrentItem(lastPagerTabIndex);
                 List<Integer> newTabIds = new ArrayList<>();
                 List<String> newTabTitles = new ArrayList<>();
                 for(Tab tab : tabs){
@@ -114,13 +154,6 @@ public class HomeFragment extends Fragment {
                 }
 
                 pagerAdapter.updatePagerAdapter(newTabIds, newTabTitles);
-
-//                new Handler().postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        binding.pager.setCurrentItem(lastPagerTabIndex);
-//                    }
-//                }, 200);
             }
         });
     }
@@ -195,5 +228,29 @@ public class HomeFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "HomeFragment destroyed");
+    }
+
+    private void setKeyboardListener(){
+        constraintLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+
+                int heightDiff = constraintLayout.getRootView().getHeight() - constraintLayout.getHeight();
+                Log.e(TAG, "HeightDiff == " + heightDiff);
+                Log.e(TAG, "parent height == " + constraintLayout.getRootView().getHeight() + " container = " + constraintLayout.getHeight());
+
+                if(heightDiff > constraintLayout.getRootView().getHeight()/4){
+
+                    Log.e(TAG, "onGlobalLayout -- Gone passed");
+
+                    addBtn.setVisibility(View.GONE);
+                    deleteBtn.setVisibility(View.GONE);
+                }
+                else{
+                    addBtn.setVisibility(View.VISIBLE);
+                    deleteBtn.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 }

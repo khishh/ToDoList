@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -49,6 +50,16 @@ public class ItemFragment extends Fragment {
      * =====  Listeners  =====
      */
 
+    private Listener listener;
+
+    public interface Listener{
+        void keyboardVisibilityChange(boolean willBeShown);
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
     /**
      * onClick(position) will be triggered when a user click an item in the recyclerview.
      * onClick(position) will handle the visibility of LinearLayout containing EditText where
@@ -70,7 +81,7 @@ public class ItemFragment extends Fragment {
 
                 // showing recent items on the top and old items on the bottom
                 int reversePosition = adapter.getItemCount() - positionItem - 1;
-                updateBtn.setText("Update");
+                updateBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24);
 
                 if(positionItem != -1)
                     new Handler().postDelayed(new Runnable() {
@@ -114,32 +125,43 @@ public class ItemFragment extends Fragment {
         }
     };
 
-    /**
-     * When add Button is clicked, set up texts of EditText and Button before show them on the screen
-     * followed by showUserInput()
-     */
-    private View.OnClickListener addBtnOnCLickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            // Log.d(TAG, String.valueOf(positionItem));
-            editText.setText("");
-            updateBtn.setText("Add");
+//    /**
+//     * When add Button is clicked, set up texts of EditText and Button before show them on the screen
+//     * followed by showUserInput()
+//     */
+//    private View.OnClickListener addBtnOnCLickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            // Log.d(TAG, String.valueOf(positionItem));
+//            editText.setText("");
+//            updateBtn.setImageResource(R.drawable.ic_baseline_add_2_green);
+//
+//            // let position of item clicked -1 to distinguish from adding and updating a item.
+//            positionItem = -1;
+//            showUserInput();
+//        }
+//    };
 
-            // let position of item clicked -1 to distinguish from adding and updating a item.
-            positionItem = -1;
-            showUserInput();
-        }
-    };
+    public void showAddNewItemInput(){
+        // Log.d(TAG, String.valueOf(positionItem));
+        editText.setText("");
+        updateBtn.setImageResource(R.drawable.ic_baseline_add_2_green);
+//        updateBtn.setText("Add");
 
-    /**
-     * Delete Button click will delete all To-Do items in Recyclerview with a check-mark
-     */
-    private View.OnClickListener deleteBtnOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            deleteAllDoneItems();
-        }
-    };
+        // let position of item clicked -1 to distinguish from adding and updating a item.
+        positionItem = -1;
+        showUserInput();
+    }
+
+//    /**
+//     * Delete Button click will delete all To-Do items in Recyclerview with a check-mark
+//     */
+//    private View.OnClickListener deleteBtnOnClickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            deleteAllDoneItems();
+//        }
+//    };
 
     private View.OnClickListener updateBtnOnCLickListener = new View.OnClickListener() {
         @Override
@@ -175,9 +197,7 @@ public class ItemFragment extends Fragment {
     private RecyclerView recyclerView;
     private LinearLayout linearLayout;
     private CustomEditText editText;
-    private Button updateBtn;
-    private FloatingActionButton addBtn;
-    private FloatingActionButton deleteBtn;
+    private ImageButton updateBtn;
 
     // tabId
     private int tabId;
@@ -203,8 +223,6 @@ public class ItemFragment extends Fragment {
 
         recyclerView = binding.listRecyclerView;
         updateBtn = binding.updateBtn;
-        addBtn = binding.btnAddTodo;
-        deleteBtn = binding.btnDeleteTodo;
         linearLayout = binding.userInputLinearLayout;
         editText = binding.userInputEditText;
 
@@ -259,12 +277,10 @@ public class ItemFragment extends Fragment {
 
     private void attachOnClickListenerToViews(){
         editText.setOnFocusChangeListener(editTextFocusChangeListener);
-        addBtn.setOnClickListener(addBtnOnCLickListener);
-        deleteBtn.setOnClickListener(deleteBtnOnClickListener);
         updateBtn.setOnClickListener(updateBtnOnCLickListener);
     }
 
-    private void addNewToDoItem(String newToDoContent){
+    public void addNewToDoItem(String newToDoContent){
         itemViewModel.addNewToDo(newToDoContent);
         Toast.makeText(linearLayout.getContext(), "New ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
     }
@@ -276,7 +292,7 @@ public class ItemFragment extends Fragment {
         itemViewModel.updateToDoContentAtPosition(reversePosition, newToDoContent);
     }
 
-    private void deleteAllDoneItems(){
+    public void deleteAllDoneItems(){
         itemViewModel.removeAllDoneToDo();
     }
 
@@ -292,18 +308,23 @@ public class ItemFragment extends Fragment {
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if(inputMethodManager != null)
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        if(listener != null){
+            listener.keyboardVisibilityChange(false);
+        }
     }
 
 
     private void showUserInput(){
+
+        if(listener != null){
+            listener.keyboardVisibilityChange(true);
+        }
         linearLayout.setVisibility(View.VISIBLE);
         editText.setVisibility(View.VISIBLE);
         updateBtn.setVisibility(View.VISIBLE);
 
         editText.requestFocus();
-
-        addBtn.setVisibility(View.GONE);
-        deleteBtn.setVisibility(View.GONE);
     }
 
     public void hideUserInput(){
@@ -312,14 +333,6 @@ public class ItemFragment extends Fragment {
         updateBtn.setVisibility(View.GONE);
 
         editText.clearFocus();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                addBtn.setVisibility(View.VISIBLE);
-                deleteBtn.setVisibility(View.VISIBLE);
-            }
-        }, 50);
     }
 
     @Override
