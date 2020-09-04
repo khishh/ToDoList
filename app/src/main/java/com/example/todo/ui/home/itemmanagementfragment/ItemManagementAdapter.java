@@ -48,10 +48,10 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         this.toDoList = toDos;
     }
 
-    public void updateToDos(List<ToDo> toDos, boolean needToRedraw){
+    public void updateToDos(List<ToDo> toDos, boolean needToUpdateList){
 
 
-        if(needToRedraw) {
+        if(needToUpdateList) {
             toDoList.clear();
             toDoList.addAll(toDos);
         }

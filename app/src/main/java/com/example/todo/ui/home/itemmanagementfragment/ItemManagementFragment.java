@@ -39,7 +39,7 @@ public class ItemManagementFragment extends Fragment{
     private static final String KEY_TAB_ID = "tabId";
 
     private int tabId;
-    private boolean needToRedraw;
+    private boolean needToUpdateAdapterData;
 
     private ItemManagementViewModel itemManagementViewModel;
     private MoveToDoDialog dialog;
@@ -54,7 +54,7 @@ public class ItemManagementFragment extends Fragment{
         @Override
         public void onDialogClick(int targetTabId) {
             Log.d(TAG, "onDialogClick clicked");
-            needToRedraw = true;
+            needToUpdateAdapterData = true;
             itemManagementViewModel.moveToDoToOtherTab(targetTabId, adapter.getToDoList());
         }
     };
@@ -91,7 +91,7 @@ public class ItemManagementFragment extends Fragment{
             final int reversedFromPos = totalNumOfToDo - fromPos - 1;
             final int reversedToPos = totalNumOfToDo - toPos - 1;
 
-            needToRedraw = false;
+            needToUpdateAdapterData = false;
             adapter.swapToDo(reversedFromPos, reversedToPos);
             adapter.notifyItemMoved(fromPos, toPos);
 
@@ -198,7 +198,7 @@ public class ItemManagementFragment extends Fragment{
                 boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected(adapter.getToDoList());
 
                 if(isAtLeastOneSelected) {
-                    needToRedraw = true;
+                    needToUpdateAdapterData = true;
                     itemManagementViewModel.deleteSelectedToDo(adapter.getToDoList());
                 }
                 else {
@@ -214,7 +214,7 @@ public class ItemManagementFragment extends Fragment{
     private void setUpRecyclerView(){
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        needToRedraw = true;
+        needToUpdateAdapterData = true;
         adapter = new ItemManagementAdapter(new ArrayList<ToDo>());
         adapter.setListener(new ItemManagementAdapter.Listener() {
             @Override
@@ -243,7 +243,7 @@ public class ItemManagementFragment extends Fragment{
             @Override
             public void onChanged(List<ToDo> toDos) {
                 Log.e(TAG, "List<ToDo> updated");
-                adapter.updateToDos(toDos, needToRedraw);
+                adapter.updateToDos(toDos, needToUpdateAdapterData);
             }
         });
 
