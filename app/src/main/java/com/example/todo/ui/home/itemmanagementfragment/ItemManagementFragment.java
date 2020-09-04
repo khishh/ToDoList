@@ -1,5 +1,6 @@
 package com.example.todo.ui.home.itemmanagementfragment;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
@@ -13,6 +14,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemManagementBinding;
+import com.example.todo.model.Tab;
 import com.example.todo.model.ToDo;
 
 import java.util.ArrayList;
@@ -38,6 +42,7 @@ public class ItemManagementFragment extends Fragment{
     private boolean needToRedraw;
 
     private ItemManagementViewModel itemManagementViewModel;
+    private MoveToDoDialog dialog;
 
     private RecyclerView recyclerView;
 
@@ -50,7 +55,7 @@ public class ItemManagementFragment extends Fragment{
         public void onDialogClick(int targetTabId) {
             Log.d(TAG, "onDialogClick clicked");
             needToRedraw = true;
-            itemManagementViewModel.moveToDoToOtherTab(targetTabId);
+            itemManagementViewModel.moveToDoToOtherTab(targetTabId, adapter.getToDoList());
         }
     };
 
@@ -66,31 +71,32 @@ public class ItemManagementFragment extends Fragment{
         return fragment;
     }
 
+
+//    https://stackoverflow.com/questions/35920584/android-how-to-catch-drop-action-of-itemtouchhelper-which-is-used-with-recycle
     public class ItemManagementItemCallback extends ItemTouchHelper.SimpleCallback{
 
         public ItemManagementItemCallback(int dragDirs, int swipeDirs) {
             super(dragDirs, swipeDirs);
         }
 
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            final int fromPos = viewHolder.getAbsoluteAdapterPosition();
-            final int toPos = target.getAbsoluteAdapterPosition();
-            adapter.notifyItemMoved(fromPos, toPos);
+    @Override
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        return true;
+    }
 
+    @Override
+        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
             final int totalNumOfToDo = adapter.getItemCount();
             final int reversedFromPos = totalNumOfToDo - fromPos - 1;
             final int reversedToPos = totalNumOfToDo - toPos - 1;
 
             needToRedraw = false;
-            itemManagementViewModel.updateToDoList(reversedFromPos, reversedToPos);
+            adapter.swapToDo(reversedFromPos, reversedToPos);
+            adapter.notifyItemMoved(fromPos, toPos);
 
-            return true;
-        }
+            vibrate();
 
-        @Override
-        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
-            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
             Log.d(TAG, "MOVE finished");
         }
 
@@ -108,6 +114,8 @@ public class ItemManagementFragment extends Fragment{
         @Override
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
+            itemManagementViewModel.saveLastToDoOrder(adapter.getToDoList());
+            Log.e(TAG, "Dragging stopped");
             if(viewHolder != null){
                 viewHolder.itemView.setAlpha(1.0f);
             }
@@ -146,14 +154,15 @@ public class ItemManagementFragment extends Fragment{
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
 
         itemManagementViewModel = new ViewModelProvider(this).get(ItemManagementViewModel.class);
-        itemManagementViewModel.loadToDoList(tabId);
         itemManagementViewModel.loadTabs();
+        itemManagementViewModel.loadToDoList(tabId);
 
         recyclerView = binding.itemManagementRecyclerView;
 
         binding.itemManagementTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                vibrate();
                 ((MainActivity)getActivity()).popOffFragment();
             }
         });
@@ -162,11 +171,15 @@ public class ItemManagementFragment extends Fragment{
             @Override
             public void onClick(View v) {
 
-                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected();
+                vibrate();
+
+                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected(adapter.getToDoList());
 
                 if (isAtLeastOneSelected) {
-                    MoveToDoDialog dialog = new MoveToDoDialog(itemManagementViewModel.getTabList());
+
+                    dialog = new MoveToDoDialog(itemManagementViewModel.getTabsValue());
                     dialog.setListener(dialogClickListener);
+
                     dialog.show(getChildFragmentManager(), null);
                 }
                 else{
@@ -180,11 +193,13 @@ public class ItemManagementFragment extends Fragment{
             @Override
             public void onClick(View v) {
 
-                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected();
+                vibrate();
+
+                boolean isAtLeastOneSelected = itemManagementViewModel.isToDoSelected(adapter.getToDoList());
 
                 if(isAtLeastOneSelected) {
                     needToRedraw = true;
-                    itemManagementViewModel.deleteSelectedToDo();
+                    itemManagementViewModel.deleteSelectedToDo(adapter.getToDoList());
                 }
                 else {
                     Toast.makeText(getContext(), "Please select at least one ToDo make an action", Toast.LENGTH_SHORT).show();
@@ -206,6 +221,11 @@ public class ItemManagementFragment extends Fragment{
             public void onSortBtnClick(ItemManagementAdapter.ViewHolder viewHolder) {
                 startDragging(viewHolder);
             }
+
+            @Override
+            public void onCheckBtnClicked() {
+                vibrate();
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -222,13 +242,28 @@ public class ItemManagementFragment extends Fragment{
         itemManagementViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
+                Log.e(TAG, "List<ToDo> updated");
                 adapter.updateToDos(toDos, needToRedraw);
+            }
+        });
+
+        itemManagementViewModel.getTabs().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
+            @Override
+            public void onChanged(List<Tab> tabs) {
+                Log.e(TAG, "List<Tab> updated");
+                Log.e(TAG, tabs.toString());
             }
         });
     }
 
     private void startDragging(ItemManagementAdapter.ViewHolder viewHolder){
+        vibrate();
         helper.startDrag(viewHolder);
     }
 
+    private void vibrate(){
+        Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.EFFECT_TICK);
+    }
 }
+

@@ -306,7 +306,7 @@ public class ItemFragment extends Fragment {
         deleteBtn.setVisibility(View.GONE);
     }
 
-    private void hideUserInput(){
+    public void hideUserInput(){
         linearLayout.setVisibility(View.GONE);
         editText.setVisibility(View.GONE);
         updateBtn.setVisibility(View.GONE);

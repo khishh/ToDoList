@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.example.todo.ui.home.itemfragment.ItemAdapter;
 import com.example.todo.ui.home.itemfragment.ItemFragment;
 
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
      * pagerAdapter.addFragment(fragment, title Of tab, position of tab)
      */
     private void initializeTabFragments(List<Integer> newTabIds, List<String> newTabTitles){
-//        Log.d(TAG, "initializeTabFragments called");
         for(int i = 0; i < newTabIds.size(); i++){
             ItemFragment fragment = new ItemFragment(newTabIds.get(i));
             addFragment(fragment,
@@ -85,6 +85,11 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         mFragmentList.add(position, fragment);
         mFragmentTitleList.add(position, title);
         mFragmentTabIdList.add(position, tabId);
+    }
+
+    public void closeUserInput(int position){
+        Fragment targetFragment = mFragmentList.get(position);
+        ((ItemFragment)targetFragment).hideUserInput();
     }
 
     @Nullable

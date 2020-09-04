@@ -140,10 +140,14 @@ public class HomeFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
+        int curPage = binding.pager.getCurrentItem();
+        pagerAdapter.closeUserInput(curPage);
+
         switch (item.getItemId()){
 
             case R.id.add_newTab:
                 hideKeyboard(requireView());
+
                 ((MainActivity)requireActivity()).createTabManagementFragment();
                 break;
 
