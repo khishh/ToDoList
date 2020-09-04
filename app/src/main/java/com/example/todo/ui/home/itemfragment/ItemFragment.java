@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -72,6 +74,7 @@ public class ItemFragment extends Fragment {
         public void onClick(int position) {
             // Log.d(TAG, "position = " + position);
 
+            vibrate();
             // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
             positionItem = position;
 
@@ -89,7 +92,7 @@ public class ItemFragment extends Fragment {
                         public void run() {
                             recyclerView.smoothScrollToPosition(positionItem);
                         }
-                    },300);
+                    },350);
 
                 editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
             }
@@ -99,6 +102,7 @@ public class ItemFragment extends Fragment {
 
         @Override
         public void onIsDoneClick(int position, boolean isDone) {
+            vibrate();
             adapter.setModifiedToDoPos(position);
             int reversePosition = adapter.getItemCount() - position - 1;
             itemViewModel.updateToDoIsDoneAtPosition(reversePosition, isDone);
@@ -143,6 +147,7 @@ public class ItemFragment extends Fragment {
 //    };
 
     public void showAddNewItemInput(){
+        vibrate();
         // Log.d(TAG, String.valueOf(positionItem));
         editText.setText("");
         updateBtn.setImageResource(R.drawable.ic_baseline_add_2_green);
@@ -166,6 +171,7 @@ public class ItemFragment extends Fragment {
     private View.OnClickListener updateBtnOnCLickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            vibrate();
             if(!TextUtils.isEmpty(editText.getText().toString())){
 
                 String newToDoContent = editText.getText().toString();
@@ -293,6 +299,7 @@ public class ItemFragment extends Fragment {
     }
 
     public void deleteAllDoneItems(){
+        vibrate();
         itemViewModel.removeAllDoneToDo();
     }
 
@@ -333,6 +340,11 @@ public class ItemFragment extends Fragment {
         updateBtn.setVisibility(View.GONE);
 
         editText.clearFocus();
+    }
+
+    private void vibrate(){
+        Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.EFFECT_TICK);
     }
 
     @Override

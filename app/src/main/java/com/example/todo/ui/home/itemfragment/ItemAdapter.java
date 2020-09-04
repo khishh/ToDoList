@@ -1,5 +1,8 @@
 package com.example.todo.ui.home.itemfragment;
 
+import android.content.Context;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -139,4 +142,5 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
             ib.setImageResource(R.drawable.item_circle);
         }
     }
+
 }
