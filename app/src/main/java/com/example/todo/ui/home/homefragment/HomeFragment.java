@@ -174,6 +174,7 @@ public class HomeFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         int curPage = binding.pager.getCurrentItem();
+        Log.e(TAG, "curPage == " + curPage);
         pagerAdapter.closeUserInput(curPage);
 
         switch (item.getItemId()){

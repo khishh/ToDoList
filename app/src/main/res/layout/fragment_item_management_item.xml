@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp">
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -17,7 +17,8 @@
             <ImageButton
                 android:id="@+id/item_management_check_button"
                 android:layout_width="50dp"
-                android:layout_height="match_parent"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_baseline_radio_button_unchecked_24"
                 android:background="@color/white_bg"/>
@@ -25,15 +26,17 @@
             <TextView
                 android:id="@+id/item_management_content"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:minHeight="50dp"
                 android:gravity="center_vertical"
                 android:padding="5dp" />
 
             <ImageButton
                 android:id="@+id/item_management_sort"
                 android:layout_width="50dp"
-                android:layout_height="match_parent"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_baseline_sort_24"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:background="@color/white_bg"/>
