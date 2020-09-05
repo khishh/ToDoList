@@ -159,7 +159,7 @@ public class ItemManagementFragment extends Fragment{
 
         recyclerView = binding.itemManagementRecyclerView;
 
-        binding.itemManagementTitle.setOnClickListener(new View.OnClickListener() {
+        binding.itemManagementClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 vibrate();

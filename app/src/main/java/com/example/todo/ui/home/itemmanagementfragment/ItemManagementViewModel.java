@@ -80,7 +80,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
         toToDo.setDone(isDoneKeep);
         toToDo.setContent(contentKeep);
     }
-
      */
 
     public void deleteSelectedToDo(List<ToDo> curList){

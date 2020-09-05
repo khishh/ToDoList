@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:animateLayoutChanges="true"
+    android:clickable="true"
+    android:focusable="true"
     android:background="@color/white_bg"
     tools:context=".ui.home.tabmanagementfragment.TabManagementFragment">
 
@@ -21,6 +22,7 @@
             android:layout_width="60dp"
             android:padding="5dp"
             android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             />
 
         <TextView

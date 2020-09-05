@@ -7,6 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white_bg"
+        android:clickable="true"
+        android:focusable="true"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context=".ui.home.itemmanagementfragment.ItemManagementFragment">
 
@@ -31,6 +33,7 @@
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:text="Close"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:textColor="@color/white_bg"
                     android:textSize="16sp" />
 
@@ -40,7 +43,6 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:text="Manage ToDo"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:textColor="@color/white_bg"
                     android:textSize="16sp" />
 
