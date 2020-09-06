@@ -69,6 +69,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().popBackStack();
     }
 
+    public void popOffFragmentAndResetHomeFragment(){
+        getSupportFragmentManager().popBackStack();
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment).commit();
+    }
+
     /**
      * show HomeFragment called from other fragments to come back
      * using replace to show the up-to-date data

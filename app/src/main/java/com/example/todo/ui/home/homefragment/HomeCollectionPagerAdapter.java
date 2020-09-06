@@ -1,6 +1,7 @@
 package com.example.todo.ui.home.homefragment;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +18,8 @@ import java.util.List;
  * PagerAdapter class for TabLayout
  */
 public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
+
+    private final static String TAG = HomeCollectionPagerAdapter.class.getSimpleName();
 
     // List of Tab's titles
     private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -113,6 +116,7 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     public void addNewBtnClicked(int position){
+        Log.e(TAG, "position clicked == " + position);
         Fragment targetFragment = mFragmentList.get(position);
         ((ItemFragment)targetFragment).showAddNewItemInput();
     }
