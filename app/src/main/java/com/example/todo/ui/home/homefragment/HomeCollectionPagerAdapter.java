@@ -106,9 +106,10 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     public void closeUserInput(int position){
-
-        Fragment targetFragment = mFragmentList.get(position);
-        ((ItemFragment)targetFragment).hideUserInput();
+        if(position < getCount()) {
+            Fragment targetFragment = mFragmentList.get(position);
+            ((ItemFragment) targetFragment).hideUserInput();
+        }
     }
 
     public void addNewBtnClicked(int position){
