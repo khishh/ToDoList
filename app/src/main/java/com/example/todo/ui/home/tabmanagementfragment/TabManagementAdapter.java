@@ -31,12 +31,10 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
 
     private Listener listener;
 
-    private HashMap<Integer, TabManagementAdapter.ViewHolder> holderList = new HashMap<>();
-
     interface Listener{
         void onSortBtnClick(ViewHolder viewHolder);
         void onSwipeDeleteBack(int position);
-        void deleteTabAtPosition(int position);
+        void deleteTabAtPosition(int position, Tab deleteTab);
     }
 
     public void setListener(Listener listener) {
@@ -47,10 +45,18 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
         this.tabList = tabList;
     }
 
-    public void updateTabList(List<Tab> tabList){
-        this.tabList.clear();
-        this.tabList.addAll(tabList);
+    public void updateTabList(List<Tab> tabList, boolean needToUpdateAdapterData){
+
+        if(needToUpdateAdapterData) {
+            this.tabList.clear();
+            this.tabList.addAll(tabList);
+        }
+
         notifyDataSetChanged();
+    }
+
+    public ArrayList<Tab> getTabList() {
+        return tabList;
     }
 
     @NonNull
@@ -67,13 +73,6 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
         Tab tab = tabList.get(position);
 
         holder.content.setText(tab.getTabTitle());
-
-
-        if(!holderList.containsKey(position)){
-            holderList.put(position, holder);
-        }
-
-//        holder.linearLayout.bringToFront();
 
         holder.sortButton.setOnTouchListener(new View.OnTouchListener() {
 
@@ -120,6 +119,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             @Override
             public void onClick(View v) {
 
+                Log.e(TAG, "deleteBtn Clicked at " + deleteMovedPos);
+
                 if(deleteMovedPos != -1){
                     if(listener != null){
                         listener.onSwipeDeleteBack(deleteMovedPos);
@@ -131,6 +132,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                 holder.linearLayout.animate().translationX(-x).setDuration(300).start();
 
                 deleteMovedPos = position;
+
+                Log.e(TAG, "deleteBtn Clicked at " + deleteMovedPos);
             }
         });
 
@@ -151,15 +154,13 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             public void onClick(View v) {
                 Log.d(TAG, "deleteMsg Clicked");
                 if(listener != null){
-                    listener.deleteTabAtPosition(position);
+                    listener.onSwipeDeleteBack(position);
+                    listener.deleteTabAtPosition(position, tabList.get(position));
+                    deleteMovedPos = -1;
                 }
             }
         });
 
-    }
-
-    public ViewHolder getViewByPosition(int position){
-        return holderList.get(position);
     }
 
     @Override

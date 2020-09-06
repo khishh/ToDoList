@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +36,8 @@ import java.util.List;
 public class TabManagementFragment extends Fragment {
 
     private static final String TAG = "TabManagementFragment";
+
+    private boolean needToUpdateAdapterData = true;
 
     private TabManagementViewModel viewModel;
 
@@ -67,23 +71,30 @@ public class TabManagementFragment extends Fragment {
 
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            final int fromPos = viewHolder.getAbsoluteAdapterPosition();
-            final int toPos = target.getAbsoluteAdapterPosition();
+//            final int fromPos = viewHolder.getAbsoluteAdapterPosition();
+//            final int toPos = target.getAbsoluteAdapterPosition();
 
 //            adapter.swapTabList(fromPos, toPos);
 
-            adapter.notifyItemMoved(fromPos, toPos);
+//            adapter.notifyItemMoved(fromPos, toPos);
 
-            Log.d(TAG, fromPos + " " + toPos);
-
-
-            viewModel.updateTabList(fromPos, toPos);
+//            Log.d(TAG, fromPos + " " + toPos);
+//
+//
+//            viewModel.updateTabList(fromPos, toPos);
             return true;
         }
 
         @Override
         public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
             super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+
+            needToUpdateAdapterData = false;
+            adapter.swapTabList(fromPos, toPos);
+            adapter.notifyItemMoved(fromPos, toPos);
+
+            vibrate();
+
             Log.d(TAG, "MOVE finished");
         }
 
@@ -101,6 +112,8 @@ public class TabManagementFragment extends Fragment {
         @Override
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
+            viewModel.saveTabOrder(adapter.getTabList());
+            Log.e(TAG, "Dragging stopped");
             if(viewHolder != null){
                 viewHolder.itemView.setAlpha(1.0f);
             }
@@ -127,7 +140,14 @@ public class TabManagementFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                ((MainActivity)requireActivity()).popOffFragment();
+                if(viewModel.isDeleted()){
+                    Log.e(TAG, "isDeleted");
+                    ((MainActivity)requireActivity()).popOffFragmentAndResetHomeFragment();
+                }
+                else {
+                    Log.e(TAG, "is not Deleted");
+                    ((MainActivity) requireActivity()).popOffFragment();
+                }
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -149,12 +169,7 @@ public class TabManagementFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.tab_manage_recyclerView);
 
-        linearLayoutManager = new LinearLayoutManager(getContext()){
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
+        linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
 
@@ -167,15 +182,16 @@ public class TabManagementFragment extends Fragment {
             @Override
             public void onSwipeDeleteBack(int position) {
                 Log.d(TAG, "onSwipeDeleteBack pos = " + position);
-                TabManagementAdapter.ViewHolder viewHolder = adapter.getViewByPosition(position);
+                TabManagementAdapter.ViewHolder viewHolder = (TabManagementAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
                 viewHolder.linearLayout.animate().translationX(0).setDuration(300).start();
             }
 
             @Override
-            public void deleteTabAtPosition(int position) {
+            public void deleteTabAtPosition(int position, Tab deleteTab) {
                 final int deletePos = position;
                 adapter.notifyItemRemoved(deletePos);
-                viewModel.deleteTab(deletePos);
+                needToUpdateAdapterData = true;
+                viewModel.deleteTab(deleteTab);
             }
         });
 
@@ -184,7 +200,14 @@ public class TabManagementFragment extends Fragment {
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)requireActivity()).popOffFragment();
+                if(viewModel.isDeleted()){
+                    Log.e(TAG, "isDeleted");
+                    ((MainActivity)requireActivity()).popOffFragmentAndResetHomeFragment();
+                }
+                else {
+                    Log.e(TAG, "is not Deleted");
+                    ((MainActivity) requireActivity()).popOffFragment();
+                }
             }
         });
 
@@ -196,6 +219,7 @@ public class TabManagementFragment extends Fragment {
                 String newTabTitle = userInputTab.getText().toString();
 
                 if(!TextUtils.isEmpty(newTabTitle)){
+                    needToUpdateAdapterData = true;
                     viewModel.addNewTab(newTabTitle);
                     userInputTab.setText("");
                 }
@@ -221,7 +245,7 @@ public class TabManagementFragment extends Fragment {
         viewModel.getmTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
-                adapter.updateTabList(tabs);
+                adapter.updateTabList(tabs, needToUpdateAdapterData);
             }
         });
     }
@@ -236,5 +260,10 @@ public class TabManagementFragment extends Fragment {
         assert inputMethodManager != null;
 
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void vibrate(){
+        Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.EFFECT_TICK);
     }
 }

@@ -74,6 +74,8 @@ public class HomeViewModel extends AndroidViewModel {
                 else
                     subCollection.add(new ToDo(i, String.valueOf(j+1), true));
             }
+
+            subCollection.add(new ToDo(rInt, "TAB " + (i+1), false));
             tab.setToDoList(subCollection);
 
             tabList.add(tab);

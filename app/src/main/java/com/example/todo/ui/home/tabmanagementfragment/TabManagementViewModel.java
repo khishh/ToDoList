@@ -3,10 +3,10 @@ package com.example.todo.ui.home.tabmanagementfragment;
 import android.app.Application;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.todo.model.Tab;
@@ -27,22 +27,24 @@ import java.util.List;
 
 public class TabManagementViewModel extends AndroidViewModel {
 
-    // *---  fields ---*
-
     private static final String TAG = "TabManagementViewModel";
 
+    public enum ActionType{
+        Add, Update, Delete, Edit
+    }
+
     //  store all tabs retrieved from Room Database
-    MutableLiveData<List<Tab>> mTabList = new MutableLiveData<>();
+    LiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
-    //  the instance of RetrieveTabFromDatabase class extends to AsyncTask to get All Tabs from Room Database
-    private AsyncTask<Void, Void, List<Tab>> retrieveTabFromDatabase;
+    private AsyncTask<Void, Void, Void> updateTabIntoDatabase;
 
-    // the instance of UpdateTabIntoDatabase class extends to AsyncTask to save all UPDATED Tabs into Room Database
-    private AsyncTask<List<Tab>, Void, List<Tab>> updateTabIntoDatabase;
+    private ActionType actionType;
+    private boolean isDeleted = false;
 
-    private AsyncTask<Tab, Void, Tab> deleteTabFromDatabase;
+    private List<Tab> modifiedTabs = new ArrayList<>();
+    private List<Integer> preOrderedTabIds = new ArrayList<>();
 
-    private AsyncTask<Tab, Void, List<Tab>> addNewTabIntoDatabase;
+    private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
     // default constructor
     public TabManagementViewModel(@NonNull Application application) {
@@ -51,199 +53,113 @@ public class TabManagementViewModel extends AndroidViewModel {
 
     // retrieving all Tabs in Room database by calling execute()
     public void retrieveTabList(){
-        retrieveTabFromDatabase = new RetrieveTabFromDatabase();
-        retrieveTabFromDatabase.execute();
+        mTabList = dao.getAllLiveTab();
     }
 
-    // When users sort Tab from screen, Tab stored in Room will be also sorted accordingly.
-    // - fromPos -> the position of Tab in RecyclerView where users started dragging from
-    // - toPos   -> the position of Tab in RecyclerView where users sending dragging at
-    public void updateTabList(int fromPos, int toPos){
-
-        // Log.d(TAG, "fromPos == " + fromPos + " toPos == " + toPos);
-
-        // update the order of mTabList based on fromPos and toPos
-        swapTabOrder(fromPos, toPos);
-
-        // create ArrayList to store two sorted Tab
-        List<Tab> tabs = new ArrayList<>();
-        tabs.add(mTabList.getValue().get(fromPos));
-        tabs.add(mTabList.getValue().get(toPos));
-
-        updateTabIntoDatabase = new UpdateTabIntoDatabase();
-        updateTabIntoDatabase.execute(tabs);
+    public void updateTabList(){
+        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
+        updateTabIntoDatabase.execute();
     }
 
-    public void deleteTab(int deletePos){
+    public void deleteTab(Tab deleteTab){
 
-        Tab deleteTab = deleteTabAtPosition(deletePos);
+        if(!isDeleted){
+            isDeleted = true;
+        }
 
-        deleteTabFromDatabase = new DeleteTabFromDataBase();
-        deleteTabFromDatabase.execute(deleteTab);
-
+        modifiedTabs.add(deleteTab);
+        actionType = ActionType.Delete;
+        updateTabList();
     }
 
     public void addNewTab(String newTabTitle){
-
         Tab newTab = new Tab(mTabList.getValue().size(), newTabTitle);
-
-        addNewTabIntoDatabase = new AddNewTabIntoDatabase();
-        addNewTabIntoDatabase.execute(newTab);
+        modifiedTabs.add(newTab);
+        actionType = ActionType.Add;
+        updateTabList();
     }
 
-    // RetrieveTabFromDataBase class
-    // gets all Tabs stored in Room in doInBackground()
-    // call setValue() method on mTabList to assign retrieved List<Tab> after finish retrieval
-    private class RetrieveTabFromDatabase extends AsyncTask<Void, Void, List<Tab>>{
+    public void saveTabOrder(List<Tab> orderedTabList){
 
-        @Override
-        protected List<Tab> doInBackground(Void... voids) {
-            return TabToDoDataBase.getInstance(getApplication()).tabToDoDao().getAllTab();
+        // store the original Id's order
+        for(Tab tab : mTabList.getValue()){
+            preOrderedTabIds.add(tab.getTabId());
         }
 
-        @Override
-        protected void onPostExecute(List<Tab> tabs) {
-            retrievedTabList(tabs);
-        }
+        Log.e(TAG, preOrderedTabIds.toString());
+        Log.e(TAG, "Orig ==== " + orderedTabList.toString());
+
+        modifiedTabs.addAll(orderedTabList);
+        actionType = ActionType.Update;
+        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
+        updateTabIntoDatabase.execute();
     }
 
-    // UpdateTabIntoDatabase class
-    // updates given Tab(s) in Room database in doInBackground()
-    private class UpdateTabIntoDatabase extends AsyncTask<List<Tab>, Void, List<Tab>>{
+    public void editTabName(){
+
+    }
+
+    private class UpdateTabIntoDataBase2 extends AsyncTask<Void, Void, Void>{
 
         @Override
-        protected List<Tab> doInBackground(List<Tab>... lists) {
+        protected Void doInBackground(Void... voids) {
 
-//            Log.d(TAG, "UpdateTabIntoDatabase doInBackground started");
+            switch (actionType){
 
-            // get Tab(s) to be updated
-            List<Tab> tabList = lists[0];
+                case Delete:
+                    Log.e(TAG, "Delete passed");
+                    dao.deleteTab(modifiedTabs.toArray(new Tab[0]));
+                    break;
 
-            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+                case Add:
+                    Log.e(TAG, "Add passed");
+                    dao.insertTab(modifiedTabs.toArray(new Tab[0]));
+                    break;
 
-            // get the original tabIds from two Tabs before sorting
-            int fromPosId = tabList.get(0).getTabId();
-            int toPosId = tabList.get(1).getTabId();
+                case Update:
+                    Log.e(TAG, "Update passed");
+                    List<List<ToDo>> tabCollection = new ArrayList<>();
+                    for(int i = 0; i < modifiedTabs.size(); i++){
+                        List<ToDo> toDos = dao.getToDoList(modifiedTabs.get(i).getTabId());
+                        Log.e(TAG, toDos.toString());
+                        tabCollection.add(toDos);
+                    }
 
-            // get All List<To-Do> with tabIds of two Tabs before sorting
-            List<ToDo> fromPosToDoList = dao.getToDoList(fromPosId);
-            List<ToDo> toPosToDoList = dao.getToDoList(toPosId);
+                    for(int i = 0; i < modifiedTabs.size(); i++){
 
-            // change each To-Do's ownerId to toPosId and call updateToDoList() to reflect the changes
-//            Log.d(TAG, "fromPosToDoList Size " + fromPosToDoList.size());
-            for(ToDo todo : fromPosToDoList){
-                todo.setToDoOwnerId(toPosId);
-//                Log.d(TAG, "fromPosToDoList newOwnerId = " + toPosId);
+                        int newId = preOrderedTabIds.get(i);
+
+                        // update new Id for All To-Dos belong to the Tab
+                        List<ToDo> toDos = tabCollection.get(i);
+                        for(ToDo _toDo : toDos){
+                            _toDo.setToDoOwnerId(newId);
+                        }
+
+                        // update new Id for Tab
+                        Tab tab = modifiedTabs.get(i);
+                        tab.setTabId(newId);
+
+                        Log.e(TAG, "After modified " + toDos.toString());
+                        dao.updateToDoList(toDos.toArray(new ToDo[0]));
+                    }
+
+                    Log.e(TAG, "After modified " + modifiedTabs.toString());
+                    dao.updateTab(modifiedTabs.toArray(new Tab[0]));
             }
 
-            dao.updateToDoList(fromPosToDoList.toArray(new ToDo[0]));
-
-//            Log.d(TAG, "toPosToDoList Size " + toPosToDoList.size());
-
-            // change each To-Do's ownerId to toPosId and call updateToDoList() to reflect the changes
-            for(ToDo todo : toPosToDoList){
-                todo.setToDoOwnerId(fromPosId);
-//                Log.d(TAG, "toPosToDoList newOwnerId = " + fromPosId);
-            }
-            dao.updateToDoList(toPosToDoList.toArray(new ToDo[0]));
-
-
-            //update tabId of two Tabs
-            int tabIndexKeep = fromPosId;
-
-            Log.d(TAG, "Before = 0's title = " + tabList.get(0).getTabTitle() + " 1's title " + tabList.get(1).getTabTitle());
-            Log.d(TAG, "Before = 0's tabId = " + (tabList.get(0).getTabId()) + " 1's tabId " + (tabList.get(1).getTabId()));
-            String tabTitleKeep = tabList.get(0).getTabTitle();
-            tabList.get(0).setTabId(toPosId);
-            tabList.get(1).setTabId(tabIndexKeep);
-            Log.d(TAG, "After = 0's title = " + tabList.get(0).getTabTitle() + " 1's title " + tabList.get(1).getTabTitle());
-            Log.d(TAG, "After = 0's tabId = " + tabList.get(0).getTabId() + " 1's tabId " + tabList.get(1).getTabId());
-
-            dao.updateTab(tabList.get(0));
-            dao.updateTab(tabList.get(1));
-
-            return tabList;
+            modifiedTabs.clear();
+            return null;
         }
     }
 
-    private class DeleteTabFromDataBase extends AsyncTask<Tab, Void, Tab>{
-
-        @Override
-        protected Tab doInBackground(Tab... tabs) {
-
-            Log.d(TAG, "DELETE started");
-            Tab deleteTab = tabs[0];
-
-            int deleteTabId = deleteTab.getTabId();
-
-            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
-
-            dao.deleteTab(deleteTab);
-            dao.deleteAllToDoOfId(deleteTabId);
-
-            return deleteTab;
-        }
-
-        @Override
-        protected void onPostExecute(Tab tab) {
-            deletedTab(tab);
-        }
-    }
-
-    private class AddNewTabIntoDatabase extends AsyncTask<Tab, Void, List<Tab>>{
-
-        @Override
-        protected List<Tab> doInBackground(Tab... tabs) {
-            Tab newTab = tabs[0];
-
-            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
-
-            dao.insertTab(newTab);
-
-            return dao.getAllTab();
-        }
-
-        @Override
-        protected void onPostExecute(List<Tab> tabs) {
-            retrievedTabList(tabs);
-            Log.d(TAG, tabs.toString());
-        }
-    }
-
-    private void retrievedTabList(List<Tab> tabs){
-        mTabList.setValue(tabs);
-    }
-
-    private void deletedTab(Tab tab){
-        List<Tab> cur = mTabList.getValue();
-        cur.remove(tab);
-        mTabList.setValue(cur);
-    }
-
-
-
-    public MutableLiveData<List<Tab>> getmTabList() {
+    public LiveData<List<Tab>> getmTabList() {
         return mTabList;
     }
 
-    public void swapTabOrder(int fromTabIndex, int toTabIndex){
-
-        Tab fromTab = mTabList.getValue().get(fromTabIndex);
-        Tab toTab = mTabList.getValue().get(toTabIndex);
-
-        mTabList.getValue().set(toTabIndex, fromTab);
-        mTabList.getValue().set(fromTabIndex, toTab);
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
-    public Tab deleteTabAtPosition(int deleteTabIndex){
-
-        Tab deleteTab = mTabList.getValue().get(deleteTabIndex);
-
-        Log.d(TAG, "Delete Tab == " + deleteTab.getTabTitle());
-        mTabList.getValue().remove(deleteTab);
-
-        return deleteTab;
-    }
 
     @Override
     protected void onCleared() {
@@ -252,16 +168,6 @@ public class TabManagementViewModel extends AndroidViewModel {
         if(updateTabIntoDatabase != null){
             updateTabIntoDatabase.cancel(true);
             updateTabIntoDatabase = null;
-        }
-
-        if(deleteTabFromDatabase != null){
-            deleteTabFromDatabase.cancel(true);
-            deleteTabFromDatabase = null;
-        }
-
-        if(addNewTabIntoDatabase != null){
-            addNewTabIntoDatabase.cancel(true);
-            addNewTabIntoDatabase = null;
         }
     }
 }

@@ -18,19 +18,19 @@ public abstract class TabToDoDao {
     private static final String TAG = "TabToDoDao";
 
     @Insert
-    public abstract Long insertTab(Tab tab);
+    public abstract List<Long> insertTab(Tab... tab);
 
     @Insert
     public abstract List<Long> insertToDoList(ToDo... toDoList);
 
     @Delete
-    public abstract void deleteTab(Tab tab);
+    public abstract void deleteTab(Tab... tab);
 
     @Delete
     public abstract void deleteToDos(ToDo... toDos);
 
     @Update
-    public abstract void updateTab(Tab tab);
+    public abstract void updateTab(Tab... tab);
 
     @Update
     public abstract void updateToDoList(ToDo... toDos);
@@ -58,7 +58,7 @@ public abstract class TabToDoDao {
 
     public void insertToDoWithTab(Tab tab){
 
-        int tabId = insertTab(tab).intValue();
+        int tabId = insertTab(tab).get(0).intValue();
         tab.setTabId(tabId);
 
         List<ToDo> toDoList = tab.getToDoList();
