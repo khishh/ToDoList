@@ -42,6 +42,7 @@
                     android:layout_width="0dp"
                     android:gravity="center_vertical"
                     android:padding="5dp"
+                    android:maxLines="2"
                     android:layout_weight="1"/>
 
                 <ImageButton

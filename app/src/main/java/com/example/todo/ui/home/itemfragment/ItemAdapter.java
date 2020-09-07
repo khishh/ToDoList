@@ -1,5 +1,8 @@
 package com.example.todo.ui.home.itemfragment;
 
+import android.content.Context;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,15 +10,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.example.todo.R;
@@ -23,12 +23,13 @@ import com.example.todo.databinding.ItemTodoBinding;
 import com.example.todo.model.ToDo;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
-    implements ListItemOnClickListener{
+        implements ListItemOnClickListener{
 
     private static final String TAG = "ItemAdapter";
 
     private Listener listener;
     private List<ToDo> doList;
+    private int modifiedToDoPos;
 
     @Override
     public void onListItemClick(View view) {
@@ -41,14 +42,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         }
     }
 
-
     interface  Listener{
         void onClick(int position);
-        void onIsDoneClick();
+        void onIsDoneClick(int position, boolean isDone);
     }
 
     public void setListener(Listener listener){
         this.listener = listener;
+    }
+
+    public void setModifiedToDoPos(int modifiedToDoPos) {
+        this.modifiedToDoPos = modifiedToDoPos;
     }
 
     // may need change since I needed fragment to add EditText below RecyclerView
@@ -59,14 +63,20 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
     public void updateToDoList(List<ToDo> newCollection){
         doList.clear();
         doList.addAll(newCollection);
-        notifyDataSetChanged();
+
+        if(modifiedToDoPos != -1){
+            notifyItemChanged(modifiedToDoPos);
+            modifiedToDoPos = -1;
+        }
+        else {
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-//        View view = inflater.inflate(R.layout.item_todo, parent, false);
         ItemTodoBinding binding = DataBindingUtil.inflate(inflater, R.layout.item_todo, parent, false);
 
         return new ViewHolder(binding);
@@ -96,14 +106,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
                 if(!toDo.isDone()){
                     ((ImageButton)v).setImageResource(R.drawable.ic_check_item);
                     // change To-Do's isDone to be true
-                    doList.get(reversePosition).setDone(true);
-                    listener.onIsDoneClick();
+                    Log.e(TAG, toDo.toString() + " position == " + position);
+                    listener.onIsDoneClick(position, true);
                 }
                 else{
                     ((ImageButton)v).setImageResource(R.drawable.item_circle);
                     // change To-Do's isDone to be true
-                    doList.get(reversePosition).setDone(false);
-                    listener.onIsDoneClick();
+                    listener.onIsDoneClick(position, false);
                 }
             }
         });
@@ -133,4 +142,5 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
             ib.setImageResource(R.drawable.item_circle);
         }
     }
+
 }

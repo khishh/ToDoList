@@ -49,13 +49,31 @@ public class MainActivity extends AppCompatActivity {
     public void createTabManagementFragment(){
         TabManagementFragment fragment = TabManagementFragment.getInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_from_down, R.anim.slide_to_up).replace(R.id.container, fragment).commit();
+//        ft.setCustomAnimations(R.anim.slide_from_down, R.anim.slide_to_up).replace(R.id.container, fragment).commit();
+        ft.setCustomAnimations(R.anim.slide_from_down, R.anim.slide_to_up, R.anim.slide_from_top, R.anim.slide_to_down)
+                .add(R.id.container, fragment)
+                .addToBackStack(TabManagementFragment.class.getSimpleName())
+                .commit();
     }
 
     public void createItemManagementFragment(int tabId){
         ItemManagementFragment fragment = ItemManagementFragment.newInstance(tabId);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_from_left, R.anim.slide_to_right).replace(R.id.container, fragment).commit();
+        ft.setCustomAnimations(R.anim.slide_from_left, R.anim.slide_to_right, R.anim.slide_from_right, R.anim.slide_to_left)
+                .add(R.id.container, fragment)
+                .addToBackStack(ItemManagementFragment.class.getSimpleName())
+                .commit();
+    }
+
+    public void popOffFragment(){
+        getSupportFragmentManager().popBackStack();
+    }
+
+    public void popOffFragmentAndResetHomeFragment(){
+        getSupportFragmentManager().popBackStack();
+        HomeFragment fragment = HomeFragment.getInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment).commit();
     }
 
     /**
@@ -76,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         ft.setCustomAnimations(R.anim.slide_from_right, R.anim.slide_to_left).replace(R.id.container, fragment).commit();
     }
 
-      // for later use
+    // for later use
 //    //    detect if screen shows keyboard
 //    //    https://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
 //    private void setKeyBoardOpenListener(){

@@ -26,6 +26,13 @@ public class ToDo {
         this.isSelected = false;
     }
 
+    public ToDo(int toDoOwnerId, String content, boolean isDone, boolean isSelected){
+        this.toDoOwnerId = toDoOwnerId;
+        this.content = content;
+        this.isDone = isDone;
+        this.isSelected = isSelected;
+    }
+
     // accessor
 
     public String getContent() {
@@ -75,6 +82,7 @@ public class ToDo {
                 ", toDoOwnerId=" + toDoOwnerId +
                 ", content='" + content + '\'' +
                 ", isDone=" + isDone +
+                ", isSelected=" + isSelected +
                 '}';
     }
 }

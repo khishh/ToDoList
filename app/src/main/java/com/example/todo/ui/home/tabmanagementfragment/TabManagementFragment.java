@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,6 +14,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,11 +25,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.todo.MainActivity;
 import com.example.todo.R;
+import com.example.todo.databinding.FragmentTabManagementBinding;
 import com.example.todo.model.Tab;
+import com.example.todo.util.CustomEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +41,10 @@ public class TabManagementFragment extends Fragment {
 
     private static final String TAG = "TabManagementFragment";
 
+    private boolean needToUpdateAdapterData = true;
+
     private TabManagementViewModel viewModel;
+    private FragmentTabManagementBinding binding;
 
     private TabManagementAdapter adapter = new TabManagementAdapter(new ArrayList<Tab>());
 
@@ -43,16 +52,17 @@ public class TabManagementFragment extends Fragment {
 
     private ItemTouchHelper helper;
 
+    private int editPosition;
+
     private LinearLayoutManager linearLayoutManager;
-
     private ImageView tabCloseBtn;
-
     private ImageButton addTabBtn;
-
-    private EditText userInputTab;
-
+    private CustomEditText userInputTab;
     // ui components
     private RecyclerView recyclerView;
+    private LinearLayout linearLayout;
+    private CustomEditText editText;
+    private ImageButton editButton;
 
     public static TabManagementFragment getInstance(){
         TabManagementFragment fragment = new TabManagementFragment();
@@ -67,23 +77,19 @@ public class TabManagementFragment extends Fragment {
 
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            final int fromPos = viewHolder.getAbsoluteAdapterPosition();
-            final int toPos = target.getAbsoluteAdapterPosition();
-
-//            adapter.swapTabList(fromPos, toPos);
-
-            adapter.notifyItemMoved(fromPos, toPos);
-
-            Log.d(TAG, fromPos + " " + toPos);
-
-
-            viewModel.updateTabList(fromPos, toPos);
             return true;
         }
 
         @Override
         public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
             super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
+
+            needToUpdateAdapterData = false;
+            adapter.swapTabList(fromPos, toPos);
+            adapter.notifyItemMoved(fromPos, toPos);
+
+            vibrate();
+
             Log.d(TAG, "MOVE finished");
         }
 
@@ -101,6 +107,8 @@ public class TabManagementFragment extends Fragment {
         @Override
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
+            viewModel.saveTabOrder(adapter.getTabList());
+            Log.e(TAG, "Dragging stopped");
             if(viewHolder != null){
                 viewHolder.itemView.setAlpha(1.0f);
             }
@@ -112,6 +120,36 @@ public class TabManagementFragment extends Fragment {
         }
     }
 
+    private View.OnFocusChangeListener editTextFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus){
+                Log.e(TAG, "EditText obtained focus");
+                showKeyboard(editText);
+            }
+            else{
+                Log.e(TAG, "EditText lost focus");
+                hideKeyboard(editText);
+            }
+        }
+    };
+
+    private CustomEditText.Listener customEditTextListener = new CustomEditText.Listener() {
+        @Override
+        public void onKeyboardDownClicked() {
+            Log.e(TAG, "onKeyboardDownClicked called");
+            hideUserInput();
+        }
+    };
+
+
+    private CustomEditText.Listener customEditTextListener2 = new CustomEditText.Listener() {
+        @Override
+        public void onKeyboardDownClicked() {
+            Log.e(TAG, "onKeyboardDownClicked called");
+            userInputTab.clearFocus();
+        }
+    };
 
     public TabManagementFragment() {
         // Required empty public constructor
@@ -127,7 +165,14 @@ public class TabManagementFragment extends Fragment {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
+                if(viewModel.isDeleted()){
+                    Log.e(TAG, "isDeleted");
+                    ((MainActivity)requireActivity()).popOffFragmentAndResetHomeFragment();
+                }
+                else {
+                    Log.e(TAG, "is not Deleted");
+                    ((MainActivity) requireActivity()).popOffFragment();
+                }
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
@@ -137,7 +182,11 @@ public class TabManagementFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_tab_management, container, false);
+        binding = DataBindingUtil.inflate(inflater,
+                R.layout.fragment_tab_management,
+                container,
+                false);
+        return binding.getRoot();
     }
 
     @Override
@@ -147,14 +196,21 @@ public class TabManagementFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(TabManagementViewModel.class);
         viewModel.retrieveTabList();
 
-        recyclerView = view.findViewById(R.id.tab_manage_recyclerView);
+        // reference to All Ui Components
+        recyclerView = binding.tabManageRecyclerView;
+        linearLayout = binding.tabManageUserEdit;
+        editText = binding.tabManageUserEditText;
+        editButton = binding.tabManageUserImageButton;
+        userInputTab = binding.tabManagementEditText;
+        addTabBtn = binding.tabManagementAddTab;
+        tabCloseBtn = binding.tabManageClose;
 
-        linearLayoutManager = new LinearLayoutManager(getContext()){
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
+        editText.setOnFocusChangeListener(editTextFocusChangeListener);
+        editText.setListener(customEditTextListener);
+        userInputTab.setOnFocusChangeListener(editTextFocusChangeListener);
+        userInputTab.setListener(customEditTextListener2);
+
+        linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
 
@@ -167,44 +223,64 @@ public class TabManagementFragment extends Fragment {
             @Override
             public void onSwipeDeleteBack(int position) {
                 Log.d(TAG, "onSwipeDeleteBack pos = " + position);
-                TabManagementAdapter.ViewHolder viewHolder = adapter.getViewByPosition(position);
+                TabManagementAdapter.ViewHolder viewHolder = (TabManagementAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
                 viewHolder.linearLayout.animate().translationX(0).setDuration(300).start();
             }
 
             @Override
-            public void deleteTabAtPosition(int position) {
+            public void deleteTabAtPosition(int position, Tab deleteTab) {
                 final int deletePos = position;
                 adapter.notifyItemRemoved(deletePos);
-                viewModel.deleteTab(deletePos);
+                needToUpdateAdapterData = true;
+                viewModel.deleteTab(deleteTab);
+            }
+
+            @Override
+            public void onEditBtnClick(int position, String content) {
+                editPosition = position;
+                editText.setText(content);
+                showUserInput();
             }
         });
 
-
-        tabCloseBtn = view.findViewById(R.id.tab_manage_close);
         tabCloseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).updateHomeFragmentFromTabManagement();
+                if(viewModel.isDeleted()){
+                    Log.e(TAG, "isDeleted");
+                    ((MainActivity)requireActivity()).popOffFragmentAndResetHomeFragment();
+                }
+                else {
+                    Log.e(TAG, "is not Deleted");
+                    ((MainActivity) requireActivity()).popOffFragment();
+                }
             }
         });
 
-        userInputTab = view.findViewById(R.id.tab_management_edit_text);
-        addTabBtn = view.findViewById(R.id.tab_management_add_tab);
         addTabBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String newTabTitle = userInputTab.getText().toString();
 
                 if(!TextUtils.isEmpty(newTabTitle)){
+                    needToUpdateAdapterData = true;
                     viewModel.addNewTab(newTabTitle);
                     userInputTab.setText("");
+                    userInputTab.clearFocus();
                 }
                 else{
                     Toast.makeText(getContext(), "Tab's title is empty", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
 
-                userInputTab.clearFocus();
-                hideKeyboard(userInputTab);
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newTabTitle = editText.getText().toString();
+                needToUpdateAdapterData = true;
+                viewModel.editTabName(editPosition, newTabTitle);
+                hideUserInput();
             }
         });
 
@@ -221,7 +297,7 @@ public class TabManagementFragment extends Fragment {
         viewModel.getmTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
-                adapter.updateTabList(tabs);
+                adapter.updateTabList(tabs, needToUpdateAdapterData);
             }
         });
     }
@@ -230,11 +306,39 @@ public class TabManagementFragment extends Fragment {
         helper.startDrag(viewHolder);
     }
 
+    private void showKeyboard(View view){
+        InputMethodManager inputMethodManager = (InputMethodManager)(view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
+        if(inputMethodManager != null)
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+    }
 
     private void hideKeyboard(View view){
         InputMethodManager inputMethodManager = (InputMethodManager)view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         assert inputMethodManager != null;
 
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void vibrate(){
+        Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.EFFECT_TICK);
+    }
+
+    private void showUserInput(){
+
+        linearLayout.setVisibility(View.VISIBLE);
+        editText.setVisibility(View.VISIBLE);
+        editButton.setVisibility(View.VISIBLE);
+
+        editText.requestFocus();
+    }
+
+    public void hideUserInput(){
+
+        linearLayout.setVisibility(View.GONE);
+        editText.setVisibility(View.GONE);
+        editButton.setVisibility(View.GONE);
+
+        editText.clearFocus();
     }
 }

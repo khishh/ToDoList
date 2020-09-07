@@ -1,6 +1,7 @@
 package com.example.todo.ui.home.homefragment;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +19,8 @@ import java.util.List;
  */
 public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
 
+    private final static String TAG = HomeCollectionPagerAdapter.class.getSimpleName();
+
     // List of Tab's titles
     private final List<Fragment> mFragmentList = new ArrayList<>();
 
@@ -25,6 +28,16 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     private final List<String> mFragmentTitleList = new ArrayList<>();
 
     private final List<Integer> mFragmentTabIdList = new ArrayList<>();
+
+    private Listener listener;
+
+    interface Listener{
+        void keyboardVisibilityChange(boolean willBeShown);
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
 
     public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
@@ -48,9 +61,17 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
      * pagerAdapter.addFragment(fragment, title Of tab, position of tab)
      */
     private void initializeTabFragments(List<Integer> newTabIds, List<String> newTabTitles){
-//        Log.d(TAG, "initializeTabFragments called");
         for(int i = 0; i < newTabIds.size(); i++){
             ItemFragment fragment = new ItemFragment(newTabIds.get(i));
+            fragment.setListener(new ItemFragment.Listener() {
+                @Override
+                public void keyboardVisibilityChange(boolean willBeShown) {
+                    if(listener != null){
+                        listener.keyboardVisibilityChange(willBeShown);
+                    }
+                }
+            });
+
             addFragment(fragment,
                     newTabTitles.get(i),
                     newTabIds.get(i),
@@ -85,6 +106,24 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         mFragmentList.add(position, fragment);
         mFragmentTitleList.add(position, title);
         mFragmentTabIdList.add(position, tabId);
+    }
+
+    public void closeUserInput(int position){
+        if(position < getCount()) {
+            Fragment targetFragment = mFragmentList.get(position);
+            ((ItemFragment) targetFragment).hideUserInput();
+        }
+    }
+
+    public void addNewBtnClicked(int position){
+        Log.e(TAG, "position clicked == " + position);
+        Fragment targetFragment = mFragmentList.get(position);
+        ((ItemFragment)targetFragment).showAddNewItemInput();
+    }
+
+    public void deleteButtonClicked(int position){
+        Fragment targetFragment = mFragmentList.get(position);
+        ((ItemFragment)targetFragment).deleteAllDoneItems();
     }
 
     @Nullable

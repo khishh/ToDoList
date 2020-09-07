@@ -1,5 +1,8 @@
 package com.example.todo.ui.home.itemmanagementfragment;
 
+import android.content.Context;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -18,6 +21,7 @@ import com.example.todo.databinding.FragmentItemManagementItemBinding;
 import com.example.todo.model.ToDo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAdapter.ViewHolder> {
@@ -33,6 +37,7 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
 
     interface Listener{
         void onSortBtnClick(ViewHolder viewHolder);
+        void onCheckBtnClicked();
     }
 
     public void setListener(Listener listener) {
@@ -43,12 +48,43 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         this.toDoList = toDos;
     }
 
-    public void updateToDos(List<ToDo> toDos){
-        toDoList.clear();
-        toDoList.addAll(toDos);
+    public void updateToDos(List<ToDo> toDos, boolean needToUpdateList){
+
+
+        if(needToUpdateList) {
+            toDoList.clear();
+            toDoList.addAll(toDos);
+        }
         notifyDataSetChanged();
 
+        Log.e(TAG, toDoList.toString());
+
         isSelected.clear();
+    }
+
+    public List<ToDo> getToDoList() {
+        return toDoList;
+    }
+
+    public void swapToDo(int fromPos, int toPos){
+
+        ToDo fromToDo = toDoList.get(fromPos);
+        ToDo toToDo = toDoList.get(toPos);
+
+        Log.e(TAG, "swapToDo before : " + fromToDo.toString() + " " + toToDo.toString());
+        String contentKeep = fromToDo.getContent();
+        boolean isDoneKeep = fromToDo.isDone();
+        boolean isSelectedKeep = fromToDo.isSelected();
+
+        fromToDo.setDone(toToDo.isDone());
+        fromToDo.setContent(toToDo.getContent());
+        fromToDo.setSelected(toToDo.isSelected());
+
+        toToDo.setDone(isDoneKeep);
+        toToDo.setContent(contentKeep);
+        toToDo.setSelected(isSelectedKeep);
+
+        Log.e(TAG, "swapToDo after : " + fromToDo.toString() + " " + toToDo.toString());
     }
 
     @NonNull
@@ -113,6 +149,11 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         holder.checkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(listener != null){
+                    listener.onCheckBtnClicked();
+                }
+
                 if(toDo.isSelected()){
                     holder.checkBtn.setImageResource(R.drawable.ic_baseline_radio_button_unchecked_24);
                     holder.checkBtn.setBackgroundColor(v.getResources().getColor(R.color.white_bg));
@@ -144,6 +185,7 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.itemView = itemView;
+
             checkBtn = itemView.findViewById(R.id.item_management_check_button);
             content = itemView.findViewById(R.id.item_management_content);
             sortBtn = itemView.findViewById(R.id.item_management_sort);

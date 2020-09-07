@@ -31,6 +31,10 @@ public class MoveToDoDialog extends DialogFragment {
         this.tabs = tabs;
     }
 
+    public void setTabs(List<Tab> tabs) {
+        this.tabs = tabs;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

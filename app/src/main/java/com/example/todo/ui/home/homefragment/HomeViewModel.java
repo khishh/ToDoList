@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.todo.model.Tab;
@@ -22,13 +23,15 @@ public class HomeViewModel extends AndroidViewModel {
 
     private static final String TAG = "HomeViewModel";
 
-    MutableLiveData<List<Tab>> mTabList = new MutableLiveData<>();
+    private LiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
     private AsyncTask<List<Tab>, Void, List<Tab>> insertTabsIntoDatabase;
 
-    private AsyncTask<Void, Void, List<Tab>> retrieveTabsFromDatabase;
+//    private AsyncTask<Void, Void, List<Tab>> retrieveTabsFromDatabase;
 
     private SharedPreferencesHelper sharedPreferencesHelper = SharedPreferencesHelper.getInstance(getApplication());
+
+    private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -39,16 +42,19 @@ public class HomeViewModel extends AndroidViewModel {
 
         long updateTime = sharedPreferencesHelper.getUpdateTime();
 
+        mTabList = dao.getAllLiveTab();
+
         if(updateTime == 0){
             // case if there is no data loaded into database yet
             List<Tab> tabList = setUpToDoItems();
             insertTabsIntoDatabase = new InsertTabsIntoDataBase();
             insertTabsIntoDatabase.execute(tabList);
         }
-        else{
-            retrieveTabsFromDatabase = new RetrieveTabsFromDataBase();
-            retrieveTabsFromDatabase.execute();
-        }
+//        else{
+//            retrieveTabsFromDatabase = new RetrieveTabsFromDataBase();
+//            retrieveTabsFromDatabase.execute();
+//
+//        }
     }
 
     private List<Tab> setUpToDoItems(){
@@ -68,6 +74,8 @@ public class HomeViewModel extends AndroidViewModel {
                 else
                     subCollection.add(new ToDo(i, String.valueOf(j+1), true));
             }
+
+            subCollection.add(new ToDo(rInt, "TAB " + (i+1), false));
             tab.setToDoList(subCollection);
 
             tabList.add(tab);
@@ -80,51 +88,39 @@ public class HomeViewModel extends AndroidViewModel {
 
         @Override
         protected List<Tab> doInBackground(List<Tab>... lists) {
-
             List<Tab> tabList = lists[0];
-
-            TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
             for (int i = 0; i < tabList.size(); i++){
                 dao.insertToDoWithTab(tabList.get(i));
             }
-
             // after save Tabs into database, record the current time
             sharedPreferencesHelper.saveUpdateTime(System.nanoTime());
-
-            List<Tab> res = dao.getAllTab();
             return tabList;
         }
-
-        @Override
-        protected void onPostExecute(List<Tab> tabs) {
-            tabsRetrieved(tabs);
-            Log.d(TAG, tabs.toString());
-            Log.d(TAG, "data saved");
-        }
     }
 
-    private class RetrieveTabsFromDataBase extends AsyncTask<Void, Void, List<Tab>>{
+//    private class RetrieveTabsFromDataBase extends AsyncTask<Void, Void, List<Tab>>{
+//
+//        @Override
+//        protected List<Tab> doInBackground(Void... voids) {
+//            return dao.getAllTab();
+//        }
+//
+//        @Override
+//        protected void onPostExecute(List<Tab> tabs) {
+//            tabsRetrieved(tabs);
+//            Log.d(TAG, "RETRIEVED " + tabs.toString());
+//        }
+//    }
 
-        @Override
-        protected List<Tab> doInBackground(Void... voids) {
-            return TabToDoDataBase.getInstance(getApplication()).tabToDoDao().getAllTab();
-        }
-
-        @Override
-        protected void onPostExecute(List<Tab> tabs) {
-            tabsRetrieved(tabs);
-            Log.d(TAG, "RETRIEVED " + tabs.toString());
-        }
-    }
-
-    private void tabsRetrieved(List<Tab> tabs) {
-        mTabList.setValue(tabs);
-    }
+//    private void tabsRetrieved(List<Tab> tabs) {
+//        mTabList.setValue(tabs);
+//    }
 
     // getter and setter
 
-    public MutableLiveData<List<Tab>> getTabList() {
+
+    public LiveData<List<Tab>> getmTabList() {
         return mTabList;
     }
 
@@ -150,9 +146,9 @@ public class HomeViewModel extends AndroidViewModel {
             insertTabsIntoDatabase = null;
         }
 
-        if(retrieveTabsFromDatabase != null){
-            retrieveTabsFromDatabase.cancel(true);
-            retrieveTabsFromDatabase = null;
-        }
+//        if(retrieveTabsFromDatabase != null){
+//            retrieveTabsFromDatabase.cancel(true);
+//            retrieveTabsFromDatabase = null;
+//        }
     }
 }

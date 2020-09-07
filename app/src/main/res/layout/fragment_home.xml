@@ -1,52 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
 
     </data>
 
-    <LinearLayout android:layout_height="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/home_container"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:background="@color/white_bg"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:animateLayoutChanges="true"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appbarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?android:actionBarSize"
-                app:titleTextColor="@color/white_bg"
-                style="@style/AppTheme"/>
-
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/pager"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
+        <LinearLayout
             android:layout_height="match_parent"
-            tools:context=".ui.home.homefragment.HomeFragment">
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            >
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appbarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:tabMode="scrollable"/>
+                app:layout_constraintTop_toTopOf="parent">
 
-        </androidx.viewpager.widget.ViewPager>
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?android:actionBarSize"
+                    app:titleTextColor="@color/white_bg"
+                    style="@style/AppTheme"/>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/pager"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context=".ui.home.homefragment.HomeFragment">
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabMode="scrollable"/>
+
+            </androidx.viewpager.widget.ViewPager>
 
 
-    </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_delete_todo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_delete"
+            android:layout_margin="20dp"
+            android:animateLayoutChanges="false"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_add_todo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_add_24"
+            android:layout_alignParentBottom="true"
+            app:rippleColor="@color/white_bg"
+            android:layout_margin="20dp"
+            android:animateLayoutChanges="false"
+            android:layout_alignParentEnd="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 </layout>
 
