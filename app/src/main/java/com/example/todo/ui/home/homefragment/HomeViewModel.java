@@ -19,18 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ *
+ * HomeViewModel
+ *
+ * 1. Keep the most recent Tab data into LiveData<List<Tab>> mTabList loaded from Database
+ * 2. If first launch of this app, save the initial data set into Database
+ */
+
 public class HomeViewModel extends AndroidViewModel {
 
     private static final String TAG = "HomeViewModel";
 
     private LiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
-    private AsyncTask<List<Tab>, Void, List<Tab>> insertTabsIntoDatabase;
-
-//    private AsyncTask<Void, Void, List<Tab>> retrieveTabsFromDatabase;
+    private AsyncTask<List<Tab>, Void, Void> insertTabsIntoDatabase;
 
     private SharedPreferencesHelper sharedPreferencesHelper = SharedPreferencesHelper.getInstance(getApplication());
-
     private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
 
     public HomeViewModel(@NonNull Application application) {
@@ -38,25 +43,28 @@ public class HomeViewModel extends AndroidViewModel {
         Log.d(TAG, "HomeViewModel created");
     }
 
-    public void initializeData(){
+    /**
+     * Load all Tabs from database
+     * If this is the first launch, save the initial data into Database and display it.
+     */
+    public void loadTabs(){
 
         long updateTime = sharedPreferencesHelper.getUpdateTime();
-
         mTabList = dao.getAllLiveTab();
 
+        // case if this ist he first launch
         if(updateTime == 0){
             // case if there is no data loaded into database yet
             List<Tab> tabList = setUpToDoItems();
             insertTabsIntoDatabase = new InsertTabsIntoDataBase();
             insertTabsIntoDatabase.execute(tabList);
         }
-//        else{
-//            retrieveTabsFromDatabase = new RetrieveTabsFromDataBase();
-//            retrieveTabsFromDatabase.execute();
-//
-//        }
     }
 
+    /**
+     * Only called when this is the first launch
+     * Creating the initial data to be shown in the app
+     */
     private List<Tab> setUpToDoItems(){
 
         List<Tab> tabList = new ArrayList<>();
@@ -80,75 +88,52 @@ public class HomeViewModel extends AndroidViewModel {
 
             tabList.add(tab);
         }
-
         return tabList;
     }
 
-    private class InsertTabsIntoDataBase extends AsyncTask<List<Tab>, Void, List<Tab>>{
+    /**
+     * AsyncTask to save initial data set into database
+     */
+    private class InsertTabsIntoDataBase extends AsyncTask<List<Tab>, Void, Void>{
 
         @Override
-        protected List<Tab> doInBackground(List<Tab>... lists) {
+        protected Void doInBackground(List<Tab>... lists) {
             List<Tab> tabList = lists[0];
 
             for (int i = 0; i < tabList.size(); i++){
                 dao.insertToDoWithTab(tabList.get(i));
             }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
             // after save Tabs into database, record the current time
             sharedPreferencesHelper.saveUpdateTime(System.nanoTime());
-            return tabList;
         }
     }
 
-//    private class RetrieveTabsFromDataBase extends AsyncTask<Void, Void, List<Tab>>{
-//
-//        @Override
-//        protected List<Tab> doInBackground(Void... voids) {
-//            return dao.getAllTab();
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<Tab> tabs) {
-//            tabsRetrieved(tabs);
-//            Log.d(TAG, "RETRIEVED " + tabs.toString());
-//        }
-//    }
-
-//    private void tabsRetrieved(List<Tab> tabs) {
-//        mTabList.setValue(tabs);
-//    }
-
-    // getter and setter
-
-
+    /**
+     * Accessors
+     */
     public LiveData<List<Tab>> getmTabList() {
         return mTabList;
-    }
-
-    public String getTabTitleWithPosition(int position){
-        return mTabList.getValue().get(position).getTabTitle();
-    }
-
-    public int getTabListSize(){
-        return mTabList.getValue().size();
     }
 
     public int getTabIdAtPosition(int position){
         return mTabList.getValue().get(position).getTabId();
     }
 
+
     @Override
     protected void onCleared() {
         super.onCleared();
         Log.d(TAG, "HomeViewModel onCleared");
 
+        // cancel AsyncTask and set it to null in order to prevent memory leaks
         if(insertTabsIntoDatabase != null){
             insertTabsIntoDatabase.cancel(true);
             insertTabsIntoDatabase = null;
         }
-
-//        if(retrieveTabsFromDatabase != null){
-//            retrieveTabsFromDatabase.cancel(true);
-//            retrieveTabsFromDatabase = null;
-//        }
     }
 }

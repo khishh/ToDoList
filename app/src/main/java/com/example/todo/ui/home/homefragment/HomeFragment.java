@@ -10,7 +10,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
@@ -33,20 +32,41 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * HomeFragment
+ *
+ * 1. HomeFragment displays the TabLayout embedded inside ViewPager, toolbar and 2 FABs, adding To-Do button and
+ * deleting completed To-Do button.
+ *
+ * 2. HomeFragment will display one ItemFragment inside TabLayout, where displays all To-Do items belong to one Tab.
+ * Users can swipe left and right to move to other Tabs.
+ *
+ * 3. This Fragment will control the user clicks onto 2 FABs and notify its PagerAdapter the event. And the PagerAdapter
+ * will notify ItemFragment to handle the event.
+ *
+ */
 
-
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment
+    implements KeyBoardVisibilityListener{
 
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
     private HomeViewModel homeViewModel;
+
     private HomeCollectionPagerAdapter pagerAdapter;
 
+    /**
+     * UI components
+     */
     private ConstraintLayout constraintLayout;
     private FloatingActionButton addBtn;
     private FloatingActionButton deleteBtn;
 
+    /**
+     * Listener
+     */
     private ViewPager.OnPageChangeListener listener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
@@ -78,6 +98,31 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "HomeFragment onCreateView");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false);
+
+        setUpUIComponents();
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
+
+        Log.d(TAG, "HomeFragment onViewCreated");
+
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        // fetching Tab data from database
+        homeViewModel.loadTabs();
+
+        ((AppCompatActivity) requireActivity()).setSupportActionBar(binding.toolbar);
+        setHasOptionsMenu(true);
+
+        setUpViewPager();
+        observeViewModel();
+    }
+
+    /**
+     * refer to UI components and attach listeners to them
+     */
+    private void setUpUIComponents(){
         constraintLayout = binding.homeContainer;
         addBtn = binding.btnAddTodo;
         deleteBtn = binding.btnDeleteTodo;
@@ -95,56 +140,27 @@ public class HomeFragment extends Fragment {
                 pagerAdapter.deleteButtonClicked(binding.pager.getCurrentItem());
             }
         });
-        return binding.getRoot();
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
-
-        Log.d(TAG, "HomeFragment onViewCreated");
-
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        homeViewModel.initializeData();
-
-        ((AppCompatActivity) requireActivity()).setSupportActionBar(binding.toolbar);
-        setHasOptionsMenu(true);
-
-        setUpViewPager();
-        observeViewModel();
-    }
-
+    /**
+     * Set up ViewPager & ViewPagerAdapter and attach listeners to ViewPagerAdapter
+     */
     private void setUpViewPager(){
         pagerAdapter = new HomeCollectionPagerAdapter(getChildFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        pagerAdapter.setListener(new HomeCollectionPagerAdapter.Listener() {
-            @Override
-            public void keyboardVisibilityChange(boolean willBeShown) {
-                if(willBeShown){
-                    addBtn.setVisibility(View.GONE);
-                    deleteBtn.setVisibility(View.GONE);
-                }
-                else{
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            addBtn.setVisibility(View.VISIBLE);
-                            deleteBtn.setVisibility(View.VISIBLE);
-                        }
-                    }, 350);
-
-                }
-            }
-        });
+        pagerAdapter.setKeyBoardVisibilityListener(this);
         binding.pager.addOnPageChangeListener(listener);
         binding.pager.setAdapter(pagerAdapter);
     }
 
-
+    /**
+     * Observe any changes in Tab Table in database and pass new data to ViewPagerAdapter
+     * Pass the list of TabIds (uuid for Tab) and the list of TabTitles to adapter
+     */
     private void observeViewModel() {
         homeViewModel.getmTabList().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
             @Override
             public void onChanged(List<Tab> tabs) {
                 Log.e(TAG, "Tab onChanged");
-                Log.e(TAG, tabs.toString());
 
                 List<Integer> newTabIds = new ArrayList<>();
                 List<String> newTabTitles = new ArrayList<>();
@@ -173,23 +189,19 @@ public class HomeFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        int curPage = binding.pager.getCurrentItem();
-        Log.e(TAG, "curPage == " + curPage);
-        pagerAdapter.closeUserInput(curPage);
+        // get the current shown page index and tell adapter ItemFragment to close user input field if
+        // it is visible
+        int curPageIndex = binding.pager.getCurrentItem();
+        pagerAdapter.closeUserInput(curPageIndex);
 
         switch (item.getItemId()){
 
             case R.id.add_newTab:
-                hideKeyboard(requireView());
-
                 ((MainActivity)requireActivity()).createTabManagementFragment();
                 break;
 
             case R.id.edit_todo:
-                hideKeyboard(requireView());
-                int currentTabIndex = binding.pager.getCurrentItem();
-                Log.d(TAG, "currentTabIndex == " + currentTabIndex);
-                ((MainActivity)requireActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(currentTabIndex));
+                ((MainActivity)requireActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(curPageIndex));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -231,27 +243,21 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "HomeFragment destroyed");
     }
 
-    private void setKeyboardListener(){
-        constraintLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-
-                int heightDiff = constraintLayout.getRootView().getHeight() - constraintLayout.getHeight();
-                Log.e(TAG, "HeightDiff == " + heightDiff);
-                Log.e(TAG, "parent height == " + constraintLayout.getRootView().getHeight() + " container = " + constraintLayout.getHeight());
-
-                if(heightDiff > constraintLayout.getRootView().getHeight()/4){
-
-                    Log.e(TAG, "onGlobalLayout -- Gone passed");
-
-                    addBtn.setVisibility(View.GONE);
-                    deleteBtn.setVisibility(View.GONE);
-                }
-                else{
+    @Override
+    public void keyboardVisibilityChange(boolean willBeShown) {
+        if(willBeShown){
+            addBtn.setVisibility(View.GONE);
+            deleteBtn.setVisibility(View.GONE);
+        }
+        else{
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
                     addBtn.setVisibility(View.VISIBLE);
                     deleteBtn.setVisibility(View.VISIBLE);
                 }
-            }
-        });
+            }, 350);
+
+        }
     }
 }

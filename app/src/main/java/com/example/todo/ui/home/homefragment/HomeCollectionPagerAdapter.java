@@ -16,34 +16,40 @@ import java.util.List;
 
 /**
  * PagerAdapter class for TabLayout
+ *
+ * 1. Manages all necessary data to show each Tab
+ * 2. Through Listener interface, this class will be notified when FABs on HomeFragment are clicked and
+ * this class will prompt ItemFragment to make some actions.
+ *
  */
 public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
 
     private final static String TAG = HomeCollectionPagerAdapter.class.getSimpleName();
 
-    // List of Tab's titles
+    // List of Fragment instances created
     private final List<Fragment> mFragmentList = new ArrayList<>();
 
-    // List of Fragment instances created
+    // List of Tab's title
     private final List<String> mFragmentTitleList = new ArrayList<>();
 
+    // List of Tab's Id
     private final List<Integer> mFragmentTabIdList = new ArrayList<>();
 
-    private Listener listener;
+    private KeyBoardVisibilityListener keyBoardVisibilityListener;
 
-    interface Listener{
-        void keyboardVisibilityChange(boolean willBeShown);
-    }
-
-    public void setListener(Listener listener) {
-        this.listener = listener;
+    public void setKeyBoardVisibilityListener(KeyBoardVisibilityListener keyBoardVisibilityListener) {
+        this.keyBoardVisibilityListener = keyBoardVisibilityListener;
     }
 
     public HomeCollectionPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
     }
 
-    // LiveData object will notify whenever any changes to the data will occur
+
+    /**
+     * Update PagerAdapter's data
+     * LiveData object in HomeFragment will notify whenever any changes to the data will occur
+     */
     public void updatePagerAdapter(List<Integer> newTabIds, List<String> newTabTitles){
 
         // clean up the previous lists
@@ -66,8 +72,8 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
             fragment.setListener(new ItemFragment.Listener() {
                 @Override
                 public void keyboardVisibilityChange(boolean willBeShown) {
-                    if(listener != null){
-                        listener.keyboardVisibilityChange(willBeShown);
+                    if(keyBoardVisibilityListener != null){
+                        keyBoardVisibilityListener.keyboardVisibilityChange(willBeShown);
                     }
                 }
             });
@@ -108,6 +114,9 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         mFragmentTabIdList.add(position, tabId);
     }
 
+    /**
+     * Order the current shown ItemFragment to hide the user input fields
+     */
     public void closeUserInput(int position){
         if(position < getCount()) {
             Fragment targetFragment = mFragmentList.get(position);
@@ -115,12 +124,18 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         }
     }
 
+    /**
+     * Order the current shown ItemFragment to show the user input field for adding a new To-Do
+     */
     public void addNewBtnClicked(int position){
         Log.e(TAG, "position clicked == " + position);
         Fragment targetFragment = mFragmentList.get(position);
         ((ItemFragment)targetFragment).showAddNewItemInput();
     }
 
+    /**
+     * Order the current shown ItemFragment to delete completed To-Dos
+     */
     public void deleteButtonClicked(int position){
         Fragment targetFragment = mFragmentList.get(position);
         ((ItemFragment)targetFragment).deleteAllDoneItems();
