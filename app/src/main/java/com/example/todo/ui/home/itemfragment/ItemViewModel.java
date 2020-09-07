@@ -30,7 +30,7 @@ import java.util.List;
 public class ItemViewModel extends AndroidViewModel {
 
     /**
-     * ActionType enum : 3 types of actions this class will operate
+     * ActionType enum : 3 types of actions this class can operate
      */
     public enum ActionType{
         Add, Edit, Delete

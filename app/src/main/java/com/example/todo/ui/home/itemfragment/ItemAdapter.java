@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,14 +22,17 @@ import com.example.todo.model.ToDo;
  * RecyclerAdapter class for ItemFragment
  */
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
-        implements ListItemOnClickListener{
+public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     private static final String TAG = "ItemAdapter";
 
     private RecyclerItemOnClickListener recyclerItemOnClickListener;
     private List<ToDo> doList;
     private int modifiedToDoPos;
+
+    /**
+     * UI Components
+     */
 
     public void setRecyclerItemOnClickListener(RecyclerItemOnClickListener recyclerItemOnClickListener) {
         this.recyclerItemOnClickListener = recyclerItemOnClickListener;
@@ -63,7 +65,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         ItemTodoBinding binding = DataBindingUtil.inflate(inflater, R.layout.item_todo, parent, false);
-
         return new ViewHolder(binding);
     }
 
@@ -73,8 +74,15 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         final int reversePosition = getItemCount() - position - 1;
         final ToDo toDo = doList.get(reversePosition);
         holder.binding.setToDo(doList.get(reversePosition));
-        holder.binding.setItemListener(this);
-        holder.binding.setPosition(position);
+
+        holder.binding.itemTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(recyclerItemOnClickListener != null){
+                    recyclerItemOnClickListener.onContentClick(position);
+                }
+            }
+        });
 
         TextView tv = holder.binding.itemTextView;
         ImageButton ib = holder.binding.itemImage;
@@ -121,21 +129,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         }
         else{
             ib.setImageResource(R.drawable.item_circle);
-        }
-    }
-
-    /**
-     * ListItemOnClickListener interface
-     */
-
-    @Override
-    public void onListItemClick(View view) {
-        if(recyclerItemOnClickListener != null){
-            LinearLayout linearLayout = (LinearLayout) view.getParent();
-            TextView tv = linearLayout.findViewById(R.id.item_index);
-            int position = Integer.parseInt(tv.getText().toString());
-            Log.d(TAG, "onListItemClick at " + position);
-            recyclerItemOnClickListener.onContentClick(position);
         }
     }
 }

@@ -1,28 +1,25 @@
 package com.example.todo.ui.home.itemmanagementfragment;
 
-import android.content.Context;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemManagementItemBinding;
 import com.example.todo.model.ToDo;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+/**
+ * RecyclerViewAdapter class for ItemManagementFragment
+ */
 
 public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAdapter.ViewHolder> {
 
@@ -31,47 +28,38 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
     FragmentItemManagementItemBinding binding;
 
     private List<ToDo> toDoList;
-    private List<Boolean> isSelected = new ArrayList<>();
 
-    private Listener listener;
+    private RecyclerItemOnClickListener recyclerItemOnClickListener;
 
-    interface Listener{
-        void onSortBtnClick(ViewHolder viewHolder);
-        void onCheckBtnClicked();
-    }
-
-    public void setListener(Listener listener) {
-        this.listener = listener;
+    public void setRecyclerItemOnClickListener(RecyclerItemOnClickListener recyclerItemOnClickListener) {
+        this.recyclerItemOnClickListener = recyclerItemOnClickListener;
     }
 
     public ItemManagementAdapter(List<ToDo> toDos){
         this.toDoList = toDos;
     }
 
-    public void updateToDos(List<ToDo> toDos, boolean needToUpdateList){
-
-
-        if(needToUpdateList) {
-            toDoList.clear();
-            toDoList.addAll(toDos);
-        }
+    public void updateToDos(List<ToDo> toDos){
+        toDoList.clear();
+        toDoList.addAll(toDos);
         notifyDataSetChanged();
 
         Log.e(TAG, toDoList.toString());
-
-        isSelected.clear();
     }
 
     public List<ToDo> getToDoList() {
         return toDoList;
     }
 
+    /**
+     * Method to swap items. Called every time a user swap items.
+     */
     public void swapToDo(int fromPos, int toPos){
 
         ToDo fromToDo = toDoList.get(fromPos);
         ToDo toToDo = toDoList.get(toPos);
 
-        Log.e(TAG, "swapToDo before : " + fromToDo.toString() + " " + toToDo.toString());
+        // keep Temps
         String contentKeep = fromToDo.getContent();
         boolean isDoneKeep = fromToDo.isDone();
         boolean isSelectedKeep = fromToDo.isSelected();
@@ -84,13 +72,11 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
         toToDo.setContent(contentKeep);
         toToDo.setSelected(isSelectedKeep);
 
-        Log.e(TAG, "swapToDo after : " + fromToDo.toString() + " " + toToDo.toString());
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_item_management_item, parent, false);
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         binding = FragmentItemManagementItemBinding.inflate(inflater, parent, false);
         return new ViewHolder(binding.getRoot());
@@ -122,8 +108,8 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
                 switch (action){
                     case MotionEvent.ACTION_DOWN:
                         Log.d(TAG, "DOWN");
-                        if(listener != null){
-                            listener.onSortBtnClick(holder);
+                        if(recyclerItemOnClickListener != null){
+                            recyclerItemOnClickListener.onSortBtnClick(holder);
                         }
                         return true;
 
@@ -150,8 +136,8 @@ public class ItemManagementAdapter extends RecyclerView.Adapter<ItemManagementAd
             @Override
             public void onClick(View v) {
 
-                if(listener != null){
-                    listener.onCheckBtnClicked();
+                if(recyclerItemOnClickListener != null){
+                    recyclerItemOnClickListener.onCheckBtnClicked();
                 }
 
                 if(toDo.isSelected()){

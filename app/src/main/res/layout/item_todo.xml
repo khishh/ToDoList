@@ -6,14 +6,7 @@
         <variable
             name="toDo"
             type="com.example.todo.model.ToDo" />
-        
-        <variable
-            name="itemListener"
-            type="com.example.todo.ui.home.itemfragment.ListItemOnClickListener" />
 
-        <variable
-            name="position"
-            type="Integer" />
     </data>
 
     <LinearLayout
@@ -32,7 +25,6 @@
             android:layout_weight="5"
             android:textSize="20sp"
             android:padding="10dp"
-            android:onClick="@{itemListener::onListItemClick}"
             />
         
 
@@ -45,14 +37,6 @@
             android:layout_weight="1"
             android:layout_marginStart="10dp"
             />
-
-        <TextView
-            android:id="@+id/item_index"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@{String.valueOf(position)}"
-            android:visibility="gone"/>
-
 
     </LinearLayout>
 
