@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -30,84 +29,60 @@ import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemBinding;
 import com.example.todo.model.ToDo;
 import com.example.todo.util.CustomEditText;
+import com.example.todo.util.KeyBoardVisibilityListener;
 import com.example.todo.util.LinearLayoutManagerWithSmoothScroller;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * ItemFragment
+ *
+ * 1. A fragment to show all To-Dos belong to the Tab, currently displayed in TabLayout.
+ *
+ * 2. Allow user to add/edit/delete To-Do(s).
+ *  - Since Add and Delete FABs is owned by HomeFragment, this class will be notified when a user clicks
+ *  them and make actions.
+ *
+ * 3. Control the visibility of the user input field, composed of EditText, where a user can type content to
+ * edit the existing To-Do or add new To-Do, and ImageButton, where a user can request ItemViewModel to
+ * execute the operation of editing or adding To-Do.
+ *
  */
-public class ItemFragment extends Fragment {
+public class ItemFragment extends Fragment
+    implements RecyclerItemOnClickListener{
 
     private static final String TAG = "ItemFragment";
-    public static final String ARG_OBJECT = "object";
+    public static final String KEY_TAB_ID = "KEY_TAB_ID";
 
     private FragmentItemBinding binding;
     private ItemViewModel itemViewModel;
-    private ItemAdapter adapter;
+    private ItemAdapter itemAdapter;
+
+    // tabId
+    private int tabId;
+
+    // position of the item in a list clicked recently
+    private int lastClickedItemPosition;
 
     /**
-     * =====  Listeners  =====
+     * =====  Layout components  =====
      */
+    private RecyclerView recyclerView;
+    private LinearLayout linearLayout;
+    private CustomEditText editText;
+    private ImageButton updateBtn;
 
-    private Listener listener;
-
-    public interface Listener{
-        void keyboardVisibilityChange(boolean willBeShown);
-    }
-
-    public void setListener(Listener listener) {
-        this.listener = listener;
-    }
 
     /**
-     * onClick(position) will be triggered when a user click an item in the recyclerview.
-     * onClick(position) will handle the visibility of LinearLayout containing EditText where
-     * a user can add/update To-Do class.
-     * If LinearLayout is not visible, display it and let its EditText have a content of To-Do class.
-     * If already visible, hide it from screen.
+     * Listeners
      */
-    private ItemAdapter.Listener userClickListener = new ItemAdapter.Listener() {
-        @Override
-        public void onClick(int position) {
-            // Log.d(TAG, "position = " + position);
 
-            vibrate();
-            // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
-            positionItem = position;
+    private KeyBoardVisibilityListener keyBoardVisibilityListener;
 
-            if(linearLayout.getVisibility() == View.GONE){
-
-                showUserInput();
-
-                // showing recent items on the top and old items on the bottom
-                int reversePosition = adapter.getItemCount() - positionItem - 1;
-                updateBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24);
-
-                if(positionItem != -1)
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.smoothScrollToPosition(positionItem);
-                        }
-                    },350);
-
-                editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
-            }
-            else
-                hideUserInput();
-        }
-
-        @Override
-        public void onIsDoneClick(int position, boolean isDone) {
-            vibrate();
-            adapter.setModifiedToDoPos(position);
-            int reversePosition = adapter.getItemCount() - position - 1;
-            itemViewModel.updateToDoIsDoneAtPosition(reversePosition, isDone);
-        }
-    };
+    public void setKeyBoardVisibilityListener(KeyBoardVisibilityListener keyBoardVisibilityListener) {
+        this.keyBoardVisibilityListener = keyBoardVisibilityListener;
+    }
 
     /**
      * onFocusChange(v, hasFocus) will be called when EditText inside LinearLayout gains or loses a focus.
@@ -129,45 +104,28 @@ public class ItemFragment extends Fragment {
         }
     };
 
-//    /**
-//     * When add Button is clicked, set up texts of EditText and Button before show them on the screen
-//     * followed by showUserInput()
-//     */
-//    private View.OnClickListener addBtnOnCLickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            // Log.d(TAG, String.valueOf(positionItem));
-//            editText.setText("");
-//            updateBtn.setImageResource(R.drawable.ic_baseline_add_2_green);
-//
-//            // let position of item clicked -1 to distinguish from adding and updating a item.
-//            positionItem = -1;
-//            showUserInput();
-//        }
-//    };
 
+    /**
+     * If a user clicks on Add FAB Button, set the text of EditText to be empty and the adding icon.
+     * Also, set lastClickedItemPosition so that when a user pushes Add button, it will insert that To-Do as
+     * a new instance rather than updating the existing To-Do in database
+     */
     public void showAddNewItemInput(){
         vibrate();
-        // Log.d(TAG, String.valueOf(positionItem));
         editText.setText("");
         updateBtn.setImageResource(R.drawable.ic_baseline_add_2_green);
-//        updateBtn.setText("Add");
 
         // let position of item clicked -1 to distinguish from adding and updating a item.
-        positionItem = -1;
+        lastClickedItemPosition = -1;
         showUserInput();
     }
 
-//    /**
-//     * Delete Button click will delete all To-Do items in Recyclerview with a check-mark
-//     */
-//    private View.OnClickListener deleteBtnOnClickListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            deleteAllDoneItems();
-//        }
-//    };
-
+    /**
+     * if the text in EditText is not empty, this listener will fire one of two possible actions.
+     * One is calling a method to add new To-Do into Database if lastClickedItemPosition is -1.
+     * Second is calling a method to update the existing To-Do inside database.
+     * After this handled, hide the user input field.
+     */
     private View.OnClickListener updateBtnOnCLickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -177,7 +135,7 @@ public class ItemFragment extends Fragment {
                 String newToDoContent = editText.getText().toString();
 
                 // add new To-Do Item
-                if(positionItem == -1){
+                if(lastClickedItemPosition == -1){
                     addNewToDoItem(newToDoContent);
                 }
                 // update existing To-Do Item
@@ -189,6 +147,9 @@ public class ItemFragment extends Fragment {
         }
     };
 
+    /**
+     * when a user clicks on the down button on the keyboard, hide the user input field.
+     */
     private CustomEditText.Listener customEditTextListener = new CustomEditText.Listener() {
         @Override
         public void onKeyboardDownClicked() {
@@ -198,19 +159,8 @@ public class ItemFragment extends Fragment {
     };
 
     /**
-     * =====  Layout components  =====
+     * Constructor
      */
-    private RecyclerView recyclerView;
-    private LinearLayout linearLayout;
-    private CustomEditText editText;
-    private ImageButton updateBtn;
-
-    // tabId
-    private int tabId;
-
-    // position of the item in a list clicked recently
-    private int positionItem;
-
     public ItemFragment() {
         // Required empty public constructor
         Log.d(TAG, "ItemFragment created");
@@ -227,16 +177,10 @@ public class ItemFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_item, container, false);
 
-        recyclerView = binding.listRecyclerView;
-        updateBtn = binding.updateBtn;
-        linearLayout = binding.userInputLinearLayout;
-        editText = binding.userInputEditText;
-
-        editText.setListener(customEditTextListener);
-
         Bundle bundle = getArguments();
-        if(bundle != null)
-            tabId = bundle.getInt(ARG_OBJECT, 0);
+        if(bundle != null) {
+            tabId = bundle.getInt(KEY_TAB_ID, 0);
+        }
 
         return binding.getRoot();
     }
@@ -244,33 +188,46 @@ public class ItemFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        Log.d(TAG, "onViewCreated tabId = " + tabId);
-
-        setUpRecyclerView();
-
         itemViewModel = new ViewModelProvider(this).get(ItemViewModel.class);
         itemViewModel.loadToDoList(tabId);
 
+        setUpUIComponents();
+        setUpRecyclerView();
+
         observeViewModel();
-        attachOnClickListenerToViews();
+    }
+
+    private void setUpUIComponents(){
+        recyclerView = binding.listRecyclerView;
+        updateBtn = binding.updateBtn;
+        linearLayout = binding.userInputLinearLayout;
+        editText = binding.userInputEditText;
+
+        editText.setListener(customEditTextListener);
+        editText.setOnFocusChangeListener(editTextFocusChangeListener);
+        updateBtn.setOnClickListener(updateBtnOnCLickListener);
     }
 
     private void setUpRecyclerView(){
         final LinearLayoutManagerWithSmoothScroller linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
-        adapter = new ItemAdapter(new ArrayList<ToDo>());
-        adapter.setListener(userClickListener);
-        recyclerView.setAdapter(adapter);
+        itemAdapter = new ItemAdapter(new ArrayList<ToDo>());
+        itemAdapter.setRecyclerItemOnClickListener(this);
+        recyclerView.setAdapter(itemAdapter);
     }
 
+    /**
+     * Observe any changes in To-Do in database and pass new To-Dos to RecyclerViewAdapter
+     * Pass the list of To-Do
+     */
     private void observeViewModel(){
         itemViewModel.getmDoList().observe(getViewLifecycleOwner(), new Observer<List<ToDo>>() {
             @Override
             public void onChanged(List<ToDo> toDos) {
                 Log.d(TAG, "onChanged called = " + tabId);
-                Log.d(TAG, toDos.toString());
-                adapter.updateToDoList(toDos);
+                itemAdapter.updateToDoList(toDos);
 
+                // if there is no To-Dos, display the empty message
                 if(toDos.size() == 0){
                     binding.todoEmptyMsg.setVisibility(View.VISIBLE);
                 }
@@ -281,23 +238,27 @@ public class ItemFragment extends Fragment {
         });
     }
 
-    private void attachOnClickListenerToViews(){
-        editText.setOnFocusChangeListener(editTextFocusChangeListener);
-        updateBtn.setOnClickListener(updateBtnOnCLickListener);
-    }
-
+    /**
+     * Method to insert new To-Do into database
+     */
     public void addNewToDoItem(String newToDoContent){
         itemViewModel.addNewToDo(newToDoContent);
-        Toast.makeText(linearLayout.getContext(), "New ToDo " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(linearLayout.getContext(), "New To-Do " + newToDoContent + " added", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Method to update the existing To-Do inside database
+     */
     private void updateToDoItem(String newToDoContent){
         // need to compute the reversePosition since displaying in the reversed order
         // -> if positionItem(user clicked position) is 0, then the item position needed to change is the last element in the List.
-        int reversePosition = adapter.getItemCount() - positionItem - 1;
+        int reversePosition = itemAdapter.getItemCount() - lastClickedItemPosition - 1;
         itemViewModel.updateToDoContentAtPosition(reversePosition, newToDoContent);
     }
 
+    /**
+     * Method to delete all To-Dos which are marked as Complete
+     */
     public void deleteAllDoneItems(){
         vibrate();
         itemViewModel.removeAllDoneToDo();
@@ -316,16 +277,18 @@ public class ItemFragment extends Fragment {
         if(inputMethodManager != null)
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-        if(listener != null){
-            listener.keyboardVisibilityChange(false);
+        if(keyBoardVisibilityListener != null){
+            keyBoardVisibilityListener.keyboardVisibilityChange(false);
         }
     }
 
-
+    /**
+     * show the user input field and request focus on its EditText
+     */
     private void showUserInput(){
 
-        if(listener != null){
-            listener.keyboardVisibilityChange(true);
+        if(keyBoardVisibilityListener != null){
+            keyBoardVisibilityListener.keyboardVisibilityChange(true);
         }
         linearLayout.setVisibility(View.VISIBLE);
         editText.setVisibility(View.VISIBLE);
@@ -334,6 +297,9 @@ public class ItemFragment extends Fragment {
         editText.requestFocus();
     }
 
+    /**
+     * hide the user input field and clear focus on its EditText
+     */
     public void hideUserInput(){
         if(linearLayout == null){
             return;
@@ -348,6 +314,58 @@ public class ItemFragment extends Fragment {
     private void vibrate(){
         Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(VibrationEffect.EFFECT_TICK);
+    }
+
+    /**
+     * RecyclerItemOnClickListener interface
+     *
+     * onContent(position) will be triggered when a user click TextView holding content of a To-Do in the recyclerview.
+     * onContent(position) will handle the visibility of LinearLayout containing EditText where
+     * a user can add/update To-Do class.
+     * If LinearLayout is not visible, display it and let its EditText have a content of To-Do class.
+     * If already visible, hide it from screen.
+     */
+
+    @Override
+    public void onContentClick(int position) {
+
+        vibrate();
+        // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
+        lastClickedItemPosition = position;
+
+        if(linearLayout.getVisibility() == View.GONE){
+
+            showUserInput();
+
+            // showing recent items on the top and old items on the bottom
+            int reversePosition = itemAdapter.getItemCount() - lastClickedItemPosition - 1;
+            updateBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24);
+
+            if(lastClickedItemPosition != -1)
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.smoothScrollToPosition(lastClickedItemPosition);
+                    }
+                },350);
+
+            // set content of To-Do before users can edit
+            editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
+        }
+        else
+            hideUserInput();
+    }
+
+    /**
+     * onIsDoneClick(position, isDone) will be called when a user click on the isDone button.
+     * Order ItemViewModel to update isDone (boolean value) of the clicked To-Do with newIsDone
+     */
+    @Override
+    public void onIsDoneClick(int position, boolean newIsDone) {
+        vibrate();
+        itemAdapter.setModifiedToDoPos(position);
+        int reversePosition = itemAdapter.getItemCount() - position - 1;
+        itemViewModel.updateToDoIsDoneAtPosition(reversePosition, newIsDone);
     }
 
     @Override
@@ -387,4 +405,5 @@ public class ItemFragment extends Fragment {
         super.onDestroyView();
         Log.d(TAG, "ItemFragment onDestroyView");
     }
+
 }

@@ -27,6 +27,7 @@ import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentHomeBinding;
 import com.example.todo.model.Tab;
+import com.example.todo.util.KeyBoardVisibilityListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import java.util.List;
  */
 
 public class HomeFragment extends Fragment
-    implements KeyBoardVisibilityListener{
+    implements KeyBoardVisibilityListener {
 
     private static final String TAG = "HomeFragment";
 

@@ -1,8 +1,5 @@
 package com.example.todo.ui.home.itemfragment;
 
-import android.content.Context;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,33 +19,21 @@ import com.example.todo.R;
 import com.example.todo.databinding.ItemTodoBinding;
 import com.example.todo.model.ToDo;
 
+/**
+ * RecyclerAdapter class for ItemFragment
+ */
+
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         implements ListItemOnClickListener{
 
     private static final String TAG = "ItemAdapter";
 
-    private Listener listener;
+    private RecyclerItemOnClickListener recyclerItemOnClickListener;
     private List<ToDo> doList;
     private int modifiedToDoPos;
 
-    @Override
-    public void onListItemClick(View view) {
-        if(listener != null){
-            LinearLayout linearLayout = (LinearLayout) view.getParent();
-            TextView tv = linearLayout.findViewById(R.id.item_index);
-            int position = Integer.parseInt(tv.getText().toString());
-            Log.d(TAG, "onListItemClick at " + position);
-            listener.onClick(position);
-        }
-    }
-
-    interface  Listener{
-        void onClick(int position);
-        void onIsDoneClick(int position, boolean isDone);
-    }
-
-    public void setListener(Listener listener){
-        this.listener = listener;
+    public void setRecyclerItemOnClickListener(RecyclerItemOnClickListener recyclerItemOnClickListener) {
+        this.recyclerItemOnClickListener = recyclerItemOnClickListener;
     }
 
     public void setModifiedToDoPos(int modifiedToDoPos) {
@@ -91,28 +76,24 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         holder.binding.setItemListener(this);
         holder.binding.setPosition(position);
 
-        Log.d(TAG, holder.binding.getToDo().toString());
-
         TextView tv = holder.binding.itemTextView;
         ImageButton ib = holder.binding.itemImage;
 
         // able to display the newly added item in the List shows on top of the recyclerview
-        // Log.d(TAG, "position: " + reversePosition);
         tv.setText(doList.get(reversePosition).getContent());
 
         ib.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e(TAG, toDo.toString() + " position == " + position);
                 if(!toDo.isDone()){
                     ((ImageButton)v).setImageResource(R.drawable.ic_check_item);
-                    // change To-Do's isDone to be true
-                    Log.e(TAG, toDo.toString() + " position == " + position);
-                    listener.onIsDoneClick(position, true);
+
+                    recyclerItemOnClickListener.onIsDoneClick(position, true);
                 }
                 else{
                     ((ImageButton)v).setImageResource(R.drawable.item_circle);
-                    // change To-Do's isDone to be true
-                    listener.onIsDoneClick(position, false);
+                    recyclerItemOnClickListener.onIsDoneClick(position, false);
                 }
             }
         });
@@ -143,4 +124,18 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>
         }
     }
 
+    /**
+     * ListItemOnClickListener interface
+     */
+
+    @Override
+    public void onListItemClick(View view) {
+        if(recyclerItemOnClickListener != null){
+            LinearLayout linearLayout = (LinearLayout) view.getParent();
+            TextView tv = linearLayout.findViewById(R.id.item_index);
+            int position = Integer.parseInt(tv.getText().toString());
+            Log.d(TAG, "onListItemClick at " + position);
+            recyclerItemOnClickListener.onContentClick(position);
+        }
+    }
 }

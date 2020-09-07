@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.example.todo.ui.home.itemfragment.ItemFragment;
+import com.example.todo.util.KeyBoardVisibilityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,17 @@ import java.util.List;
 /**
  * PagerAdapter class for TabLayout
  *
- * 1. Manages all necessary data to show each Tab
- * 2. Through Listener interface, this class will be notified when FABs on HomeFragment are clicked and
- * this class will prompt ItemFragment to make some actions.
+ * 1. Hold all necessary data to show each Tab
+ * 2. This class will be notified when FABs on HomeFragment are clicked and
+ * this class will prompt ItemFragment to make actions listed below.
+ * ==> {closeUserInput, addNewBtnClicked, deleteButtonClicked}
+ * 3. Throughout KeyBoardVisibilityListener, this class will be notified by ItemFragment when the visibility
+ * of the keyboard changes and this class will notifies HomeFragment to show or hide 2 FABs depending on the
+ * state of the keyboard.
  *
  */
-public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
+public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter
+    implements KeyBoardVisibilityListener{
 
     private final static String TAG = HomeCollectionPagerAdapter.class.getSimpleName();
 
@@ -45,7 +51,6 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         super(fm, behavior);
     }
 
-
     /**
      * Update PagerAdapter's data
      * LiveData object in HomeFragment will notify whenever any changes to the data will occur
@@ -61,22 +66,15 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         notifyDataSetChanged();
     }
 
-
     /**
      * Method to create all ItemFragments and keep them in PagerAdapter class by calling
      * pagerAdapter.addFragment(fragment, title Of tab, position of tab)
+     * Also set this class, implementing KeyBoardVisibilityListener, to each ItemFragment
      */
     private void initializeTabFragments(List<Integer> newTabIds, List<String> newTabTitles){
         for(int i = 0; i < newTabIds.size(); i++){
             ItemFragment fragment = new ItemFragment(newTabIds.get(i));
-            fragment.setListener(new ItemFragment.Listener() {
-                @Override
-                public void keyboardVisibilityChange(boolean willBeShown) {
-                    if(keyBoardVisibilityListener != null){
-                        keyBoardVisibilityListener.keyboardVisibilityChange(willBeShown);
-                    }
-                }
-            });
+            fragment.setKeyBoardVisibilityListener(this);
 
             addFragment(fragment,
                     newTabTitles.get(i),
@@ -94,7 +92,7 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
         Bundle bundle = new Bundle();
 
         // pass tabId to the fragment to show To-Do items belong to Tab which has that tabId
-        bundle.putInt(ItemFragment.ARG_OBJECT, tabId);
+        bundle.putInt(ItemFragment.KEY_TAB_ID, tabId);
         fragment.setArguments(bundle);
 
         return fragment;
@@ -145,5 +143,15 @@ public class HomeCollectionPagerAdapter extends FragmentStatePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         return mFragmentTitleList.get(position);
+    }
+
+    /**
+     * KeyBoardVisibilityListener interface
+     */
+    @Override
+    public void keyboardVisibilityChange(boolean willBeShown) {
+        if(keyBoardVisibilityListener != null){
+            keyBoardVisibilityListener.keyboardVisibilityChange(willBeShown);
+        }
     }
 }
