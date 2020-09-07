@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.example.todo.MainActivity;
 import com.example.todo.R;
 import com.example.todo.databinding.FragmentItemManagementBinding;
+import com.example.todo.model.Tab;
 import com.example.todo.model.ToDo;
 
 import java.util.ArrayList;
@@ -288,6 +289,13 @@ public class ItemManagementFragment extends Fragment
             public void onChanged(List<ToDo> toDos) {
                 Log.e(TAG, "List<ToDo> updated");
                 adapter.updateToDos(toDos);
+            }
+        });
+
+        itemManagementViewModel.getTabs().observe(getViewLifecycleOwner(), new Observer<List<Tab>>() {
+            @Override
+            public void onChanged(List<Tab> tabs) {
+                Log.e(TAG, "List<Tab> updated");
             }
         });
     }

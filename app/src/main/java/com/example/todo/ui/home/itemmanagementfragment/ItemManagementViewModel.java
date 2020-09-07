@@ -28,7 +28,7 @@ import java.util.List;
  *  - Move == move all selected To-Dos to other Tab selected in MoveToDoDialog and update them inside database
  *  - Delete == delete all selected To-Dos from database
  *  - Order == update all To-Dos into database in a way to keep new ordering
- *  
+ *
  */
 
 public class ItemManagementViewModel extends AndroidViewModel {
@@ -170,6 +170,10 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     public LiveData<List<ToDo>> getmDoList() {
         return mDoList;
+    }
+
+    public LiveData<List<Tab>> getTabs() {
+        return tabs;
     }
 
     public List<Tab> getTabsValue(){
