@@ -35,6 +35,7 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
         void onSortBtnClick(ViewHolder viewHolder);
         void onSwipeDeleteBack(int position);
         void deleteTabAtPosition(int position, Tab deleteTab);
+        void onEditBtnClick(int position, String content);
     }
 
     public void setListener(Listener listener) {
@@ -161,11 +162,25 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             }
         });
 
+        holder.editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "edit Button Clicked");
+                if(listener != null){
+                    listener.onEditBtnClick(position, tabList.get(position).getTabTitle());
+                }
+            }
+        });
+
     }
 
     @Override
     public int getItemCount() {
         return tabList.size();
+    }
+
+    public Tab getTabAtIndex(int position){
+        return tabList.get(position);
     }
 
     public void swapTabList(int fromPos, int toPos){

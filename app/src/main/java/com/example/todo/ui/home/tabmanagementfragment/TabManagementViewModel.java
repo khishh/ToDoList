@@ -95,8 +95,14 @@ public class TabManagementViewModel extends AndroidViewModel {
         updateTabIntoDatabase.execute();
     }
 
-    public void editTabName(){
+    public void editTabName(int positionToEdit, String newTabTitle){
+        Tab editTab = mTabList.getValue().get(positionToEdit);
+        editTab.setTabTitle(newTabTitle);
+        modifiedTabs.add(editTab);
 
+        actionType = ActionType.Edit;
+        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
+        updateTabIntoDatabase.execute();
     }
 
     private class UpdateTabIntoDataBase2 extends AsyncTask<Void, Void, Void>{
@@ -144,6 +150,11 @@ public class TabManagementViewModel extends AndroidViewModel {
                     }
 
                     Log.e(TAG, "After modified " + modifiedTabs.toString());
+                    dao.updateTab(modifiedTabs.toArray(new Tab[0]));
+                    break;
+
+                case Edit:
+                    Log.e(TAG, "Edit passed");
                     dao.updateTab(modifiedTabs.toArray(new Tab[0]));
             }
 
