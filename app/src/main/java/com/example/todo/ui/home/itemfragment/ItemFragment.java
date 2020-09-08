@@ -250,10 +250,7 @@ public class ItemFragment extends Fragment
      * Method to update the existing To-Do inside database
      */
     private void updateToDoItem(String newToDoContent){
-        // need to compute the reversePosition since displaying in the reversed order
-        // -> if positionItem(user clicked position) is 0, then the item position needed to change is the last element in the List.
-        int reversePosition = itemAdapter.getItemCount() - lastClickedItemPosition - 1;
-        itemViewModel.updateToDoContentAtPosition(reversePosition, newToDoContent);
+        itemViewModel.updateToDoContentAtPosition(lastClickedItemPosition, newToDoContent);
     }
 
     /**
@@ -332,13 +329,11 @@ public class ItemFragment extends Fragment
         vibrate();
         // keep the position of item clicked and will be used for smoothScroll in setVisibilityListener
         lastClickedItemPosition = position;
-
         if(linearLayout.getVisibility() == View.GONE){
 
             showUserInput();
 
             // showing recent items on the top and old items on the bottom
-            int reversePosition = itemAdapter.getItemCount() - lastClickedItemPosition - 1;
             updateBtn.setImageResource(R.drawable.ic_baseline_arrow_forward_ios_24);
 
             if(lastClickedItemPosition != -1)
@@ -350,7 +345,7 @@ public class ItemFragment extends Fragment
                 },350);
 
             // set content of To-Do before users can edit
-            editText.setText(itemViewModel.getToDoContentAtPosition(reversePosition));
+            editText.setText(itemViewModel.getToDoContentAtPosition(lastClickedItemPosition));
         }
         else
             hideUserInput();
@@ -364,8 +359,7 @@ public class ItemFragment extends Fragment
     public void onIsDoneClick(int position, boolean newIsDone) {
         vibrate();
         itemAdapter.setModifiedToDoPos(position);
-        int reversePosition = itemAdapter.getItemCount() - position - 1;
-        itemViewModel.updateToDoIsDoneAtPosition(reversePosition, newIsDone);
+        itemViewModel.updateToDoIsDoneAtPosition(position, newIsDone);
     }
 
     @Override

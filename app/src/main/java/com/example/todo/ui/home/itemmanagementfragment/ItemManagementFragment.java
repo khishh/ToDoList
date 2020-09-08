@@ -117,13 +117,7 @@ public class ItemManagementFragment extends Fragment
         @Override
         public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
             super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
-
-            // computing the reversed position because showing To-Do in reversed order
-            final int totalNumOfToDo = adapter.getItemCount();
-            final int reversedFromPos = totalNumOfToDo - fromPos - 1;
-            final int reversedToPos = totalNumOfToDo - toPos - 1;
-
-            adapter.swapToDo(reversedFromPos, reversedToPos);
+            adapter.swapToDo(fromPos, toPos);
             adapter.notifyItemMoved(fromPos, toPos);
 
             vibrate();

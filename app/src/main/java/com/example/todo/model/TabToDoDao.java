@@ -15,7 +15,7 @@ import java.util.List;
 @Dao
 public abstract class TabToDoDao {
 
-    private static final String TAG = "TabToDoDao";
+    private static final String TAG = TabToDoDao.class.getSimpleName();
 
     @Insert
     public abstract List<Long> insertTab(Tab... tab);
@@ -36,16 +36,7 @@ public abstract class TabToDoDao {
     public abstract void updateToDoList(ToDo... toDos);
 
     @Query("SELECT * FROM Tab")
-    public abstract List<Tab> getAllTab();
-
-    @Query("SELECT * FROM Tab")
     public abstract LiveData<List<Tab>> getAllLiveTab();
-
-    @Query("DELETE FROM Tab where tabId = :tabId")
-    public abstract  void deleteTabOfId(int tabId);
-
-    @Query("DELETE FROM ToDo where toDoOwnerId = :toDoOwnerId")
-    public abstract void deleteAllToDoOfId(int toDoOwnerId);
 
     @Query("SELECT * FROM Tab where tabIndex = :tabIndex")
     public abstract Tab getTab(int tabIndex);

@@ -70,10 +70,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-
-        final int reversePosition = getItemCount() - position - 1;
-        final ToDo toDo = doList.get(reversePosition);
-        holder.binding.setToDo(doList.get(reversePosition));
+        final ToDo toDo = doList.get(position);
+        holder.binding.setToDo(doList.get(position));
 
         holder.binding.itemTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +86,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         ImageButton ib = holder.binding.itemImage;
 
         // able to display the newly added item in the List shows on top of the recyclerview
-        tv.setText(doList.get(reversePosition).getContent());
+        tv.setText(doList.get(position).getContent());
 
         ib.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -3,6 +3,8 @@ package com.example.todo.ui.home.homefragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -198,10 +200,12 @@ public class HomeFragment extends Fragment
         switch (item.getItemId()){
 
             case R.id.add_newTab:
+                vibrate();
                 ((MainActivity)requireActivity()).createTabManagementFragment();
                 break;
 
             case R.id.edit_todo:
+                vibrate();
                 ((MainActivity)requireActivity()).createItemManagementFragment(homeViewModel.getTabIdAtPosition(curPageIndex));
         }
         return super.onOptionsItemSelected(item);
@@ -244,6 +248,14 @@ public class HomeFragment extends Fragment
         Log.d(TAG, "HomeFragment destroyed");
     }
 
+    private void vibrate(){
+        Vibrator vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.EFFECT_TICK);
+    }
+
+    /**
+     * KeyBoardVisibilityListener interface
+     */
     @Override
     public void keyboardVisibilityChange(boolean willBeShown) {
         if(willBeShown){
@@ -257,7 +269,7 @@ public class HomeFragment extends Fragment
                     addBtn.setVisibility(View.VISIBLE);
                     deleteBtn.setVisibility(View.VISIBLE);
                 }
-            }, 350);
+            }, 300);
 
         }
     }
