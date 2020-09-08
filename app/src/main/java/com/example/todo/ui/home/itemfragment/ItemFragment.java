@@ -314,7 +314,7 @@ public class ItemFragment extends Fragment
     }
 
     /**
-     * RecyclerItemOnClickListener interface
+     * itemfragment.RecyclerItemOnClickListener interface
      *
      * onContent(position) will be triggered when a user click TextView holding content of a To-Do in the recyclerview.
      * onContent(position) will handle the visibility of LinearLayout containing EditText where

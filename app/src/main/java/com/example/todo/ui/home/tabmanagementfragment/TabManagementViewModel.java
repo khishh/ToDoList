@@ -115,7 +115,7 @@ public class TabManagementViewModel extends AndroidViewModel {
             isDeleterOrSortedOrEditedOrAdded = true;
         }
 
-        Tab newTab = new Tab(mTabList.getValue().size(), newTabTitle);
+        Tab newTab = new Tab(newTabTitle);
         modifiedTabs.add(newTab);
         actionType = ActionType.Add;
         updateTabList();

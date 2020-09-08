@@ -2,21 +2,15 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a98020d2ac1f93c744d8f422d8bd104e",
+    "identityHash": "10ea41c7172274035e063a42b92fc87d",
     "entities": [
       {
         "tableName": "Tab",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tabId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tabIndex` INTEGER NOT NULL, `tabTitle` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tabId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tabTitle` TEXT)",
         "fields": [
           {
             "fieldPath": "tabId",
             "columnName": "tabId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "tabIndex",
-            "columnName": "tabIndex",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -78,7 +72,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a98020d2ac1f93c744d8f422d8bd104e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10ea41c7172274035e063a42b92fc87d')"
     ]
   }
 }

@@ -80,33 +80,8 @@ public class HomeViewModel extends AndroidViewModel {
      * Creating the initial data to be shown in the app
      */
     private Tab setUpToDoItems(){
-
-//        List<Tab> tabList = new ArrayList<>();
-
-        /*
-        for(int i = 0; i < 10; i++){
-
-            Tab tab = new Tab(i, "Tab" + (i+1));
-            List<ToDo> subCollection = new ArrayList<>();
-            Random r = new Random();
-            int rInt = r.nextInt(20)+1;
-
-            for(int j = 0; j < rInt; j++){
-                if(j % 2 == 0)
-                    subCollection.add(new ToDo(i, String.valueOf(j+1), false));
-                else
-                    subCollection.add(new ToDo(i, String.valueOf(j+1), true));
-            }
-
-            subCollection.add(new ToDo(rInt, "TAB " + (i+1), false));
-            tab.setToDoList(subCollection);
-
-            tabList.add(tab);
-        }
-
-         */
         List<ToDo> toDos = new ArrayList<>();
-        Tab howToUseTab = new Tab(0, initialTitle);
+        Tab howToUseTab = new Tab(initialTitle);
 
         for (int resourceId : initialHowToUse) {
             ToDo _toDo;
@@ -134,10 +109,6 @@ public class HomeViewModel extends AndroidViewModel {
             Tab tabList = lists[0];
 
             dao.insertToDoWithTab(tabList);
-
-//            for (int i = 0; i < tabList.size(); i++){
-//                dao.insertToDoWithTab(tabList.get(i));
-//            }
             return null;
         }
 

@@ -14,15 +14,12 @@ public class Tab {
     @PrimaryKey (autoGenerate = true)
     private int tabId;
 
-    private int tabIndex;
-
     private String tabTitle;
 
     @Ignore
     private List<ToDo> toDoList = new ArrayList<>();
 
-    public Tab(int tabIndex, String tabTitle){
-        this.tabIndex = tabIndex;
+    public Tab(String tabTitle){
         this.tabTitle = tabTitle;
     }
 
@@ -34,14 +31,6 @@ public class Tab {
 
     public void setTabId(int tabId) {
         this.tabId = tabId;
-    }
-
-    public int getTabIndex() {
-        return tabIndex;
-    }
-
-    public void setTabIndex(int tabIndex) {
-        this.tabIndex = tabIndex;
     }
 
     public String getTabTitle() {
@@ -65,7 +54,6 @@ public class Tab {
         return "Tab{" +
                 "toDoListSize= " + toDoList.size() +
                 ", tabId=" + tabId +
-                ", tabIndex=" + tabIndex +
                 ", tabTitle='" + tabTitle + '\'' +
                 ", toDoList=" + toDoList +
                 '}';

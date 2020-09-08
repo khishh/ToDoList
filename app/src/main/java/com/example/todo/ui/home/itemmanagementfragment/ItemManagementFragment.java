@@ -76,7 +76,7 @@ public class ItemManagementFragment extends Fragment
     };
 
     /**
-     * implements methods of RecyclerItemOnClickListener interface
+     * implements methods of itemmanagementfragment.RecyclerItemOnClickListener interface
      */
 
     // this method will be fired whenever a user clicks on Sort button on each item in the RecyclerView.

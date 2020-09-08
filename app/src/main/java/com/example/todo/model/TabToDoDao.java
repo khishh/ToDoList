@@ -1,9 +1,6 @@
 package com.example.todo.model;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -38,9 +35,6 @@ public abstract class TabToDoDao {
     @Query("SELECT * FROM Tab")
     public abstract LiveData<List<Tab>> getAllLiveTab();
 
-    @Query("SELECT * FROM Tab where tabIndex = :tabIndex")
-    public abstract Tab getTab(int tabIndex);
-
     @Query("SELECT * FROM ToDo where toDoOwnerId = :toDoOwnerId")
     public abstract List<ToDo> getToDoList(int toDoOwnerId);
 
@@ -63,12 +57,5 @@ public abstract class TabToDoDao {
         for(int i = 0; i < toDoList.size(); i++){
             toDoList.get(i).setToDoId(toDoIds.get(i).intValue());
         }
-    }
-
-    public Tab getTabWithToDo(int tabIndex){
-        Tab tab = getTab(tabIndex);
-        List<ToDo> toDoList = getToDoList(tabIndex);
-        tab.setToDoList(toDoList);
-        return tab;
     }
 }
