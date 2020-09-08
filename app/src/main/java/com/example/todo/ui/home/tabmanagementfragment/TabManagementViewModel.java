@@ -18,30 +18,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-// *-----------------------------------------------------------
-//  TabManagementViewModel class
-//  Fields:
-//      1. mTabList -> store all tabs retrieved from Room Database
-//      2. retrievedTabFromDatabase -> the instance to RetrieveTabFromDatabase class extends to AsyncTask to get All Tabs from Room Database
-//      3. updateTabIntoDatabase
+/**
+ * TabManagementViewModel
+ *
+ * 1. Keeps all updated Tabs continuously fetched from database as data changes.
+ *
+ * 2. Executes 4 types of operations interacting with database
+ *  - Add    : Add a newly created Tab into database
+ *  - Sort   : Update all Tabs to keep the new order of them
+ *  - Delete : Delete a selected Tab from database
+ *  - Edit   : Update a existing Tab in database with new tabTitle
+ *
+ */
 
 public class TabManagementViewModel extends AndroidViewModel {
 
-    private static final String TAG = "TabManagementViewModel";
+    private static final String TAG = TabManagementViewModel.class.getSimpleName();
 
+    /**
+     * ActionType enum : 4 types of actions this class can operate
+     */
     public enum ActionType{
-        Add, Update, Delete, Edit
+        Add, Sort, Delete, Edit
     }
 
-    //  store all tabs retrieved from Room Database
     LiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
     private AsyncTask<Void, Void, Void> updateTabIntoDatabase;
 
     private ActionType actionType;
-    private boolean isDeleted = false;
 
+    /**
+     * the boolean value to check if Tabs are reordered or any Tab is deleted
+     * I have this value because when a user comes back to HomeFragment with the last displayed Tab and its To-Dos,
+     * the Tab might no longer exist (delete case) or not be the same Tab anymore (edited or sort case).
+     * This value will decide whether HomeFragment has to be refreshed or not when a user clicks on Back or Close button in TabManagementFragment.
+     */
+    private boolean isDeleterOrSortedOrEditedOrAdded = false;
+
+    /**
+     * A list of Tab needs to go through Add or Sort or Delete or Edit.
+     */
     private List<Tab> modifiedTabs = new ArrayList<>();
+
+    /**
+     * Keep the precious order of TabIds, used for ActionType.Sort
+     */
     private List<Integer> preOrderedTabIds = new ArrayList<>();
 
     private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
@@ -51,20 +73,30 @@ public class TabManagementViewModel extends AndroidViewModel {
         super(application);
     }
 
-    // retrieving all Tabs in Room database by calling execute()
+    /**
+     * Retrieve all Tabs from database
+     */
     public void retrieveTabList(){
         mTabList = dao.getAllLiveTab();
     }
 
+    /**
+     * Methods to update Tab table in Database
+     * updateTabIntoDatabase can make 4 different executions depending on the actionType.
+     */
     public void updateTabList(){
-        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
+        updateTabIntoDatabase = new TabDatabaseTask();
         updateTabIntoDatabase.execute();
     }
 
+    /**
+     * Method to store a selected Tab inside modifiedTabs.
+     * As actionType is set to Delete, when we call updateTabList(), UpdateToDoTask AsyncTask
+     * will delete the selected Tab inside database.
+     */
     public void deleteTab(Tab deleteTab){
-
-        if(!isDeleted){
-            isDeleted = true;
+        if(!isDeleterOrSortedOrEditedOrAdded){
+            isDeleterOrSortedOrEditedOrAdded = true;
         }
 
         modifiedTabs.add(deleteTab);
@@ -72,40 +104,68 @@ public class TabManagementViewModel extends AndroidViewModel {
         updateTabList();
     }
 
+    /**
+     * Method to store a newly created Tab inside modifiedTabs.
+     * As actionType is set to Add, when we call updateTabList(), UpdateToDoTask AsyncTask
+     * will insert the new Tab inside database.
+     */
     public void addNewTab(String newTabTitle){
+
+        if(!isDeleterOrSortedOrEditedOrAdded){
+            isDeleterOrSortedOrEditedOrAdded = true;
+        }
+
         Tab newTab = new Tab(mTabList.getValue().size(), newTabTitle);
         modifiedTabs.add(newTab);
         actionType = ActionType.Add;
         updateTabList();
     }
 
+    /**
+     * Method to store all newly ordered Tabs inside modifiedTabs.
+     * As actionType is set to Sort, when we call updateTabList(), UpdateToDoTask AsyncTask
+     * will update all Tabs in database to keep the new ordering of Tabs.
+     */
     public void saveTabOrder(List<Tab> orderedTabList){
+
+        if(!isDeleterOrSortedOrEditedOrAdded){
+            isDeleterOrSortedOrEditedOrAdded = true;
+        }
 
         // store the original Id's order
         for(Tab tab : mTabList.getValue()){
             preOrderedTabIds.add(tab.getTabId());
         }
 
-        Log.e(TAG, preOrderedTabIds.toString());
-        Log.e(TAG, "Orig ==== " + orderedTabList.toString());
-
         modifiedTabs.addAll(orderedTabList);
-        actionType = ActionType.Update;
-        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
-        updateTabIntoDatabase.execute();
+        actionType = ActionType.Sort;
+        updateTabList();
     }
 
+    /**
+     * Method to store a tab-title edited Tab inside modifiedTabs.
+     * As actionType is set to Edit, when we call updateTabList(), TabDatabaseTask AsyncTask
+     * will update edited Tab in database.
+     */
     public void editTabName(int positionToEdit, String newTabTitle){
+
+        if(!isDeleterOrSortedOrEditedOrAdded){
+            isDeleterOrSortedOrEditedOrAdded = true;
+        }
+
         Tab editTab = mTabList.getValue().get(positionToEdit);
         editTab.setTabTitle(newTabTitle);
         modifiedTabs.add(editTab);
 
         actionType = ActionType.Edit;
-        updateTabIntoDatabase = new UpdateTabIntoDataBase2();
-        updateTabIntoDatabase.execute();
+        updateTabList();
     }
 
-    private class UpdateTabIntoDataBase2 extends AsyncTask<Void, Void, Void>{
+    /**
+     * AsyncTask class to operate 4 kinds of tasks depending on the current value of ActionType.
+     * actionType must be set before calling execute() of this class.
+     */
+    private class TabDatabaseTask extends AsyncTask<Void, Void, Void>{
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -122,7 +182,7 @@ public class TabManagementViewModel extends AndroidViewModel {
                     dao.insertTab(modifiedTabs.toArray(new Tab[0]));
                     break;
 
-                case Update:
+                case Sort:
                     Log.e(TAG, "Update passed");
                     List<List<ToDo>> tabCollection = new ArrayList<>();
                     for(int i = 0; i < modifiedTabs.size(); i++){
@@ -145,7 +205,6 @@ public class TabManagementViewModel extends AndroidViewModel {
                         Tab tab = modifiedTabs.get(i);
                         tab.setTabId(newId);
 
-                        Log.e(TAG, "After modified " + toDos.toString());
                         dao.updateToDoList(toDos.toArray(new ToDo[0]));
                     }
 
@@ -167,10 +226,9 @@ public class TabManagementViewModel extends AndroidViewModel {
         return mTabList;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
+    public boolean isDeleterOrSortedOrEditedOrAdded() {
+        return isDeleterOrSortedOrEditedOrAdded;
     }
-
 
     @Override
     protected void onCleared() {

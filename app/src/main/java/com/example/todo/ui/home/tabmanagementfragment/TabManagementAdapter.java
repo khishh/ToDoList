@@ -18,41 +18,33 @@ import com.example.todo.R;
 import com.example.todo.model.Tab;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+
+/**
+ * RecyclerViewAdapter class for TabManagementFragment
+ */
 
 public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdapter.ViewHolder> {
 
-    private static final String TAG = "TabManagementAdapter";
+    private static final String TAG = TabManagementAdapter.class.getSimpleName();
 
     private ArrayList<Tab> tabList;
 
     private int deleteMovedPos = -1;
 
-    private Listener listener;
+    private RecyclerItemOnClickListener recyclerItemOnClickListener;
 
-    interface Listener{
-        void onSortBtnClick(ViewHolder viewHolder);
-        void onSwipeDeleteBack(int position);
-        void deleteTabAtPosition(int position, Tab deleteTab);
-        void onEditBtnClick(int position, String content);
-    }
-
-    public void setListener(Listener listener) {
-        this.listener = listener;
+    public void setRecyclerItemOnClickListener(RecyclerItemOnClickListener recyclerItemOnClickListener) {
+        this.recyclerItemOnClickListener = recyclerItemOnClickListener;
     }
 
     public TabManagementAdapter(ArrayList<Tab> tabList){
         this.tabList = tabList;
     }
 
-    public void updateTabList(List<Tab> tabList, boolean needToUpdateAdapterData){
-
-        if(needToUpdateAdapterData) {
-            this.tabList.clear();
-            this.tabList.addAll(tabList);
-        }
-
+    public void updateTabList(List<Tab> tabList){
+        this.tabList.clear();
+        this.tabList.addAll(tabList);
         notifyDataSetChanged();
     }
 
@@ -83,8 +75,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                 int action = event.getAction();
 
                 if(deleteMovedPos != -1){
-                    if(listener != null){
-                        listener.onSwipeDeleteBack(deleteMovedPos);
+                    if(recyclerItemOnClickListener != null){
+                        recyclerItemOnClickListener.onSwipeDeleteBack(deleteMovedPos);
                         deleteMovedPos = -1;
                     }
                 }
@@ -92,8 +84,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                 switch (action){
                     case MotionEvent.ACTION_DOWN:
                         Log.d(TAG, "DOWN");
-                        if(listener != null){
-                            listener.onSortBtnClick(holder);
+                        if(recyclerItemOnClickListener != null){
+                            recyclerItemOnClickListener.onSortBtnClick(holder);
                         }
                         return true;
 
@@ -123,8 +115,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
                 Log.e(TAG, "deleteBtn Clicked at " + deleteMovedPos);
 
                 if(deleteMovedPos != -1){
-                    if(listener != null){
-                        listener.onSwipeDeleteBack(deleteMovedPos);
+                    if(recyclerItemOnClickListener != null){
+                        recyclerItemOnClickListener.onSwipeDeleteBack(deleteMovedPos);
                         deleteMovedPos = -1;
                     }
                 }
@@ -142,8 +134,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             @Override
             public void onClick(View v) {
                 if(deleteMovedPos != -1){
-                    if(listener != null){
-                        listener.onSwipeDeleteBack(deleteMovedPos);
+                    if(recyclerItemOnClickListener != null){
+                        recyclerItemOnClickListener.onSwipeDeleteBack(deleteMovedPos);
                         deleteMovedPos = -1;
                     }
                 }
@@ -154,9 +146,9 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "deleteMsg Clicked");
-                if(listener != null){
-                    listener.onSwipeDeleteBack(position);
-                    listener.deleteTabAtPosition(position, tabList.get(position));
+                if(recyclerItemOnClickListener != null){
+                    recyclerItemOnClickListener.onSwipeDeleteBack(position);
+                    recyclerItemOnClickListener.onDeleteBtnClick(position, tabList.get(position));
                     deleteMovedPos = -1;
                 }
             }
@@ -166,8 +158,8 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "edit Button Clicked");
-                if(listener != null){
-                    listener.onEditBtnClick(position, tabList.get(position).getTabTitle());
+                if(recyclerItemOnClickListener != null){
+                    recyclerItemOnClickListener.onEditBtnClick(position, tabList.get(position).getTabTitle());
                 }
             }
         });
@@ -177,10 +169,6 @@ public class TabManagementAdapter extends RecyclerView.Adapter<TabManagementAdap
     @Override
     public int getItemCount() {
         return tabList.size();
-    }
-
-    public Tab getTabAtIndex(int position){
-        return tabList.get(position);
     }
 
     public void swapTabList(int fromPos, int toPos){

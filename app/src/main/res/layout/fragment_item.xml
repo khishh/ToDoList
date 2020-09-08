@@ -44,8 +44,9 @@
                         android:id="@+id/todo_empty_msg"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center"
                         android:text="No Tasks Yet"
+                        android:gravity="center_horizontal"
+                        android:paddingTop="200dp"
                         android:textSize="26sp"
                         android:visibility="gone"/>
 
@@ -94,24 +95,3 @@
 
 </layout>
 
-<!--    android:layout_weight="7"-->
-
-
-<!--<com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--android:id="@+id/btn_delete_todo"-->
-<!--android:layout_width="wrap_content"-->
-<!--android:layout_height="wrap_content"-->
-<!--android:src="@drawable/ic_delete"-->
-<!--android:layout_margin="20dp"-->
-<!--android:layout_alignParentBottom="true"-->
-<!--android:layout_alignParentStart="true"/>-->
-
-<!--<com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--android:id="@+id/btn_add_todo"-->
-<!--android:layout_width="wrap_content"-->
-<!--android:layout_height="wrap_content"-->
-<!--android:src="@drawable/ic_baseline_add_24"-->
-<!--android:layout_alignParentBottom="true"-->
-<!--app:rippleColor="@color/white_bg"-->
-<!--android:layout_margin="20dp"-->
-<!--android:layout_alignParentEnd="true" />-->

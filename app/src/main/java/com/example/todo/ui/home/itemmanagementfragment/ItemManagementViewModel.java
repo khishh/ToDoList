@@ -18,16 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * ItemManagementViewModel
  *
  * 1. Keeps all To-Dos of the last visited Tab and all Tabs, used for users to select one Tab
  *    in MoveToDoDialog to decide the destination of selected To-Dos.
  *
- * 2. Executes 3 types of operations
- *  - Move == move all selected To-Dos to other Tab selected in MoveToDoDialog and update them inside database
- *  - Delete == delete all selected To-Dos from database
- *  - Order == update all To-Dos into database in a way to keep new ordering
+ * 2. Executes 3 types of operations interacting with database
+ *  - Move   :move all selected To-Dos to other Tab selected in MoveToDoDialog and update them inside database
+ *  - Delete : delete all selected To-Dos from database
+ *  - Order  : update all To-Dos into database in a way to keep new ordering
  *
  */
 
@@ -40,12 +39,11 @@ public class ItemManagementViewModel extends AndroidViewModel {
         Move, Delete, Order
     }
 
-    private static final String TAG = "ItemManagementViewModel";
+    private static final String TAG = ItemManagementFragment.class.getSimpleName();
 
     private LiveData<List<ToDo>> mDoList = new MutableLiveData<>();
     private LiveData<List<Tab>> tabs = new MutableLiveData<>();
 
-    private int curTabId;
     private List<ToDo> selectedToDos = new ArrayList<>();
     private ActionType actionType;
 
@@ -59,7 +57,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
     }
 
     public void loadToDoList(int tabId){
-        curTabId = tabId;
         mDoList = dao.getLiveToDoList(tabId);
     }
 
@@ -72,13 +69,13 @@ public class ItemManagementViewModel extends AndroidViewModel {
      * updateToDoIntoDatabase can make 3 different executions depending on the actionType.
      */
     public void updateToDoList() {
-        updateToDoIntoDatabase = new UpdateToDoTask();
+        updateToDoIntoDatabase = new ToDoDatabaseTask();
         updateToDoIntoDatabase.execute();
     }
 
     /**
      * Method to store all selected To-Dos inside selectedToDos.
-     * As actionType is set to Move, when we call updateToDoList, UpdateToDoTask AsyncTask
+     * As actionType is set to Move, when we call updateToDoList(), UpdateToDoTask AsyncTask
      * will update To-Dos with a new owner Tab whose tabId is equal to targetTabId inside database,
      */
     public void moveToDoToOtherTab(int targetTabId, List<ToDo> curList){
@@ -91,14 +88,13 @@ public class ItemManagementViewModel extends AndroidViewModel {
             }
             i++;
         }
-
         actionType = ActionType.Move;
         updateToDoList();
     }
 
     /**
      * Method to store all selected To-Dos inside selectedToDos.
-     * As actionType is set to Delete, when we call updateToDoList, UpdateToDoTask AsyncTask
+     * As actionType is set to Delete, when we call updateToDoList(), ToDoDatabaseTask AsyncTask
      * will delete all To-Dos inside selectedToDos inside database.
      */
     public void deleteSelectedToDo(List<ToDo> curList){
@@ -116,7 +112,7 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
     /**
      * Method to store all selected To-Dos inside selectedToDos.
-     * As actionType is set to Order, when we call updateToDoList, UpdateToDoTask AsyncTask
+     * As actionType is set to Order, when we call updateToDoList(), UpdateToDoTask AsyncTask
      * will update To-Dos so that their new order will be preserved.
      */
     public void updateToDoOrder(List<ToDo> orderedList){
@@ -130,15 +126,15 @@ public class ItemManagementViewModel extends AndroidViewModel {
      * AsyncTask class to operate 3 kinds of tasks depending on the current value of ActionType.
      * actionType must be set before calling execute() of this class.
      */
-    private class UpdateToDoTask extends AsyncTask<Void, Void, Void>{
+    private class ToDoDatabaseTask extends AsyncTask<Void, Void, Void>{
 
         @Override
         protected Void doInBackground(Void... voids) {
 
-            List<ToDo> test = dao.getToDoList(curTabId);
-            Log.e(TAG, "Before: " + test.toString());
-
-            Log.e(TAG, "selectedList " + selectedToDos.toString());
+//            List<ToDo> test = dao.getToDoList(curTabId);
+//            Log.e(TAG, "Before: " + test.toString());
+//
+//            Log.e(TAG, "selectedList " + selectedToDos.toString());
 
             switch (actionType){
 
@@ -158,9 +154,9 @@ public class ItemManagementViewModel extends AndroidViewModel {
 
             }
 
-            // test
-            List<ToDo> test2 = dao.getToDoList(curTabId);
-            Log.e(TAG, "After: " + test2.toString());
+//            // test
+//            List<ToDo> test2 = dao.getToDoList(curTabId);
+//            Log.e(TAG, "After: " + test2.toString());
 
             selectedToDos.clear();
             return null;
@@ -194,7 +190,6 @@ public class ItemManagementViewModel extends AndroidViewModel {
             }
             count++;
         }
-
         return isAtLeastOneSelected;
     }
 

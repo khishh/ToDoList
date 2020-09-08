@@ -1,7 +1,9 @@
 package com.example.todo.ui.home.itemmanagementfragment;
 
-import com.example.todo.model.Tab;
-
+/**
+ * MoveToDoDialogClickListener interface
+ * This interface method will be fired when a user clicks on one item on the Dialog
+ */
 public interface MoveToDoDialogClickListener {
     void onDialogClick(int targetTabId);
 }

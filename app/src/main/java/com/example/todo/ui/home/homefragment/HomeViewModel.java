@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.todo.R;
 import com.example.todo.model.Tab;
 import com.example.todo.model.TabToDoDao;
 import com.example.todo.model.TabToDoDataBase;
@@ -25,6 +26,7 @@ import java.util.Random;
  *
  * 1. Keep the most recent Tab data into LiveData<List<Tab>> mTabList loaded from Database
  * 2. If first launch of this app, save the initial data set into Database
+ *
  */
 
 public class HomeViewModel extends AndroidViewModel {
@@ -33,10 +35,22 @@ public class HomeViewModel extends AndroidViewModel {
 
     private LiveData<List<Tab>> mTabList = new MutableLiveData<>();
 
-    private AsyncTask<List<Tab>, Void, Void> insertTabsIntoDatabase;
+    private AsyncTask<Tab, Void, Void> insertTabsIntoDatabase;
 
     private SharedPreferencesHelper sharedPreferencesHelper = SharedPreferencesHelper.getInstance(getApplication());
     private TabToDoDao dao = TabToDoDataBase.getInstance(getApplication()).tabToDoDao();
+
+    private static final String initialTitle = "How to use";
+    private static final int[] initialHowToUse = {
+            R.string.instruction_tab_title,
+            R.string.instruction_task_example1,
+            R.string.instruction_task_example2,
+            R.string.instruction_add,
+            R.string.instruction_delete,
+            R.string.instruction_menu,
+            R.string.instruction_item_management,
+            R.string.instruction_tab_management
+    };
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
@@ -55,9 +69,9 @@ public class HomeViewModel extends AndroidViewModel {
         // case if this ist he first launch
         if(updateTime == 0){
             // case if there is no data loaded into database yet
-            List<Tab> tabList = setUpToDoItems();
+            Tab initialTab = setUpToDoItems();
             insertTabsIntoDatabase = new InsertTabsIntoDataBase();
-            insertTabsIntoDatabase.execute(tabList);
+            insertTabsIntoDatabase.execute(initialTab);
         }
     }
 
@@ -65,10 +79,11 @@ public class HomeViewModel extends AndroidViewModel {
      * Only called when this is the first launch
      * Creating the initial data to be shown in the app
      */
-    private List<Tab> setUpToDoItems(){
+    private Tab setUpToDoItems(){
 
-        List<Tab> tabList = new ArrayList<>();
+//        List<Tab> tabList = new ArrayList<>();
 
+        /*
         for(int i = 0; i < 10; i++){
 
             Tab tab = new Tab(i, "Tab" + (i+1));
@@ -88,21 +103,41 @@ public class HomeViewModel extends AndroidViewModel {
 
             tabList.add(tab);
         }
-        return tabList;
+
+         */
+        List<ToDo> toDos = new ArrayList<>();
+        Tab howToUseTab = new Tab(0, initialTitle);
+
+        for (int resourceId : initialHowToUse) {
+            ToDo _toDo;
+            if(resourceId != initialHowToUse[2]){
+                _toDo = new ToDo(0, getApplication().getResources().getString(resourceId), false);
+            }
+            else{
+                _toDo = new ToDo(0, getApplication().getResources().getString(resourceId), true);
+            }
+
+            toDos.add(_toDo);
+        }
+
+        howToUseTab.setToDoList(toDos);
+        return howToUseTab;
     }
 
     /**
      * AsyncTask to save initial data set into database
      */
-    private class InsertTabsIntoDataBase extends AsyncTask<List<Tab>, Void, Void>{
+    private class InsertTabsIntoDataBase extends AsyncTask<Tab, Void, Void>{
 
         @Override
-        protected Void doInBackground(List<Tab>... lists) {
-            List<Tab> tabList = lists[0];
+        protected Void doInBackground(Tab... lists) {
+            Tab tabList = lists[0];
 
-            for (int i = 0; i < tabList.size(); i++){
-                dao.insertToDoWithTab(tabList.get(i));
-            }
+            dao.insertToDoWithTab(tabList);
+
+//            for (int i = 0; i < tabList.size(); i++){
+//                dao.insertToDoWithTab(tabList.get(i));
+//            }
             return null;
         }
 

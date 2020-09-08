@@ -21,10 +21,10 @@ import java.util.List;
  *
  * 1. Keep the updated To-Dos belong to a currently displayed Tab inside mDoList, asynchronously receiving
  * new data from database if there is any changes.
- * 2. Execute 3 types of operations as requested from ItemFragment
- *  - insert new To-Dos
- *  - delete existing completed To-Dos (== whose isDone is true)
- *  - update existing To-Do which users changed its content
+ * 2. Execute 3 types of operations interacting with database
+ *  - Add    : insert new To-Dos into database
+ *  - Delete : delete existing completed To-Dos (== whose isDone is true) from database
+ *  - Edit   : update existing To-Do with a new content
  *
  */
 public class ItemViewModel extends AndroidViewModel {
@@ -68,7 +68,7 @@ public class ItemViewModel extends AndroidViewModel {
      * updateToDoIntoDatabase will make 3 different executions depending on the actionType.
      */
     public void updateToDoDataBase() {
-        updateToDoIntoDatabase = new UpdateToDoTask();
+        updateToDoIntoDatabase = new ToDoDatabaseTask();
         updateToDoIntoDatabase.execute();
     }
 
@@ -153,7 +153,7 @@ public class ItemViewModel extends AndroidViewModel {
      * AsyncTask class to operate 3 kinds of tasks depending on the current value of ActionType.
      * actionType must be set before calling execute() of this class.
      */
-    private class UpdateToDoTask extends AsyncTask<Void, Void, Void>{
+    private class ToDoDatabaseTask extends AsyncTask<Void, Void, Void>{
 
         @Override
         protected Void doInBackground(Void... voids) {

@@ -6,4 +6,15 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="update">Update</string>
+
+
+    <!--  How to use instruction  -->
+    <string name="instruction_tab_title">How to use</string>
+    <string name="instruction_task_example1">Incomplete task will have no check mark on the right</string>
+    <string name="instruction_task_example2">Completed tasks will be marked as checked on the right</string>
+    <string name="instruction_add">Press + button to add new To-Dos</string>
+    <string name="instruction_delete">Press trash Button to delete all completed To-Dos</string>
+    <string name="instruction_menu">On top right corner, there is 2 icons.</string>
+    <string name="instruction_item_management">The left icon will take you to a screen where you can delete &amp; reorder To-Dos and move To-Dos to other Tab</string>
+    <string name="instruction_tab_management">The right icon will take you to a screen where you can add &amp; delete &amp; edit &amp; reorder Tabs </string>
 </resources>

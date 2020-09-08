@@ -61,7 +61,7 @@
                 android:orientation="horizontal">
 
                 <com.example.todo.util.CustomEditText
-                    android:id="@+id/tab_management_edit_text"
+                    android:id="@+id/tab_management_add_edit_text"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -99,7 +99,7 @@
                 android:orientation="horizontal">
 
                 <com.example.todo.util.CustomEditText
-                    android:id="@+id/tab_manage_user_edit_text"
+                    android:id="@+id/tab_management_edit_edit_text"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"/>
