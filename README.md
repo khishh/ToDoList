@@ -14,19 +14,28 @@ Since a View component observe LiveData owned by its ViewModel component, it wil
 </p>
 
 ## HomeFragment
-<img src = "screenshots/HomeFragmentDemo.gif" align = "left"> 
-<div margin-left = "5em" >
-  <p>HomeFragment does...</p>
-  <ol>
-    <li>Displays all Tab's names inside ViewPager where a user can easily switch to other Tabs.
-    <li>Displays all ToDos (Tasks) belong to the currently displayed Tab.
-    <li>Allow users to add new ToDos by clicking on + button on bottom left.
-    <li>Allow users to delete checked (completed) ToDos by clicking on Trash button on bottom right.
-    <li>Allow users to edit a content of a ToDo.
-</div>
+<img src = "screenshots/HomeFragmentDemo.gif"> 
 
-</br>
-</br>
-</br>
+  - Displays all Tab's names inside ViewPager where a user can easily switch to other Tabs.
+  - Displays all ToDos (Tasks) belong to the currently displayed Tab.
+  - A user can add new ToDos by clicking on + button on bottom left.
+  - A user can delete checked (completed) ToDos by clicking on Trash button on bottom right.
+  - A user can edit a content of a ToDo.
+  
+## ItemManagementFragment
+<img src = "screenshots/ItemManagementFragmentDemo.gif">
 
+  - A user can select multiple items in a list
+  - Selected items in a list can be deleted with Delete button or moved to other Tab with Move-To-Other-Tab button.
+  - Cliking on the icon on the right will commence a dragging action. With drag and drop items, users can reorder how items should be displayed.
 
+## TabManagementFragment
+<img src = "screenshots/TabManagementFragmentDemo.gif">
+
+  - Users can add new Tabs, delete Tabs, and edit the title of Tabs.
+  - Cliking on the icon on the right will commence a dragging action. Users can rearrange the order of how Tabs should be displayed.
+  
+
+## Library reference resources:
+
+1. Room: https://developer.android.com/topic/libraries/architecture/room.html
