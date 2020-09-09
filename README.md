@@ -14,16 +14,19 @@ Since a View component observe LiveData owned by its ViewModel component, it wil
 </p>
 
 ## HomeFragment
-<div display = "inline-block">
-  <img src = "screenshots/HomeFragmentDemo.gif" width = "250" align = "left"> 
-  <div>
-    <p>HomeFragment does...</p>
-    <ol>
-      <li>Displays all Tab's names inside ViewPager where a user can easily switch to other Tabs.
-      <li>Displays all ToDos (Tasks) belong to the currently displayed Tab.
-      <li>Allow users to add new ToDos by clicking on + button on bottom left.
-      <li>Allow users to delete checked (completed) ToDos by clicking on Trash button on bottom right.
-      <li>Allow users to edit a content of a ToDo.
-    </ol>
-  </div>
+<img src = "screenshots/HomeFragmentDemo.gif" align = "left"> 
+<div margin-left = "5em" >
+  <p>HomeFragment does...</p>
+  <ol>
+    <li>Displays all Tab's names inside ViewPager where a user can easily switch to other Tabs.
+    <li>Displays all ToDos (Tasks) belong to the currently displayed Tab.
+    <li>Allow users to add new ToDos by clicking on + button on bottom left.
+    <li>Allow users to delete checked (completed) ToDos by clicking on Trash button on bottom right.
+    <li>Allow users to edit a content of a ToDo.
 </div>
+
+</br>
+</br>
+</br>
+
+
