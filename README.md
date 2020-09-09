@@ -12,3 +12,9 @@ Since a View component observe LiveData owned by its ViewModel component, it wil
 <img src = "screenshots/ItemManagementFragment.png" width ="250" />
 <img src = "screenshots/TabManagementFragment.png" width="250"/>
 </p>
+
+## HomeFragment
+<div display = "inline-block">
+  <img src = "screenshots/HomeFragmentDemo.gif" width = "250" align = "left"> 
+  <p>Hello</p>
+</div>
