@@ -8,9 +8,7 @@ Since a View component observe LiveData owned by its ViewModel component, it wil
 
 ## Each state of this app
 <p align = "center">
-<img src = "screenshots/HomeFragmentDemo.gif" width ="250" name = "test"/>
-<img src = "screenshots/ItemManagementFragmentDemo.gif" width ="250" />
-<img src = "screenshots/TabManagementFragmentDemo.gif" width="250"/>
+<img src = "screenshots/HomeFragment.png" width ="250" name = "test"/>
+<img src = "screenshots/ItemManagementFragment.png" width ="250" />
+<img src = "screenshots/TabManagementFragment.png" width="250"/>
 </p>
-
-
