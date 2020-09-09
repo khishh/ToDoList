@@ -6,7 +6,7 @@ each component has distinctive roles.
 Also, by adopting LiveData with Room database, View components can always display the newest data with less codes and less coupling between View and ViewModel.
 Since a View component observe LiveData owned by its ViewModel component, it will be notified whenever any changes occured inside database throughout user interactions.
 
-## Each state of this app
+## States of this app
 <p align = "center">
 <img src = "screenshots/HomeFragment.png" width ="250" name = "test"/>
 <img src = "screenshots/ItemManagementFragment.png" width ="250" />
@@ -16,5 +16,14 @@ Since a View component observe LiveData owned by its ViewModel component, it wil
 ## HomeFragment
 <div display = "inline-block">
   <img src = "screenshots/HomeFragmentDemo.gif" width = "250" align = "left"> 
-  <p>Hello</p>
+  <div>
+    <p>HomeFragment does...</p>
+    <ol>
+      <li>Displays all Tab's names inside ViewPager where a user can easily switch to other Tabs.
+      <li>Displays all ToDos (Tasks) belong to the currently displayed Tab.
+      <li>Allow users to add new ToDos by clicking on + button on bottom left.
+      <li>Allow users to delete checked (completed) ToDos by clicking on Trash button on bottom right.
+      <li>Allow users to edit a content of a ToDo.
+    </ol>
+  </div>
 </div>
